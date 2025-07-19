@@ -64,6 +64,11 @@ elastiResolver:
       requests:
         cpu: 100m
         memory: 40Mi
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
     sentry:
       enabled: false
       environment: ""
