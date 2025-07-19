@@ -27,7 +27,6 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -o resol
 
 FROM alpine:latest
 COPY --from=builder /workspace/resolver .
+USER 65532:65532
 EXPOSE 8012
 CMD ["./resolver"]
-
- 
