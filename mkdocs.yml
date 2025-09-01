@@ -132,6 +132,7 @@ nav:
       - Resolver: src/arch-resolver.md
       - Operator: src/arch-operator.md
       - Monitoring: src/arch-monitoring.md
+      - FAQ: src/arch-faq.md
   - Development:
       - Dev Environment: src/dev-env.md
       - Playground: src/dev-playground.md
