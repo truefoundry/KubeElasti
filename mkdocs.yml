@@ -9,6 +9,7 @@ extra_css:
 extra_files:
   - docs/CNAME
 
+
 # Repository
 repo_name: truefoundry/KubeElasti
 repo_url: https://github.com/truefoundry/KubeElasti
@@ -20,6 +21,7 @@ theme:
   name: material
   logo: images/logo/logo_white_full.png
   favicon: images/logo/favicon.ico
+  custom_dir: docs/overrides
   font:
     text: Roboto
     code: Roboto Mono
@@ -38,7 +40,7 @@ theme:
   #     example: octicons/beaker-16
   #     quote: octicons/quote-16
   features:
-    - announce.dismiss
+    # - announce.dismiss
     # - content.action.edit
     # - content.action.view
     - content.code.annotate
@@ -106,11 +108,7 @@ plugins:
       separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - blog
 
-# Additional configuration
 extra:
-  announce:
-    type: info
-    content: Join our <a href="https://discord.gg/qFyN73htgE"><strong>Discord community</strong></a> for support and discussions!
   social:
     - icon: fontawesome/brands/discord
       link: https://discord.gg/qFyN73htgE

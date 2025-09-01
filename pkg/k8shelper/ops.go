@@ -50,6 +50,7 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 			if endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready {
 				// NOTE: Below line throws a CWE, but we identified it as false positive
 				// As the svc and namespace are used for debugging and are not security sensitive, it is safe to ignore this
+				// See: https://github.com/truefoundry/KubeElasti/pull/177
 				k.logger.Debug("Service endpoint is active", zap.String("service", svc), zap.String("namespace", ns))
 				return true, nil
 			}
