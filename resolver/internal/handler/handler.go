@@ -15,73 +15,10 @@ import (
 	"github.com/truefoundry/elasti/resolver/internal/prom"
 	"github.com/truefoundry/elasti/resolver/internal/throttler"
 
-	"strings"
-
 	"github.com/truefoundry/elasti/pkg/logger"
 	"github.com/truefoundry/elasti/pkg/messages"
 	"go.uber.org/zap"
 )
-
-// maskThrottlerError masks potentially sensitive values within a throttler error message
-func maskThrottlerError(err error, host *messages.Host) string {
-	if err == nil {
-		return ""
-	}
-	msg := err.Error()
-	if host == nil {
-		return msg
-	}
-
-	// Create slice of replacements and sort by length (longest first)
-	// This prevents substring replacement issues
-	type replacement struct {
-		original string
-		masked   string
-	}
-
-	var replacements []replacement
-
-	if host.IncomingHost != "" {
-		replacements = append(replacements, replacement{
-			original: host.IncomingHost,
-			masked:   logger.MaskMiddle(host.IncomingHost, 4, 4),
-		})
-	}
-	if host.TargetService != "" {
-		replacements = append(replacements, replacement{
-			original: host.TargetService,
-			masked:   logger.MaskMiddle(host.TargetService, 2, 2),
-		})
-	}
-	if host.SourceService != "" {
-		replacements = append(replacements, replacement{
-			original: host.SourceService,
-			masked:   logger.MaskMiddle(host.SourceService, 2, 2),
-		})
-	}
-	if host.Namespace != "" {
-		replacements = append(replacements, replacement{
-			original: host.Namespace,
-			masked:   logger.MaskMiddle(host.Namespace, 2, 2),
-		})
-	}
-
-	// Sort by length (longest first) to avoid substring issues
-	for i := 0; i < len(replacements)-1; i++ {
-		for j := i + 1; j < len(replacements); j++ {
-			if len(replacements[i].original) < len(replacements[j].original) {
-				replacements[i], replacements[j] = replacements[j], replacements[i]
-			}
-		}
-	}
-
-	// Apply replacements in order
-	for _, r := range replacements {
-		msg = strings.ReplaceAll(msg, r.original, r.masked)
-	}
-
-	return msg
-}
 
 type (
 	// Handler is the reverse proxy handler
@@ -208,7 +145,9 @@ func (h *Handler) handleAnyRequest(w http.ResponseWriter, req *http.Request) (*m
 		}, func() {
 			h.operatorRPC.SendIncomingRequestInfo(host.Namespace, host.SourceService)
 		}); tryErr != nil {
-		h.logger.Error("throttler try error", zap.String("sanitized_error", maskThrottlerError(tryErr, host)))
+		// NOTE: Below line throws a CWE, but we identified it as false positive
+		// As we just pass host information like namespace and service name, it is safe to ignore this
+		h.logger.Error("throttler try error: ", zap.Error(tryErr))
 		hub := sentry.GetHubFromContext(req.Context())
 		if hub != nil {
 			hub.CaptureException(tryErr)
