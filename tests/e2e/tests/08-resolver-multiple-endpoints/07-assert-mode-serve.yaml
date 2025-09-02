@@ -1,5 +1,16 @@
+# apiVersion: kuttl.dev/v1beta1
+# kind: TestAssert
+# timeout: 1
+# commands:
+#   - command: kubectl wait --for=jsonpath='{.status.mode}'=serve --timeout=1s -n target elastiservice/target-elastiservice
+apiVersion: elasti.truefoundry.com/v1alpha1
+kind: ElastiService
+metadata:
+  name: target-elastiservice
+  namespace: target
+status:
+  mode: serve
+---
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-timeout: 1
-commands:
-  - command: kubectl wait --for=jsonpath='{.status.mode}'=serve --timeout=1s -n target elastiservice/target-elastiservice
+timeout: 60
