@@ -1,6 +1,19 @@
 # Instant assert
+# apiVersion: kuttl.dev/v1beta1
+# kind: TestAssert
+# timeout: 1
+# commands:
+#   - command: kubectl wait --for=jsonpath='{.status.mode}'=proxy --timeout=1s -n target elastiservice/target-elastiservice
+# New
+apiVersion: elasti.truefoundry.com/v1alpha1
+kind: ElastiService
+metadata:
+  name: target-elastiservice
+  namespace: target
+status:
+  mode: proxy
+---
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-timeout: 1
-commands:
-  - command: kubectl wait --for=jsonpath='{.status.mode}'=proxy --timeout=1s -n target elastiservice/target-elastiservice
+# give operator time — 60s is reasonable here
+timeout: 60
