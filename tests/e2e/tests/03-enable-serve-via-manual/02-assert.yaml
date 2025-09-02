@@ -5,3 +5,8 @@ metadata:
   namespace: target
 status:
   mode: serve
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+# give operator time — 60s is reasonable here
+timeout: 60
