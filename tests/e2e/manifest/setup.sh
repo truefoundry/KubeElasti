@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Current directory: $(pwd)"
+
 # Parse arguments - only use flags
 MANIFEST_DIR=""
 NAMESPACE=""
