@@ -101,23 +101,19 @@ You can also run specific parts of the testing process:
 | Command                  | Description                                                                                                                                                                                                    |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `make all`               | Complete pipeline: setup registry, build images, create Kind cluster, install dependencies, and run E2E tests. We recommend using this command for the first time, then using `make test` for subsequent runs. |
-| `make setup`             | Sets up the environment (registry and Kind cluster with dependencies)                                                                                                                                          |
-| `make reset-kind`        | Delete and recreate the Kind cluster with dependencies. This won't rebuild images.                                                                                                                             |
-| `make reset-setup`       | Delete and recreate docker registry, build images, Kind cluster and dependencies                                                                                                                               |
-| `make start-registry`    | Set up Docker registry on port 5002 for local image publishing                                                                                                                                                 |
-| `make stop-registry`     | Stop the Docker registry and remove the kind network                                                                                                                                                           |
-| `make build-images`      | Build and push Elasti operator and resolver images to local registry                                                                                                                                           |
-| `make kind-up`           | Create a Kind cluster with the name `elasti-e2e`                                                                                                                                                               |
-| `make kind-down`         | Delete the Kind cluster                                                                                                                                                                                        |
-| `make destroy`           | Delete Kind cluster and stop registry                                                                                                                                                                          |
-| `make apply-deps`        | Install all dependencies (Istio, Prometheus, Elasti)                                                                                                                                                           |
-| `make apply-elasti`      | Install only the Elasti operator and CRDs                                                                                                                                                                      |
-| `make apply-prometheus`  | Install only Prometheus (with Grafana)                                                                                                                                                                         |
-| `make apply-ingress`     | Install only Istio ingress gateway                                                                                                                                                                             |
-| `make apply-keda`        | Install only KEDA                                                                                                                                                                                              |
-| `make uninstall-ingress` | Uninstall Istio components                                                                                                                                                                                     |
-| `make uninstall-keda`    | Uninstall KEDA components                                                                                                                                                                                      |
-| `make test`              | Run the KUTTL E2E tests                                                                                                                                                                                        |
-| `make pf-prom`           | Port-forward the Prometheus service to localhost:9090                                                                                                                                                          |
-| `make pf-graf`           | Port-forward the Grafana service to localhost:9001                                                                                                                                                             |
-| `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080                                                                                                                                                     |
+| `make build-images`      | Build and push Elasti operator and resolver images to local registry |
+| `make setup`             | Sets up the environment (registry and Kind cluster with dependencies)|
+| `make destroy`           | Delete Kind cluster and stop registry |
+| `make kind-up`           | Create a Kind cluster with the name `elasti-e2e`|
+| `make kind-down`         | Delete the Kind cluster |
+| `make apply-deps`        | Install all dependencies (Istio, Prometheus, Elasti) |
+| `make apply-elasti`      | Install only the Elasti operator and CRDs |
+| `make apply-prometheus`  | Install only Prometheus (with Grafana) |
+| `make apply-ingress`     | Install only Istio ingress gateway |
+| `make apply-keda`        | Install only KEDA |
+| `make uninstall-ingress` | Uninstall Istio components |
+| `make uninstall-keda`    | Uninstall KEDA components |
+| `make test`              | Run the KUTTL E2E tests |
+| `make pf-prom`           | Port-forward the Prometheus service to localhost:9090 |
+| `make pf-graf`           | Port-forward the Grafana service to localhost:9001 |
+| `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080|

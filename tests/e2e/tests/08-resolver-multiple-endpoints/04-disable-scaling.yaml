@@ -1,0 +1,6 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: target-scaled-object
+  annotations:
+    autoscaling.keda.sh/paused: "true"

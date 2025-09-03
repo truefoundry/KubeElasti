@@ -1,0 +1,25 @@
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ${NAMESPACE}-target-virtualservice
+  namespace: istio-system
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - gateway
+  http:
+    - match:
+        - uri:
+            prefix: /${NAMESPACE}/
+        - headers:
+            x-test-namespace:
+              exact: ${NAMESPACE}
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: target-deployment.${NAMESPACE}.svc.cluster.local
+            port:
+              number: 80

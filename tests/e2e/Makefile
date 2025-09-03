@@ -10,54 +10,25 @@ PROMETHEUS_VERSION := 73.2.3
 PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
 
+.PHONY: all setup destroy test
+all: build-images setup test
+setup: kind-up chmod-scripts apply-deps
+destroy: kind-down
+test:
+	@echo "Running KUTTL tests..."
+	@kubectl kuttl test --start-kind=false --test $(T)
+	@echo "E2E Tests completed!"
 
-
-.PHONY: all setup destroy reset-kind reset-setup
-all: setup test
-setup: start-registry build-images kind-up chmod-reset apply-deps
-destroy: kind-down stop-registry 
-# in reset-kind, we destroy the cluster.
-reset-kind: kind-down kind-up apply-deps
-# In reset-setup, we destroy the whole setup, and setup again.
-reset-setup: destroy setup
-
-.PHONY: chmod-reset
-chmod-reset:
+.PHONY: chmod-scripts
+chmod-scripts:
 	@echo "Creating reset executable..."
 	@chmod +x ./manifest/reset.sh
-
-.PHONY: start-registry
-start-registry: ## Setup docker registry, where we publish our images
-	@echo "Setting up registry..."
-	@if docker ps -a | grep -q "$(REGISTRY_NAME)"; then \
-		echo "Registry already exists, ensuring it's running..."; \
-		docker start $(REGISTRY_NAME) 2>/dev/null || true; \
-	else \
-		echo "Creating new registry container..."; \
-		docker run -d --restart=always -p 5002:5000 --name $(REGISTRY_NAME) registry:2; \
-	fi
-	@docker network inspect kind >/dev/null 2>&1 || docker network create kind
-	@docker network inspect kind -f "{{range .Containers}}{{.Name}}{{end}}" | grep -q $(REGISTRY_NAME) || \
-		docker network connect "kind" $(REGISTRY_NAME)
-	@echo "Registry setup complete"
-
-.PHONY: stop-registry
-stop-registry: ## Stop docker registry
-	@echo "Stopping registry..."
-	@if docker ps -a | grep -q "$(REGISTRY_NAME)"; then \
-		echo "Registry container found, stopping it..."; \
-		docker stop $(REGISTRY_NAME) 2>/dev/null || true; \
-	else \
-		echo "Registry container not found, skipping stop."; \
-	fi
-	@docker network inspect kind >/dev/null 2>&1 && docker network disconnect kind $(REGISTRY_NAME)
-	@docker network rm kind
-	@echo "Registry stopped and network cleaned up"
+	@chmod +x ./manifest/setup.sh
 
 .PHONY: build-images
 build-images: ## Build and push images
-	$(MAKE) -C ../../operator docker-build docker-push IMG=$(REGISTRY_HOST)/elasti-operator:v1alpha1
-	$(MAKE) -C ../../resolver docker-build docker-push IMG=$(REGISTRY_HOST)/elasti-resolver:v1alpha1
+	$(MAKE) -C ../../operator docker-build IMG=elasti-operator:v1alpha1
+	$(MAKE) -C ../../resolver docker-build IMG=elasti-resolver:v1alpha1
 
 .PHONY: kind-up
 kind-up: ## Create Kind cluster
@@ -70,6 +41,8 @@ kind-up: ## Create Kind cluster
 		echo "Kind cluster '$(CLUSTER_NAME)' already exists."; \
 		kubectl config use-context kind-$(CLUSTER_NAME); \
 	fi
+	kind load docker-image elasti-operator:v1alpha1 --name elasti-e2e
+	kind load docker-image elasti-resolver:v1alpha1 --name elasti-e2e
 
 .PHONY: kind-down
 kind-down:
@@ -87,7 +60,7 @@ apply-deps: apply-ingress apply-prometheus apply-elasti apply-keda
 .PHONY: apply-elasti
 apply-elasti:
 	@echo "Installing Elasti Operator..."
-	@helm upgrade --install --create-namespace elasti ../../charts/elasti -n $(ELASTI_NAMESPACE) -f ./manifest/values-elasti.yaml
+	@helm upgrade --install --create-namespace elasti ../../charts/elasti -n $(ELASTI_NAMESPACE) -f ./manifest/global/values-elasti.yaml
 
 .PHONY: apply-prometheus
 apply-prometheus:
@@ -103,7 +76,7 @@ apply-prometheus:
 	  --set kubeStateMetrics.enabled=false \
 	  --set nodeExporter.enabled=false \
 	  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false --wait --timeout 180s
-	@kubectl apply -f ./manifest/istio-servicemonitor.yaml
+	@kubectl apply -f ./manifest/global/istio-servicemonitor.yaml
 	@helm upgrade --install prometheus-pushgateway prometheus-community/prometheus-pushgateway --version $(PROMETHEUS_PUSHGATEWAY_VERSION) \
 	  --namespace monitoring \
 	  --set serviceMonitor.enabled=true \
@@ -118,11 +91,13 @@ apply-ingress:
 	@helm repo update
 	@helm upgrade --install istio-base istio/base -n istio-system --create-namespace --version $(ISTIO_VERSION) --wait --timeout 180s
 	@helm upgrade --install istiod istio/istiod -n istio-system --version $(ISTIO_VERSION) --wait --timeout 180s
-	@helm upgrade --install istio-ingressgateway istio/gateway -n istio-system -f ./manifest/values-istio-ingress.yaml --version $(ISTIO_VERSION)
+	@helm upgrade --install istio-ingressgateway istio/gateway -n istio-system -f ./manifest/global/values-istio-ingress.yaml --version $(ISTIO_VERSION)
 	@kubectl -n istio-system wait --for=condition=available deployment/istio-ingressgateway --timeout=180s
 	@kubectl create namespace target --dry-run=client -o yaml | kubectl apply -f -
 	@kubectl label namespace target istio-injection=enabled --overwrite
 	@echo "Istio installed successfully."
+	@kubectl apply -f ./manifest/global/istio-gateway.yaml -n istio-system
+	@echo "Istio Gateway installed successfully."
 
 .PHONY: uninstall-ingress
 uninstall-ingress:
@@ -147,12 +122,6 @@ uninstall-keda:
 	@helm uninstall keda -n keda
 	@kubectl delete namespace keda
 	@echo "KEDA uninstalled successfully."
-
-.PHONY: test
-test:
-	@echo "Running KUTTL tests..."
-	@kubectl kuttl test --start-kind=false --namespace=$(NAMESPACE) --test $(T)
-	@echo "E2E Tests completed!"
 
 .PHONY: pf-prom
 pf-prom:

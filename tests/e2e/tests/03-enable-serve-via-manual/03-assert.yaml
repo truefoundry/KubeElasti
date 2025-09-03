@@ -3,4 +3,4 @@ kind: ElastiService
 metadata:
   name: target-elastiservice
 status:
-  mode: proxy
+  mode: serve

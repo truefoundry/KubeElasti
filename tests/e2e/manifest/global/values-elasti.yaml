@@ -1,0 +1,28 @@
+---
+enableMonitoring: true
+elastiController:
+  manager:
+    image:
+      repository: elasti-operator
+      tag: v1alpha1
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+elastiResolver:
+  proxy:
+    image:
+      repository: elasti-resolver
+      tag: v1alpha1
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi

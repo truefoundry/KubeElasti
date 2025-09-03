@@ -1,0 +1,5 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: ./send_traffic.sh 'http://target-deployment.$NAMESPACE.svc.cluster.local/bytes/1048576'
+    namespaced: true
