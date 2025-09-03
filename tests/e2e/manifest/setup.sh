@@ -6,7 +6,7 @@ echo "Current directory: $(pwd)"
 MANIFEST_DIR=""
 NAMESPACE=""
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   case $1 in
     --namespace)
       NAMESPACE="$2"
@@ -25,12 +25,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate required arguments
-if [[ -z "$MANIFEST_DIR" ]]; then
+if [ -z "$MANIFEST_DIR" ]; then
   echo "Error: --manifest-dir is required"
   exit 1
 fi
 
-if [[ -z "$NAMESPACE" ]]; then
+if [ -z "$NAMESPACE" ]; then
   echo "Error: --namespace is required"
   exit 1
 fi
