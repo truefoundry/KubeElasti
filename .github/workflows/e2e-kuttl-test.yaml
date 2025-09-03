@@ -30,12 +30,11 @@ jobs:
         with:
           version: 'v3.12.3'
 
-      - name: Start local registry
+      - name: Build and push images
+        working-directory: ./tests/e2e
         run: |
-          docker run -d --name kind-registry -p 5002:5000 registry:2
-          docker network create kind || true
-          docker network connect "kind" kind-registry || true
-
+          make build-images
+      
       - name: Install Kind with Registry
         uses: helm/kind-action@v1.5.0
         with:
@@ -44,17 +43,9 @@ jobs:
       - name: Create Kind cluster
         working-directory: ./tests/e2e
         run: |
-          kind create cluster --config ./kind-config.yaml
-          kubectl config use-context kind-elasti-e2e
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Build and push images
-        working-directory: ./tests/e2e
-        run: |
-          make build-images
-
-      - name: Apply dependencies | Elasti, KEDA, Istio, Prometheus
+          make kind-up
+      
+      - name: Install dependencies
         working-directory: ./tests/e2e
         run: |
           make apply-deps
