@@ -60,4 +60,4 @@ jobs:
       - name: Run Kuttl E2E Tests
         working-directory: ./tests/e2e
         run: |
-          kubectl kuttl test --config ./kuttl-test.yaml
+          make test
