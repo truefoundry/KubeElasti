@@ -68,10 +68,9 @@ apply-deps-parallel:
 .PHONY: setup-repos
 setup-repos:
 	@echo "Setting up Helm repositories..."
-	@helm repo add istio https://istio-release.storage.googleapis.com/charts &
-	@helm repo add prometheus-community https://prometheus-community.github.io/helm-charts &
-	@helm repo add kedacore https://kedacore.github.io/charts &
-	@wait
+	@helm repo add istio https://istio-release.storage.googleapis.com/charts
+	@helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	@helm repo add kedacore https://kedacore.github.io/charts
 	@helm repo update
 
 .PHONY: apply-elasti
