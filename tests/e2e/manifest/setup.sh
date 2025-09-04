@@ -60,3 +60,9 @@ apply_template "$MANIFEST_DIR/test-template/target-elastiservice.yaml" "$NAMESPA
 
 # 4. Add virtual service (goes to istio-system but references our namespace)
 # apply_template "$MANIFEST_DIR/test-template/target-virtualService.yaml" "$NAMESPACE"
+
+# Wait for resources to be ready
+kubectl wait --for=condition=Ready pods -l app=target-deployment -n $NAMESPACE
+kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPACE
+# ElastiService is a CRD - wait for it to exist and have a status
+kubectl wait --for=jsonpath='{.status}' elastiservice/target-elastiservice -n $NAMESPACE
