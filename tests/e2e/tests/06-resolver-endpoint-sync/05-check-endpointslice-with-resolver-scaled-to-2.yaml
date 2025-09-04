@@ -1,0 +1,45 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      #!/bin/sh
+      # Verify that the endpointslice contains resolver IPs
+
+      # Get resolver pod IPs
+      RESOLVER_IPS=$(kubectl get pods -n elasti -l app=elasti-resolver -o jsonpath='{.items[*].status.podIP}')
+
+      # Check if resolver IPs are present in the endpointslice
+      ENDPOINTSLICE_IPS=$(kubectl get endpointslice -n $NAMESPACE elasti-target-deployment-endpointslice-to-resolver-9696239e87 -o jsonpath='{.endpoints[*].addresses[*]}')
+
+      # Verify that the endpointslice contains at least one resolver IP
+      echo "Resolver IPs: $RESOLVER_IPS"
+      echo "EndpointSlice IPs: $ENDPOINTSLICE_IPS"
+
+      # Check that all resolver IPs are in the endpointslice
+      MISSING_IPS=""
+      for IP in $RESOLVER_IPS; do
+        if ! echo "$ENDPOINTSLICE_IPS" | grep -q "$IP"; then
+          MISSING_IPS="$MISSING_IPS $IP"
+        fi
+      done
+
+      # Check that all endpointslice IPs are resolver IPs
+      EXTRA_IPS=""
+      for IP in $ENDPOINTSLICE_IPS; do
+        if ! echo "$RESOLVER_IPS" | grep -q "$IP"; then
+          EXTRA_IPS="$EXTRA_IPS $IP"
+        fi
+      done
+
+      if [ -n "$MISSING_IPS" ]; then
+        echo "Missing resolver IPs in endpointslice:$MISSING_IPS"
+        exit 1
+      fi
+
+      if [ -n "$EXTRA_IPS" ]; then
+        echo "Extra IPs in endpointslice that are not resolver IPs:$EXTRA_IPS"
+        exit 1
+      fi
+
+      echo "All resolver IPs match endpointslice IPs"
+      exit 0

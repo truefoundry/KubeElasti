@@ -59,4 +59,4 @@ apply_template "$MANIFEST_DIR/test-template/keda-scaledObject-Target.yaml" "$NAM
 apply_template "$MANIFEST_DIR/test-template/target-elastiservice.yaml" "$NAMESPACE"
 
 # 4. Add virtual service (goes to istio-system but references our namespace)
-apply_template "$MANIFEST_DIR/test-template/target-virtualService.yaml" "$NAMESPACE"
+# apply_template "$MANIFEST_DIR/test-template/target-virtualService.yaml" "$NAMESPACE"

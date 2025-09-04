@@ -3,4 +3,4 @@ kind: TestStep
 commands:
   - command: ../../manifest/setup.sh --manifest-dir ../../manifest
     namespaced: true
-  - command: kubectl apply -f ../../manifest/global/pod-curl-target-gw.yaml -n 2 --create-namespace
+  - command: kubectl apply -f ../../manifest/global/pod-curl-target-gw.yaml -n default

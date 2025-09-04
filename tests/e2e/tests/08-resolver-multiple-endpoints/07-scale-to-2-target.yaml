@@ -3,5 +3,5 @@ kind: TestStep
 commands:
   - command: kubectl scale deployment/target-deployment --replicas=2
     namespaced: true
-  - command: kubectl wait --for=condition=Ready pods -l app=target-deployment --timeout=60s
+  - command: kubectl wait --for=condition=Ready pods -l app=target-deployment
     namespaced: true

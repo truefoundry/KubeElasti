@@ -52,19 +52,6 @@ jobs:
           sudo mv kubectl-kuttl /usr/local/bin/
           kubectl kuttl version
 
-      - name: Debug file structure
-        working-directory: ./tests/e2e
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Listing current directory:"
-          ls -la
-          echo "Listing manifest directory:"
-          ls -la manifest/
-          echo "Listing test-template directory:"
-          ls -la manifest/test-template/
-          echo "Checking setup.sh permissions:"
-          ls -la manifest/setup.sh
-
       - name: Run E2E Tests
         working-directory: ./tests/e2e
         run: |
