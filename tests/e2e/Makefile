@@ -9,6 +9,7 @@ ISTIO_VERSION := 1.26.1
 PROMETHEUS_VERSION := 73.2.3
 PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
+TIMEOUT := 300s
 
 .PHONY: all setup destroy test
 all: build-images setup test
@@ -55,7 +56,23 @@ kind-down:
 	fi
 
 .PHONY: apply-deps
-apply-deps: apply-ingress apply-prometheus apply-elasti apply-keda
+apply-deps: setup-repos apply-deps-parallel apply-elasti
+
+.PHONY: apply-deps-parallel
+apply-deps-parallel:
+	@$(MAKE) apply-keda &
+	@$(MAKE) apply-ingress &
+	@$(MAKE) apply-prometheus
+	@echo "All dependencies installed successfully."
+
+.PHONY: setup-repos
+setup-repos:
+	@echo "Setting up Helm repositories..."
+	@helm repo add istio https://istio-release.storage.googleapis.com/charts &
+	@helm repo add prometheus-community https://prometheus-community.github.io/helm-charts &
+	@helm repo add kedacore https://kedacore.github.io/charts &
+	@wait
+	@helm repo update
 
 .PHONY: apply-elasti
 apply-elasti:
@@ -66,8 +83,6 @@ apply-elasti:
 apply-prometheus:
 	@echo "Installing Prometheus Stack..."
 	@kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
-	@helm repo add prometheus-community https://prometheus-community.github.io/helm-charts --force-update
-	@helm repo update
 	@helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack --version $(PROMETHEUS_VERSION) \
 	  --namespace monitoring \
 	  --create-namespace \
@@ -75,29 +90,24 @@ apply-prometheus:
 	  --set grafana.enabled=true \
 	  --set kubeStateMetrics.enabled=false \
 	  --set nodeExporter.enabled=false \
-	  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false --wait --timeout 180s
+	  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false --wait --timeout $(TIMEOUT)
 	@kubectl apply -f ./manifest/global/istio-servicemonitor.yaml
 	@helm upgrade --install prometheus-pushgateway prometheus-community/prometheus-pushgateway --version $(PROMETHEUS_PUSHGATEWAY_VERSION) \
 	  --namespace monitoring \
 	  --set serviceMonitor.enabled=true \
 	  --set serviceMonitor.interval=5s \
-	  --wait --timeout 180s
+	  --wait --timeout $(TIMEOUT)
 	@echo "Prometheus Stack installed successfully."
 
 .PHONY: apply-ingress
 apply-ingress:
 	@echo "Setting up Istio..."
-	@helm repo add istio https://istio-release.storage.googleapis.com/charts
-	@helm repo update
-	@helm upgrade --install istio-base istio/base -n istio-system --create-namespace --version $(ISTIO_VERSION) --wait --timeout 180s
-	@helm upgrade --install istiod istio/istiod -n istio-system --version $(ISTIO_VERSION) --wait --timeout 180s
-	@helm upgrade --install istio-ingressgateway istio/gateway -n istio-system -f ./manifest/global/values-istio-ingress.yaml --version $(ISTIO_VERSION)
-	@kubectl -n istio-system wait --for=condition=available deployment/istio-ingressgateway --timeout=180s
 	@kubectl create namespace target --dry-run=client -o yaml | kubectl apply -f -
-	@kubectl label namespace target istio-injection=enabled --overwrite
-	@echo "Istio installed successfully."
+	@helm upgrade --install istio-base istio/base -n istio-system --create-namespace --version $(ISTIO_VERSION) --wait --timeout $(TIMEOUT)
+	@helm upgrade --install istiod istio/istiod -n istio-system --version $(ISTIO_VERSION) --wait --timeout $(TIMEOUT)
+	@helm upgrade --install istio-ingressgateway istio/gateway -n istio-system -f ./manifest/global/values-istio-ingress.yaml --version $(ISTIO_VERSION) --wait --timeout $(TIMEOUT)
 	@kubectl apply -f ./manifest/global/istio-gateway.yaml -n istio-system
-	@echo "Istio Gateway installed successfully."
+	@echo "Istio installed successfully."
 
 .PHONY: uninstall-ingress
 uninstall-ingress:
@@ -110,9 +120,7 @@ uninstall-ingress:
 apply-keda: 
 	@echo "Installing KEDA..."
 	@kubectl create namespace keda --dry-run=client -o yaml | kubectl apply -f -
-	@helm repo add kedacore https://kedacore.github.io/charts
-	@helm repo update
-	@helm upgrade --install keda kedacore/keda --namespace keda --create-namespace --version $(KEDA_VERSION) --wait --timeout 180s
+	@helm upgrade --install keda kedacore/keda --namespace keda --create-namespace --version $(KEDA_VERSION) --wait --timeout $(TIMEOUT)
 	@echo "KEDA installed successfully."
 
 # This is for locally testing, not used in CI

@@ -51,18 +51,18 @@ apply_template() {
 
 # 1. Apply target deployment
 apply_template "$MANIFEST_DIR/test-template/target-deployment.yaml" "$NAMESPACE"
+kubectl wait --for=condition=Ready pods -l app=target-deployment -n $NAMESPACE
 
 # 2. Apply keda ScaledObject in KEDA for Target  
 apply_template "$MANIFEST_DIR/test-template/keda-scaledObject-Target.yaml" "$NAMESPACE"
+kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPACE
 
 # 3. Apply ElastiService
 apply_template "$MANIFEST_DIR/test-template/target-elastiservice.yaml" "$NAMESPACE"
+kubectl wait --for=jsonpath='{.status}' elastiservice/target-elastiservice -n $NAMESPACE 
 
 # 4. Add virtual service (goes to istio-system but references our namespace)
 # apply_template "$MANIFEST_DIR/test-template/target-virtualService.yaml" "$NAMESPACE"
 
-# Wait for resources to be ready
-kubectl wait --for=condition=Ready pods -l app=target-deployment -n $NAMESPACE
-kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPACE
-# ElastiService is a CRD - wait for it to exist and have a status
-kubectl wait --for=jsonpath='{.status}' elastiservice/target-elastiservice -n $NAMESPACE
+# Label namespace for istio injection
+kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
