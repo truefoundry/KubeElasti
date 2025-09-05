@@ -5,3 +5,5 @@ commands:
     namespaced: true
   - command: kubectl apply -f ../../manifest/global/pod-curl-target-gw.yaml -n default
   - command: kubectl wait --for=condition=Ready pod/curl-target-gw -n default
+  # Small wait for everything to get provisioned properly
+  - command: sleep 5
