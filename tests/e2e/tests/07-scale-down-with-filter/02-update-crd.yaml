@@ -3,7 +3,7 @@ kind: ElastiService
 metadata:
   name: target-elastiservice
 spec:
-  cooldownPeriod: 10
+  cooldownPeriod: 5
   minTargetReplicas: 1
   triggers:
     - metadata:
