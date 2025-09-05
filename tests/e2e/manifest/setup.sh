@@ -59,7 +59,6 @@ kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPA
 
 # 3. Apply ElastiService
 apply_template "$MANIFEST_DIR/test-template/target-elastiservice.yaml" "$NAMESPACE"
-kubectl wait --for=jsonpath='{.status}' elastiservice/target-elastiservice -n $NAMESPACE 
 
 # 4. Add virtual service (goes to istio-system but references our namespace)
 # apply_template "$MANIFEST_DIR/test-template/target-virtualService.yaml" "$NAMESPACE"
