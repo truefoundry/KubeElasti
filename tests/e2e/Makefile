@@ -22,8 +22,7 @@ test:
 
 .PHONY: chmod-scripts
 chmod-scripts:
-	@echo "Creating reset executable..."
-	@chmod +x ./manifest/reset.sh
+	@echo "Creating reset executable...
 	@chmod +x ./manifest/setup.sh
 
 .PHONY: build-images
