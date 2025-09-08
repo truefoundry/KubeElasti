@@ -8,5 +8,5 @@ for i in 1 2 3 4 5; do
     if [ "$result" != "0" ]; then exit 1; fi
     if [ "$code" != "200" ]; then exit 2; fi
 
-    sleep 2
+    sleep 1
 done

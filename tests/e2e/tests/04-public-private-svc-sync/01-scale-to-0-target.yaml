@@ -3,5 +3,7 @@ kind: TestStep
 commands:
   - command: kubectl scale deployment/target-deployment --replicas=0
     namespaced: true
-  - command: kubectl wait --for=delete pods -l app=target-deployment
+  - command: sleep 2
+  - command: kubectl wait --for=delete pods -l app=target-deployment --timeout=300s
     namespaced: true
+  - command: sleep 2
