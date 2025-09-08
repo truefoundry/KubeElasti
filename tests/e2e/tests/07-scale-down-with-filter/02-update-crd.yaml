@@ -7,7 +7,7 @@ spec:
   # This is used by ElastiService to determine when to scale down
   # And also to check if promethius was up for the cooldown period
   # A low value will make metrics not available for cooldown period
-  cooldownPeriod: 20
+  cooldownPeriod: 30
   minTargetReplicas: 1
   triggers:
     - metadata:
