@@ -5,3 +5,4 @@ commands:
     namespaced: true
   - command: kubectl wait --for=delete pods -l app=target-deployment
     namespaced: true
+  - command: sleep 5
