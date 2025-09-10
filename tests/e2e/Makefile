@@ -10,7 +10,7 @@ KEDA_VERSION := 2.17.1
 TIMEOUT := 400s
 
 .PHONY: all setup destroy test
-all: test
+all: build-images setup test
 setup: kind-up chmod-scripts apply-deps
 destroy: kind-down
 test:
@@ -20,7 +20,6 @@ test:
 
 .PHONY: chmod-scripts
 chmod-scripts:
-	@echo "Making setup.sh executable..."
 	@chmod +x ./manifest/setup.sh
 
 .PHONY: build-images
@@ -56,7 +55,10 @@ kind-down:
 apply-deps: setup-repos apply-deps-parallel apply-elasti
 
 .PHONY: apply-deps-parallel
-apply-deps-parallel: apply-keda apply-ingress apply-prometheus
+apply-deps-parallel:
+	@$(MAKE) apply-keda &
+	@$(MAKE) apply-ingress &
+	@$(MAKE) apply-prometheus
 	@echo "All dependencies installed successfully."
 
 .PHONY: setup-repos
