@@ -2,4 +2,4 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:
   - command: kubectl scale deployment/elasti-resolver -n elasti --replicas=2
-  - command: kubectl wait --for=condition=Ready pods -l app=elasti-resolver -n elasti
+  - command: kubectl rollout status deployment/elasti-resolver -n elasti --timeout=400s

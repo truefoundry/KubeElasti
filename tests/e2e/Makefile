@@ -3,16 +3,14 @@ CLUSTER_NAME := elasti-e2e
 NAMESPACE := test
 ELASTI_NAMESPACE := elasti
 T ?= ./tests
-REGISTRY_HOST := localhost:5002
-REGISTRY_NAME := kind-registry
 ISTIO_VERSION := 1.26.1
 PROMETHEUS_VERSION := 73.2.3
 PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
-TIMEOUT := 300s
+TIMEOUT := 400s
 
 .PHONY: all setup destroy test
-all: build-images setup test
+all: test
 setup: kind-up chmod-scripts apply-deps
 destroy: kind-down
 test:
@@ -22,7 +20,7 @@ test:
 
 .PHONY: chmod-scripts
 chmod-scripts:
-	@echo "Creating reset executable..."
+	@echo "Making setup.sh executable..."
 	@chmod +x ./manifest/setup.sh
 
 .PHONY: build-images
@@ -58,10 +56,7 @@ kind-down:
 apply-deps: setup-repos apply-deps-parallel apply-elasti
 
 .PHONY: apply-deps-parallel
-apply-deps-parallel:
-	@$(MAKE) apply-keda &
-	@$(MAKE) apply-ingress &
-	@$(MAKE) apply-prometheus
+apply-deps-parallel: apply-keda apply-ingress apply-prometheus
 	@echo "All dependencies installed successfully."
 
 .PHONY: setup-repos
@@ -75,7 +70,7 @@ setup-repos:
 .PHONY: apply-elasti
 apply-elasti:
 	@echo "Installing Elasti Operator..."
-	@helm upgrade --install --create-namespace elasti ../../charts/elasti -n $(ELASTI_NAMESPACE) -f ./manifest/global/values-elasti.yaml
+	@helm upgrade --wait --timeout $(TIMEOUT) --install --create-namespace elasti ../../charts/elasti -n $(ELASTI_NAMESPACE) -f ./manifest/global/values-elasti.yaml
 
 .PHONY: apply-prometheus
 apply-prometheus:

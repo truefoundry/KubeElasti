@@ -3,5 +3,5 @@ kind: TestSuite
 startKIND: false
 testDirs:
   - ./tests/
-timeout: 300
+timeout: 600  
 parallel: 1

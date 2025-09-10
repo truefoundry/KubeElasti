@@ -3,4 +3,5 @@ kind: TestStep
 commands:
   - command: kubectl scale deployment/target-deployment --replicas=2
     namespaced: true
-  - command: sleep 10
+  - command: kubectl rollout status deployment/target-deployment --timeout=400s
+    namespaced: true

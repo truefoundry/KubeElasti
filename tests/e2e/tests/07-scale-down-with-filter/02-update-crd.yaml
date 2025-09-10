@@ -5,7 +5,7 @@ metadata:
 spec:
   # Keep this above 10
   # This is used by ElastiService to determine when to scale down
-  # And also to check if promethius was up for the cooldown period
+  # And also to check if prometheus was up for the cooldown period
   # A low value will make metrics not available for cooldown period
   cooldownPeriod: 30
   minTargetReplicas: 1
@@ -16,4 +16,3 @@ spec:
         threshold: "0.01"
         uptimeFilter: container="foo"
       type: prometheus
-

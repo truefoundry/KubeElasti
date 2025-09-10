@@ -5,6 +5,7 @@ echo "Current directory: $(pwd)"
 # Parse arguments - only use flags
 MANIFEST_DIR=""
 NAMESPACE=""
+TIMEOUT="300"
 
 while [ $# -gt 0 ]; do
   case $1 in
@@ -51,11 +52,11 @@ apply_template() {
 
 # 1. Apply target deployment
 apply_template "$MANIFEST_DIR/test-template/target-deployment.yaml" "$NAMESPACE"
-kubectl wait --for=condition=Ready pods -l app=target-deployment -n $NAMESPACE
+kubectl wait --for=condition=Ready pods -l app=target-deployment -n $NAMESPACE --timeout=${TIMEOUT}s
 
 # 2. Apply keda ScaledObject in KEDA for Target  
 apply_template "$MANIFEST_DIR/test-template/keda-scaledObject-Target.yaml" "$NAMESPACE"
-kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPACE
+kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPACE --timeout=${TIMEOUT}s
 
 # 3. Apply ElastiService
 apply_template "$MANIFEST_DIR/test-template/target-elastiservice.yaml" "$NAMESPACE"

@@ -13,7 +13,7 @@ spec:
     - match:
         - uri:
             prefix: /${NAMESPACE}/
-        - headers:
+          headers:
             x-test-namespace:
               exact: ${NAMESPACE}
       rewrite:
