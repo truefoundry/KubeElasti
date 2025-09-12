@@ -10,7 +10,12 @@ KEDA_VERSION := 2.17.1
 TIMEOUT := 400s
 
 .PHONY: all setup destroy test
-all: build-images setup test
+all: 
+	@echo "Run 'make build-images' to build images"
+	@echo "Run 'make setup' to setup environment"
+	@echo "Run 'make test' to run tests"
+	@echo "Run 'make destroy' to destroy environment"
+	
 setup: kind-up chmod-scripts apply-deps
 destroy: kind-down
 test:
@@ -26,6 +31,15 @@ chmod-scripts:
 build-images: ## Build and push images
 	$(MAKE) -C ../../operator docker-build IMG=elasti-operator:v1alpha1
 	$(MAKE) -C ../../resolver docker-build IMG=elasti-resolver:v1alpha1
+
+.PHONY: reload-images
+reload-images: ## Reload images into kind and restart deployments
+	@echo "Loading images into kind cluster..."
+	@kind load docker-image elasti-operator:v1alpha1 --name $(CLUSTER_NAME)
+	@kind load docker-image elasti-resolver:v1alpha1 --name $(CLUSTER_NAME)
+	@echo "Restarting elasti operator deployment..."
+	@kubectl rollout restart deployment elasti-operator-controller-manager -n $(ELASTI_NAMESPACE)
+	@echo "Images reloaded and deployment restarted."
 
 .PHONY: kind-up
 kind-up: ## Create Kind cluster

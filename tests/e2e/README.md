@@ -38,16 +38,12 @@ The E2E testing framework is organized into the following directories:
 ```bash
 elasti/tests/e2e/
 ├── tests/                     # KUTTL test definitions
-│   └── 00-elasti-setup/      # Individual test case
-│       └── 00-assert.yaml    # Test step (assertion)
-├── temp/                      # Work-in-progress tests
+│   └── 00-<TEST-NAME>/      # Individual test case
+│       └── 00-<STEP-NAME>.yaml    # Test step (assertion)
 ├── manifest/                  # Kubernetes manifests and values files
-│   ├── elasti-chart-values.yaml  # Elasti helm chart values
-│   ├── target-deployment.yaml    # Test deployment manifest
-│   ├── target-elastiservice.yaml # ElastiService CR manifest
-│   ├── istio-gateway.yaml        # Istio gateway configuration
-│   ├── target-virtualService.yaml # Istio virtual service
-│   └── traffic-job.yaml          # Traffic generator job
+│   ├── global/                # Global values files
+│   ├── test-template/         # Test setup template files
+│   └── setup.sh               # Test setup script
 ├── kind-config.yaml           # Kind cluster configuration
 ├── Makefile                   # Test automation commands
 ├── kuttl-test.yaml            # KUTTL test suite configuration
@@ -59,7 +55,6 @@ elasti/tests/e2e/
   - Each directory represents an individual test.
   - Each file within a test directory represents a step in that test.
   - Each step follows the naming convention with prefix 00-, 01-, etc. for execution ordering.
-- **`temp/`**: Contains work-in-progress tests and experimental scenarios
 - **`kind-config.yaml`**: Configuration for the Kind cluster used in testing
 - **`kuttl-test.yaml`**: Configuration file for KUTTL tests
   - Contains commands that run before test execution
@@ -81,6 +76,10 @@ The framework includes the following test scenarios:
 To run the complete test suite:
 
 ```bash
+// Build images for operator and resolver
+// Always run this step after making changes to operator or resolver
+make build-images
+
 // Setup the environment
 // Run this only first time
 make setup
@@ -100,9 +99,10 @@ You can also run specific parts of the testing process:
 
 | Command                  | Description                                                                                                                                                                                                    |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `make all`               | Complete pipeline: setup registry, build images, create Kind cluster, install dependencies, and run E2E tests. We recommend using this command for the first time, then using `make test` for subsequent runs. |
 | `make build-images`      | Build and push Elasti operator and resolver images to local registry |
-| `make setup`             | Sets up the environment (registry and Kind cluster with dependencies)|
+| `make setup`             | Sets up the environment (registry and Kind cluster with dependencies) |
+| `make test`              | Run the KUTTL E2E tests |
+| `make reload-images`     | Use the newly built image of Elasti operator and resolver images |
 | `make destroy`           | Delete Kind cluster and stop registry |
 | `make kind-up`           | Create a Kind cluster with the name `elasti-e2e`|
 | `make kind-down`         | Delete the Kind cluster |
@@ -113,7 +113,6 @@ You can also run specific parts of the testing process:
 | `make apply-keda`        | Install only KEDA |
 | `make uninstall-ingress` | Uninstall Istio components |
 | `make uninstall-keda`    | Uninstall KEDA components |
-| `make test`              | Run the KUTTL E2E tests |
 | `make pf-prom`           | Port-forward the Prometheus service to localhost:9090 |
 | `make pf-graf`           | Port-forward the Grafana service to localhost:9001 |
-| `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080|
+| `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080 |
