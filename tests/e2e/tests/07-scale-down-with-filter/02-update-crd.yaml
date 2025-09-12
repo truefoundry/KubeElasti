@@ -2,8 +2,13 @@ apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
   name: target-elastiservice
-  namespace: target
 spec:
+  # Keep this above 10
+  # This is used by ElastiService to determine when to scale down
+  # And also to check if prometheus was up for the cooldown period
+  # A low value will make metrics not available for cooldown period
+  cooldownPeriod: 30
+  minTargetReplicas: 1
   triggers:
     - metadata:
         query: round(sum(rate(some_metric[20s])),0.001) or vector(0)

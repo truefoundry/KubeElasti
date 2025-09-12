@@ -5,3 +5,7 @@ commands:
     namespaced: true
   - command: kubectl wait --for=delete pods -l app=target-deployment --timeout=400s
     namespaced: true
+  - command: kubectl scale deployment/target-deployment --replicas=1
+    namespaced: true
+  - command: kubectl rollout status deployment/target-deployment --timeout=400s
+    namespaced: true

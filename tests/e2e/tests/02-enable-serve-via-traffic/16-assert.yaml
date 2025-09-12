@@ -3,7 +3,7 @@ kind: ElastiService
 metadata:
   name: target-elastiservice
 status:
-  mode: proxy
+  mode: serve
 ---
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert

@@ -9,7 +9,7 @@ commands:
       RESOLVER_IPS=$(kubectl get pods -n elasti -l app=elasti-resolver -o jsonpath='{.items[*].status.podIP}')
 
       # Check if resolver IPs are present in the endpointslice
-      ENDPOINTSLICE_IPS=$(kubectl get endpointslice -n target elasti-target-deployment-endpointslice-to-resolver-9696239e87 -o jsonpath='{.endpoints[*].addresses[*]}')
+      ENDPOINTSLICE_IPS=$(kubectl get endpointslice -n $NAMESPACE elasti-target-deployment-endpointslice-to-resolver-9696239e87 -o jsonpath='{.endpoints[*].addresses[*]}')
 
       # Verify that the endpointslice contains at least one resolver IP
       echo "Resolver IPs: $RESOLVER_IPS"
