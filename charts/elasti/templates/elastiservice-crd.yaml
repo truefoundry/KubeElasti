@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: elastiservices.elasti.truefoundry.com
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     {{- include "elasti.labels" . | nindent 4 }}
 spec:
@@ -46,12 +46,12 @@ spec:
                     type: string
                   type:
                     enum:
-                      - hpa
-                      - keda
+                    - hpa
+                    - keda
                     type: string
                 required:
-                  - name
-                  - type
+                - name
+                - type
                 type: object
               cooldownPeriod:
                 default: 900
@@ -71,13 +71,13 @@ spec:
                 properties:
                   apiVersion:
                     enum:
-                      - apps/v1
-                      - argoproj.io/v1alpha1
+                    - apps/v1
+                    - argoproj.io/v1alpha1
                     type: string
                   kind:
                     enum:
-                      - deployments
-                      - rollouts
+                    - deployments
+                    - rollouts
                     type: string
                   name:
                     type: string
@@ -91,12 +91,15 @@ spec:
                       x-kubernetes-preserve-unknown-fields: true
                     type:
                       enum:
-                        - prometheus
+                      - prometheus
                       type: string
                   required:
-                    - type
+                  - type
                   type: object
                 type: array
+            required:
+            - scaleTargetRef
+            - service
             type: object
           status:
             description: ElastiServiceStatus defines the observed state of ElastiService

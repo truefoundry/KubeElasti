@@ -1,5 +1,5 @@
 # Build the resolver bianry
-FROM golang:1.23  AS builder
+FROM golang:1.25.1  AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -29,5 +29,3 @@ FROM alpine:latest
 COPY --from=builder /workspace/resolver .
 EXPOSE 8012
 CMD ["./resolver"]
-
- 
