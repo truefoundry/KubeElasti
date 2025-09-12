@@ -1,3 +1,7 @@
+# About This Test
+# This test is designed to verify the core scaling logic and mode-switching functionality of ElastiService under a 
+# synthetic and constant scaling signal, as detailed in the 08-resolver-multiple-endpoints test.
+# 
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:

@@ -1,4 +1,7 @@
 # Add StartupProbe to delay startup & remove istio injection for more deterministic tests
+# 
+# Reason for adding startup probe delay is to test if KubeElasti checks the pod status, before switching modes.
+# For this test, we remove istio dependency, and even make elastiService prometheus query to always signal a scale up.
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands:

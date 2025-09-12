@@ -3,7 +3,6 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: target-scaled-object
-  namespace: ${NAMESPACE}
 spec:
   minReplicaCount: 1
   maxReplicaCount: 5

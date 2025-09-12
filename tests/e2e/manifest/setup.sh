@@ -47,7 +47,7 @@ apply_template() {
   echo "Applying template: $(basename "$template_file")"
   
   # Substitute all variables and apply
-  sed -e "s/\${NAMESPACE}/$target_namespace/g" "$template_file" | kubectl apply -f -
+  sed -e "s/\${NAMESPACE}/$target_namespace/g" "$template_file" | kubectl apply -n $target_namespace -f - 
 }
 
 # 1. Apply target deployment
