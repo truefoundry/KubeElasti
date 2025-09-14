@@ -45,12 +45,6 @@ var _ = Describe("ElastiService Controller", func() {
 			namespace    = "elasti-test"
 		)
 
-		os.Setenv(config.EnvResolverNamespace, namespace)
-		os.Setenv(config.EnvResolverDeploymentName, "resolver-deployment")
-		os.Setenv(config.EnvResolverServiceName, "resolver-service")
-		os.Setenv(config.EnvResolverPort, "1234")
-		os.Setenv(config.EnvResolverProxyPort, "4321")
-
 		ctx := context.Background()
 
 		namespacedName := types.NamespacedName{
@@ -62,6 +56,23 @@ var _ = Describe("ElastiService Controller", func() {
 		service := &corev1.Service{}
 
 		BeforeEach(func() {
+			setEnv := func(key, val string) {
+				old, had := os.LookupEnv(key)
+				Expect(os.Setenv(key, val)).To(Succeed())
+				DeferCleanup(func() {
+					if had {
+						Expect(os.Setenv(key, old)).To(Succeed())
+					} else {
+						Expect(os.Unsetenv(key)).To(Succeed())
+					}
+				})
+			}
+			setEnv(config.EnvResolverNamespace, namespace)
+			setEnv(config.EnvResolverDeploymentName, "resolver-deployment")
+			setEnv(config.EnvResolverServiceName, "resolver-service")
+			setEnv(config.EnvResolverPort, "1234")
+			setEnv(config.EnvResolverProxyPort, "4321")
+
 			By("creating a new Deployment")
 			deployment = &v1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
