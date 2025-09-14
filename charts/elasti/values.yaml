@@ -8,7 +8,6 @@ elastiController:
   manager:
     args:
       - --leader-elect
-      - --leader-elect-resource-lock=leases
       - --health-probe-bind-address=:8081
       - --metrics-bind-address=0
     containerSecurityContext:
