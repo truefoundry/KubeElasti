@@ -13,15 +13,15 @@ type Config struct {
 }
 
 const (
-	ENV_RESOLVER_NAMESPACE       = "ELASTI_RESOLVER_NAMESPACE"
-	ENV_RESOLVER_DEPLOYMENT_NAME = "ELASTI_RESOLVER_DEPLOYMENT_NAME"
-	ENV_RESOLVER_SERVICE_NAME    = "ELASTI_RESOLVER_SERVICE_NAME"
-	ENV_RESOLVER_PORT            = "ELASTI_RESOLVER_PORT"
-	ENV_RESOLVER_PROXY_PORT      = "ELASTI_RESOLVER_PROXY_PORT"
-	ENV_OPERATOR_NAMESPACE       = "ELASTI_OPERATOR_NAMESPACE"
-	ENV_OPERATOR_DEPLOYMENT_NAME = "ELASTI_OPERATOR_DEPLOYMENT_NAME"
-	ENV_OPERATOR_SERVICE_NAME    = "ELASTI_OPERATOR_SERVICE_NAME"
-	ENV_OPERATOR_PORT            = "ELASTI_OPERATOR_PORT"
+	EnvResolverNamespace      = "ELASTI_RESOLVER_NAMESPACE"
+	EnvResolverDeploymentName = "ELASTI_RESOLVER_DEPLOYMENT_NAME"
+	EnvResolverServiceName    = "ELASTI_RESOLVER_SERVICE_NAME"
+	EnvResolverPort           = "ELASTI_RESOLVER_PORT"
+	EnvResolverProxyPort      = "ELASTI_RESOLVER_PROXY_PORT"
+	EnvOperatorNamespace      = "ELASTI_OPERATOR_NAMESPACE"
+	EnvOperatorDeploymentName = "ELASTI_OPERATOR_DEPLOYMENT_NAME"
+	EnvOperatorServiceName    = "ELASTI_OPERATOR_SERVICE_NAME"
+	EnvOperatorPort           = "ELASTI_OPERATOR_PORT"
 )
 
 type ResolverConfig struct {
@@ -33,22 +33,22 @@ type ResolverConfig struct {
 func GetResolverConfig() ResolverConfig {
 	return ResolverConfig{
 		Config: Config{
-			Namespace:      getEnvStringOrPanic(ENV_RESOLVER_NAMESPACE),
-			DeploymentName: getEnvStringOrPanic(ENV_RESOLVER_DEPLOYMENT_NAME),
-			ServiceName:    getEnvStringOrPanic(ENV_RESOLVER_SERVICE_NAME),
-			Port:           getEnvInt32OrPanic(ENV_RESOLVER_PORT),
+			Namespace:      getEnvStringOrPanic(EnvResolverNamespace),
+			DeploymentName: getEnvStringOrPanic(EnvResolverDeploymentName),
+			ServiceName:    getEnvStringOrPanic(EnvResolverServiceName),
+			Port:           getEnvInt32OrPanic(EnvResolverPort),
 		},
 
-		ReverseProxyPort: getEnvInt32OrPanic(ENV_RESOLVER_PROXY_PORT),
+		ReverseProxyPort: getEnvInt32OrPanic(EnvResolverProxyPort),
 	}
 }
 
 func GetOperatorConfig() Config {
 	return Config{
-		Namespace:      getEnvStringOrPanic(ENV_OPERATOR_NAMESPACE),
-		DeploymentName: getEnvStringOrPanic(ENV_OPERATOR_DEPLOYMENT_NAME),
-		ServiceName:    getEnvStringOrPanic(ENV_OPERATOR_SERVICE_NAME),
-		Port:           getEnvInt32OrPanic(ENV_OPERATOR_PORT),
+		Namespace:      getEnvStringOrPanic(EnvOperatorNamespace),
+		DeploymentName: getEnvStringOrPanic(EnvOperatorDeploymentName),
+		ServiceName:    getEnvStringOrPanic(EnvOperatorServiceName),
+		Port:           getEnvInt32OrPanic(EnvOperatorPort),
 	}
 }
 
