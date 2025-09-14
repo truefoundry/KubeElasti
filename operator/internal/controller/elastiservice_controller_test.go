@@ -45,11 +45,11 @@ var _ = Describe("ElastiService Controller", func() {
 			namespace    = "elasti-test"
 		)
 
-		os.Setenv(config.ENV_RESOLVER_NAMESPACE, namespace)
-		os.Setenv(config.ENV_RESOLVER_DEPLOYMENT_NAME, "resolver-deployment")
-		os.Setenv(config.ENV_RESOLVER_SERVICE_NAME, "resolver-service")
-		os.Setenv(config.ENV_RESOLVER_PORT, "1234")
-		os.Setenv(config.ENV_RESOLVER_PROXY_PORT, "4321")
+		os.Setenv(config.EnvResolverNamespace, namespace)
+		os.Setenv(config.EnvResolverDeploymentName, "resolver-deployment")
+		os.Setenv(config.EnvResolverServiceName, "resolver-service")
+		os.Setenv(config.EnvResolverPort, "1234")
+		os.Setenv(config.EnvResolverProxyPort, "4321")
 
 		ctx := context.Background()
 
