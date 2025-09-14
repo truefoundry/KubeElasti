@@ -97,7 +97,7 @@ func (r *ElastiServiceReconciler) createOrUpdateEndpointsliceToResolver(ctx cont
 				Name:     ptr.To(service.Spec.Ports[0].Name),
 				Protocol: ptr.To(v1.ProtocolTCP),
 				// Make this dynamic too
-				Port: ptr.To(int32(config.GetResolverConfig().Port)),
+				Port: ptr.To(config.GetResolverConfig().Port),
 			},
 		},
 	}

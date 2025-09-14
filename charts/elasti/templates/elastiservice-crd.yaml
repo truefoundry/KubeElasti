@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: elastiservices.elasti.truefoundry.com
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     {{- include "elasti.labels" . | nindent 4 }}
 spec:
@@ -97,6 +97,9 @@ spec:
                     - type
                   type: object
                 type: array
+            required:
+            - scaleTargetRef
+            - service
             type: object
           status:
             description: ElastiServiceStatus defines the observed state of ElastiService

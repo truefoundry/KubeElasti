@@ -19,9 +19,11 @@ package controller
 import (
 	"context"
 	"fmt"
+	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/truefoundry/elasti/pkg/config"
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -42,6 +44,12 @@ var _ = Describe("ElastiService Controller", func() {
 			resourceName = "test-elasti-service"
 			namespace    = "elasti-test"
 		)
+
+		os.Setenv(config.ENV_RESOLVER_NAMESPACE, namespace)
+		os.Setenv(config.ENV_RESOLVER_DEPLOYMENT_NAME, "resolver-deployment")
+		os.Setenv(config.ENV_RESOLVER_SERVICE_NAME, "resolver-service")
+		os.Setenv(config.ENV_RESOLVER_PORT, "1234")
+		os.Setenv(config.ENV_RESOLVER_PROXY_PORT, "4321")
 
 		ctx := context.Background()
 

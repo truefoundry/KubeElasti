@@ -3,8 +3,8 @@ package operator
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -36,11 +36,12 @@ type Client struct {
 // NewOperatorClient returns a new OperatorClient
 func NewOperatorClient(logger *zap.Logger, retryDuration time.Duration) *Client {
 	operatorConfig := config.GetOperatorConfig()
+	operatorHostPort := net.JoinHostPort(operatorConfig.ServiceName, strconv.Itoa(int(operatorConfig.Port)))
 
 	return &Client{
 		logger:                  logger.With(zap.String("component", "operatorRPC")),
 		retryDuration:           retryDuration,
-		operatorURL:             fmt.Sprintf("http://%s:%d", operatorConfig.ServiceName, operatorConfig.Port),
+		operatorURL:             "http://" + operatorHostPort,
 		incomingRequestEndpoint: "/informer/incoming-request",
 		client:                  http.Client{},
 	}
