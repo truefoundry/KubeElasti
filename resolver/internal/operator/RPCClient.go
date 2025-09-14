@@ -36,7 +36,8 @@ type Client struct {
 // NewOperatorClient returns a new OperatorClient
 func NewOperatorClient(logger *zap.Logger, retryDuration time.Duration) *Client {
 	operatorConfig := config.GetOperatorConfig()
-	operatorHostPort := net.JoinHostPort(operatorConfig.ServiceName, strconv.Itoa(int(operatorConfig.Port)))
+	operatorHost := operatorConfig.ServiceName + "." + operatorConfig.Namespace + ".svc." + config.GetKubernetesClusterDomain()
+	operatorHostPort := net.JoinHostPort(operatorHost, strconv.Itoa(int(operatorConfig.Port)))
 
 	return &Client{
 		logger:                  logger.With(zap.String("component", "operatorRPC")),
