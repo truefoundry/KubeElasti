@@ -17,6 +17,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	elasti_config "github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/k8shelper"
 	"github.com/truefoundry/elasti/pkg/logger"
 	"go.uber.org/zap"
@@ -48,11 +49,6 @@ type config struct {
 	SentryDsn string `split_words:"true" default:""`
 	SentryEnv string `envconfig:"SENTRY_ENVIRONMENT" default:""`
 }
-
-const (
-	reverseProxyPort = ":8012"
-	internalPort     = ":8013"
-)
 
 func main() {
 	var env config
@@ -115,6 +111,7 @@ func main() {
 	})
 
 	// Handle all the incoming requests
+	reverseProxyPort := fmt.Sprintf(":%d", elasti_config.GetResolverConfig().ReverseProxyPort)
 	reverseProxyServerMux := http.NewServeMux()
 	reverseProxyServerMux.Handle("/", sentryHandler.HandleFunc(requestHandler.ServeHTTP))
 	reverseProxyServer := &http.Server{
@@ -130,6 +127,7 @@ func main() {
 	}()
 
 	// Handle all the incoming internal request like from prometheus that are not related to the reverse proxy
+	internalPort := fmt.Sprintf(":%d", elasti_config.GetResolverConfig().Port)
 	internalServeMux := http.NewServeMux()
 	internalServeMux.Handle("/metrics", promhttp.Handler())
 	internalServeMux.Handle("/queue-status", sentryHandler.HandleFunc(requestHandler.GetQueueStatus))

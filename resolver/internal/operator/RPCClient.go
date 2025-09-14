@@ -3,6 +3,7 @@ package operator
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/truefoundry/elasti/resolver/internal/prom"
 
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/messages"
 	"go.uber.org/zap"
 
@@ -33,10 +35,12 @@ type Client struct {
 
 // NewOperatorClient returns a new OperatorClient
 func NewOperatorClient(logger *zap.Logger, retryDuration time.Duration) *Client {
+	operatorConfig := config.GetOperatorConfig()
+
 	return &Client{
 		logger:                  logger.With(zap.String("component", "operatorRPC")),
 		retryDuration:           retryDuration,
-		operatorURL:             "http://elasti-operator-controller-service:8013",
+		operatorURL:             fmt.Sprintf("http://%s:%d", operatorConfig.ServiceName, operatorConfig.Port),
 		incomingRequestEndpoint: "/informer/incoming-request",
 		client:                  http.Client{},
 	}
