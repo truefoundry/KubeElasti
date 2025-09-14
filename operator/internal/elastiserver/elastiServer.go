@@ -51,14 +51,14 @@ func NewServer(logger *zap.Logger, scaleHandler *scaling.ScaleHandler, rescaleDu
 }
 
 // Start starts the ElastiServer and declares the endpoint and handlers for it
-func (s *Server) Start(port string) error {
+func (s *Server) Start(port int) error {
 	mux := http.NewServeMux()
 	sentryHandler := sentryhttp.New(sentryhttp.Options{})
 	mux.Handle("/metrics", sentryHandler.Handle(promhttp.Handler()))
 	mux.Handle("/informer/incoming-request", sentryHandler.HandleFunc(s.resolverReqHandler))
 
 	server := &http.Server{
-		Addr:              fmt.Sprintf(":%s", strings.TrimPrefix(port, ":")),
+		Addr:              fmt.Sprintf(":%d", port),
 		Handler:           mux,
 		ReadHeaderTimeout: 2 * time.Second,
 		ReadTimeout:       30 * time.Second,
@@ -83,7 +83,7 @@ func (s *Server) Start(port string) error {
 		close(done)
 	}()
 
-	s.logger.Info("Starting ElastiServer", zap.String("port", port))
+	s.logger.Info("Starting ElastiServer", zap.Int("port", port))
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.logger.Error("Failed to start ElastiServer", zap.Error(err))
 		return fmt.Errorf("failed to start ElastiServer: %w", err)
