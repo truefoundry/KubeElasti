@@ -55,7 +55,7 @@ Common env values
 */}}
 {{- define "elasti.commonEnvValues" -}}
 - name: KUBERNETES_CLUSTER_DOMAIN
-  value: {{ .Values.global.kubernetesClusterDomain }}
+  value: {{ .Values.global.kubernetesClusterDomain | quote }}
 - name: ELASTI_OPERATOR_NAMESPACE
   value: {{ .Release.Namespace }}
 - name: ELASTI_OPERATOR_DEPLOYMENT_NAME
