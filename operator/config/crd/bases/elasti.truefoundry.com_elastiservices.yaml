@@ -77,6 +77,9 @@ spec:
                     enum:
                     - deployments
                     - rollouts
+                    - Deployment
+                    - StatefulSet
+                    - Rollout
                     type: string
                   name:
                     type: string

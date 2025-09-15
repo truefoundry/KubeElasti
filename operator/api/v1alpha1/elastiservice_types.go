@@ -49,9 +49,9 @@ type ElastiServiceSpec struct {
 }
 
 type ScaleTargetRef struct {
-	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1
+	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1;
 	APIVersion string `json:"apiVersion,omitempty"`
-	// +kubebuilder:validation:Enum=deployments;rollouts
+	// +kubebuilder:validation:Enum=deployments;rollouts;Deployment;StatefulSet;Rollout
 	Kind string `json:"kind,omitempty"`
 	Name string `json:"name,omitempty"`
 }
