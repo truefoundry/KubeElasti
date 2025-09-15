@@ -12,6 +12,7 @@ help:
 
 .PHONY: generate-manifest
 generate-manifest: ## Generate deploy manifest
+	cd operator && make manifests
 	kustomize build . > ./install.yaml
 
 .PHONY: setup-registry
