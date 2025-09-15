@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/truefoundry/elasti/pkg/logger"
 	"go.uber.org/zap"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +47,7 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 	}
 
 	if len(endpointSlices.Items) == 0 {
-		k.logger.Debug("No endpoint slices found", zap.String("service", svc), zap.String("namespace", ns))
+		k.logger.Debug("No endpoint slices found", zap.String("service", svc), zap.String("namespace", logger.MaskMiddle(ns, 4, 4)))
 		return false, nil
 	}
 
@@ -56,7 +57,7 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 	for _, slice := range endpointSlices.Items {
 		for _, endpoint := range slice.Endpoints {
 			totalEndpoints++
-			
+
 			// Check if endpoint has valid addresses
 			if len(endpoint.Addresses) == 0 {
 				continue
@@ -69,10 +70,9 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 
 			if isReady && isServing && isNotTerminating {
 				activeEndpoints++
-				k.logger.Debug("Found active endpoint", 
-					zap.String("service", svc), 
-					zap.String("namespace", ns),
-					zap.Strings("addresses", endpoint.Addresses),
+				k.logger.Debug("Found active endpoint",
+					zap.String("service", logger.MaskMiddle(svc, 4, 4)),
+					zap.String("namespace", logger.MaskMiddle(ns, 4, 4)),
 					zap.Int("activeEndpoints", activeEndpoints),
 					zap.Int("totalEndpoints", totalEndpoints))
 			}
@@ -80,17 +80,17 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 	}
 
 	if activeEndpoints > 0 {
-		k.logger.Debug("Service has active endpoints", 
-			zap.String("service", svc), 
-			zap.String("namespace", ns),
+		k.logger.Debug("Service has active endpoints",
+			zap.String("service", logger.MaskMiddle(svc, 4, 4)),
+			zap.String("namespace", logger.MaskMiddle(ns, 4, 4)),
 			zap.Int("activeEndpoints", activeEndpoints),
 			zap.Int("totalEndpoints", totalEndpoints))
 		return true, nil
 	}
 
-	k.logger.Debug("No active endpoints found", 
-		zap.String("service", svc), 
-		zap.String("namespace", ns),
+	k.logger.Debug("No active endpoints found",
+		zap.String("service", logger.MaskMiddle(svc, 4, 4)),
+		zap.String("namespace", logger.MaskMiddle(ns, 4, 4)),
 		zap.Int("totalEndpoints", totalEndpoints))
 	return false, nil
 }
