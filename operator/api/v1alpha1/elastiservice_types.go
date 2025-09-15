@@ -33,9 +33,9 @@ const (
 type ElastiServiceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	// +kubebuilder:validation:Required
 	ScaleTargetRef ScaleTargetRef `json:"scaleTargetRef,omitempty"`
 	// +kubebuilder:validation:Required
+	// +required
 	Service string `json:"service,omitempty"`
 	// +kubebuilder:validation:Minimum=1
 	MinTargetReplicas int32 `json:"minTargetReplicas,omitempty" default:"1"`
@@ -48,11 +48,18 @@ type ElastiServiceSpec struct {
 	Autoscaler     *AutoscalerSpec `json:"autoscaler,omitempty"`
 }
 
+// +kubebuilder:validation:Required
 type ScaleTargetRef struct {
-	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1;
+	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1
+	// +kubebuilder:validation:Required
+	// +required
 	APIVersion string `json:"apiVersion,omitempty"`
 	// +kubebuilder:validation:Enum=deployments;rollouts;Deployment;StatefulSet;Rollout
+	// +kubebuilder:validation:Required
+	// +required
 	Kind string `json:"kind,omitempty"`
+	// +kubebuilder:validation:Required
+	// +required
 	Name string `json:"name,omitempty"`
 }
 

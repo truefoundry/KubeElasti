@@ -71,16 +71,16 @@ spec:
                 properties:
                   apiVersion:
                     enum:
-                    - apps/v1
-                    - argoproj.io/v1alpha1
+                      - apps/v1
+                      - argoproj.io/v1alpha1
                     type: string
                   kind:
                     enum:
-                    - deployments
-                    - rollouts
-                    - Deployment
-                    - StatefulSet
-                    - Rollout
+                      - deployments
+                      - rollouts
+                      - Deployment
+                      - StatefulSet
+                      - Rollout
                     type: string
                   name:
                     type: string
