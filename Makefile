@@ -63,4 +63,17 @@ build-docs: ## Build docs
 fetch-contributors: ## Fetch contributors
 	python3 docs/scripts/fetch_contributors.py
 
+.PHONY: build-images
+build-images: ## Build and push images
+	$(MAKE) -C ./operator docker-build IMG=elasti-operator:v1alpha1
+	$(MAKE) -C ./resolver docker-build IMG=elasti-resolver:v1alpha1
 
+.PHONY: reload-images
+reload-images: ## Reload images into kind and restart deployments
+	@echo "Loading images into kind cluster..."
+	docker push localhost:5001/elasti-operator:v1alpha1
+	docker push localhost:5001/elasti-resolver:v1alpha1
+	@echo "Restarting elasti operator deployment..."
+	@kubectl rollout restart deployment elasti-operator-controller-manager -n elasti
+	@kubectl rollout restart deployment elasti-resolver -n elasti
+	
