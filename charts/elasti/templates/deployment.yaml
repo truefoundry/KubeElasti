@@ -94,7 +94,9 @@ spec:
         prometheus.io/scrape: "true"
     spec:
       containers:
-      - env:
+      - command:
+        - /resolver
+        env:
         - name: MAX_IDLE_PROXY_CONNS
           value: {{ quote .Values.elastiResolver.proxy.env.maxIdleProxyConns }}
         - name: MAX_IDLE_PROXY_CONNS_PER_HOST
