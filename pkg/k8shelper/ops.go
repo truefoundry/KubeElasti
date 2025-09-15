@@ -47,7 +47,7 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 	}
 
 	if len(endpointSlices.Items) == 0 {
-		k.logger.Debug("No endpoint slices found", zap.String("service", svc), zap.String("namespace", logger.MaskMiddle(ns, 4, 4)))
+		k.logger.Debug("No endpoint slices found", zap.String("service", logger.MaskMiddle(svc, 4, 4)), zap.String("namespace", logger.MaskMiddle(ns, 4, 4)))
 		return false, nil
 	}
 
