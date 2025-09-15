@@ -45,17 +45,52 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 		return false, fmt.Errorf("CheckIfServiceEndpointSliceActive - GET: %w", err)
 	}
 
+	if len(endpointSlices.Items) == 0 {
+		k.logger.Debug("No endpoint slices found", zap.String("service", svc), zap.String("namespace", ns))
+		return false, nil
+	}
+
+	activeEndpoints := 0
+	totalEndpoints := 0
+
 	for _, slice := range endpointSlices.Items {
 		for _, endpoint := range slice.Endpoints {
-			if endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready {
-				// NOTE: Below line throws a CWE, but we identified it as false positive
-				// As the svc and namespace are used for debugging and are not security sensitive, it is safe to ignore this
-				// See: https://github.com/truefoundry/KubeElasti/pull/177
-				k.logger.Debug("Service endpoint is active", zap.String("service", svc), zap.String("namespace", ns))
-				return true, nil
+			totalEndpoints++
+			
+			// Check if endpoint has valid addresses
+			if len(endpoint.Addresses) == 0 {
+				continue
+			}
+
+			// More comprehensive readiness check
+			isReady := endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready
+			isServing := endpoint.Conditions.Serving == nil || *endpoint.Conditions.Serving
+			isNotTerminating := endpoint.Conditions.Terminating == nil || !*endpoint.Conditions.Terminating
+
+			if isReady && isServing && isNotTerminating {
+				activeEndpoints++
+				k.logger.Debug("Found active endpoint", 
+					zap.String("service", svc), 
+					zap.String("namespace", ns),
+					zap.Strings("addresses", endpoint.Addresses),
+					zap.Int("activeEndpoints", activeEndpoints),
+					zap.Int("totalEndpoints", totalEndpoints))
 			}
 		}
 	}
 
+	if activeEndpoints > 0 {
+		k.logger.Debug("Service has active endpoints", 
+			zap.String("service", svc), 
+			zap.String("namespace", ns),
+			zap.Int("activeEndpoints", activeEndpoints),
+			zap.Int("totalEndpoints", totalEndpoints))
+		return true, nil
+	}
+
+	k.logger.Debug("No active endpoints found", 
+		zap.String("service", svc), 
+		zap.String("namespace", ns),
+		zap.Int("totalEndpoints", totalEndpoints))
 	return false, nil
 }
