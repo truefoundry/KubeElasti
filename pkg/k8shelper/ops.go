@@ -46,17 +46,61 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 		return false, fmt.Errorf("CheckIfServiceEndpointSliceActive - GET: %w", err)
 	}
 
+	if len(endpointSlices.Items) == 0 {
+		k.logger.Debug("No endpoint slices found", zap.String("service", svc), zap.String("namespace", ns))
+		return false, nil
+	}
+
+	activeEndpoints := 0
+	totalEndpoints := 0
+
 	for _, slice := range endpointSlices.Items {
 		for _, endpoint := range slice.Endpoints {
+<<<<<<< HEAD
 			// According to K8s docs: "ready" should be marked if endpoint is serving and not terminating
 			// So checking ready alone should be sufficient for most use cases
 			// nil should be interpreted as "true"
 			if endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready {
 				k.logger.Debug("Service endpoint is active", zap.String("service", logger.MaskMiddle(svc, 3, 3)), zap.String("namespace", logger.MaskMiddle(ns, 3, 3)))
 				return true, nil
+=======
+			totalEndpoints++
+			
+			// Check if endpoint has valid addresses
+			if len(endpoint.Addresses) == 0 {
+				continue
+			}
+
+			// More comprehensive readiness check
+			isReady := endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready
+			isServing := endpoint.Conditions.Serving == nil || *endpoint.Conditions.Serving
+			isNotTerminating := endpoint.Conditions.Terminating == nil || !*endpoint.Conditions.Terminating
+
+			if isReady && isServing && isNotTerminating {
+				activeEndpoints++
+				k.logger.Debug("Found active endpoint", 
+					zap.String("service", svc), 
+					zap.String("namespace", ns),
+					zap.Strings("addresses", endpoint.Addresses),
+					zap.Int("activeEndpoints", activeEndpoints),
+					zap.Int("totalEndpoints", totalEndpoints))
+>>>>>>> 55a52ea (fix: e2e test in 02, which was because of incorrect readiness check of endpointslice)
 			}
 		}
 	}
 
+	if activeEndpoints > 0 {
+		k.logger.Debug("Service has active endpoints", 
+			zap.String("service", svc), 
+			zap.String("namespace", ns),
+			zap.Int("activeEndpoints", activeEndpoints),
+			zap.Int("totalEndpoints", totalEndpoints))
+		return true, nil
+	}
+
+	k.logger.Debug("No active endpoints found", 
+		zap.String("service", svc), 
+		zap.String("namespace", ns),
+		zap.Int("totalEndpoints", totalEndpoints))
 	return false, nil
 }
