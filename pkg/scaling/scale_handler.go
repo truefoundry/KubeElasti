@@ -14,12 +14,17 @@ import (
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	discocache "k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/record"
 )
 
@@ -224,7 +229,7 @@ func (h *ScaleHandler) handleScaleToZero(ctx context.Context, cooldownPeriod tim
 		}
 	}
 
-	if err := h.ScaleTargetToZero(ctx, serviceNamespacedName, es.Spec.ScaleTargetRef.Kind, es.Spec.ScaleTargetRef.Name, es.Name); err != nil {
+	if err := h.ScaleTargetToZero(ctx, serviceNamespacedName, es.Spec.ScaleTargetRef.APIVersion, es.Spec.ScaleTargetRef.Kind, es.Spec.ScaleTargetRef.Name, es.Name); err != nil {
 		return fmt.Errorf("failed to scale target to zero: %w", err)
 	}
 	return nil
@@ -257,7 +262,7 @@ func (h *ScaleHandler) handleScaleFromZero(ctx context.Context, es *v1alpha1.Ela
 		}
 	}
 
-	if err := h.ScaleTargetFromZero(ctx, serviceNamespacedName, es.Spec.ScaleTargetRef.Kind, es.Spec.ScaleTargetRef.Name, es.Spec.MinTargetReplicas, es.Name); err != nil {
+	if err := h.ScaleTargetFromZero(ctx, serviceNamespacedName, es.Spec.ScaleTargetRef.APIVersion, es.Spec.ScaleTargetRef.Kind, es.Spec.ScaleTargetRef.Name, es.Spec.MinTargetReplicas, es.Name); err != nil {
 		return fmt.Errorf("failed to scale target from zero: %w", err)
 	}
 
@@ -282,24 +287,14 @@ func (h *ScaleHandler) createScalerForTrigger(trigger *v1alpha1.ScaleTrigger, co
 }
 
 // ScaleTargetFromZero scales the TargetRef to the provided replicas when it's at 0
-func (h *ScaleHandler) ScaleTargetFromZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetKind, targetName string, replicas int32, elastiServiceName string) error {
+func (h *ScaleHandler) ScaleTargetFromZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetAPIVersion string, targetKind, targetName string, replicas int32, elastiServiceName string) error {
 	mutex := h.getMutexForScale(serviceNamespacedName.String())
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	h.logger.Info("Scaling up from zero", zap.String("kind", targetKind), zap.String("namespacedName", serviceNamespacedName.String()), zap.Int32("replicas", replicas))
 
-	var err error
-	// This variable tracks whether the scale target was scaled or not. This is to prevent the scaled up event from being created multiple times.
-	scaled := false
-	switch strings.ToLower(targetKind) {
-	case values.KindDeployments:
-		scaled, err = h.ScaleDeployment(ctx, serviceNamespacedName.Namespace, targetName, replicas)
-	case values.KindRollout:
-		scaled, err = h.ScaleArgoRollout(ctx, serviceNamespacedName.Namespace, targetName, replicas)
-	default:
-		return fmt.Errorf("unsupported target kind: %s", targetKind)
-	}
+	scaled, err := h.Scale(ctx, serviceNamespacedName.Namespace, targetAPIVersion, targetKind, targetName, replicas)
 
 	if err != nil {
 		h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Warning", "ScaleFromZeroFailed", fmt.Sprintf("Failed to scale %s from zero to %d replicas: %v", targetKind, replicas, err))
@@ -317,23 +312,14 @@ func (h *ScaleHandler) ScaleTargetFromZero(ctx context.Context, serviceNamespace
 }
 
 // ScaleTargetToZero scales the target to zero
-func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetKind string, targetName string, elastiServiceName string) error {
+func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetAPIVersion string, targetKind string, targetName string, elastiServiceName string) error {
 	mutex := h.getMutexForScale(serviceNamespacedName.String())
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	h.logger.Info("Scaling down to zero", zap.String("kind", targetKind), zap.String("namespacedName", serviceNamespacedName.String()))
 
-	var err error
-	scaled := false
-	switch strings.ToLower(targetKind) {
-	case values.KindDeployments:
-		scaled, err = h.ScaleDeployment(ctx, serviceNamespacedName.Namespace, targetName, 0)
-	case values.KindRollout:
-		scaled, err = h.ScaleArgoRollout(ctx, serviceNamespacedName.Namespace, targetName, 0)
-	default:
-		return fmt.Errorf("unsupported target kind: %s", targetKind)
-	}
+	scaled, err := h.Scale(ctx, serviceNamespacedName.Namespace, targetAPIVersion, targetKind, targetName, 0)
 
 	if err != nil {
 		h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
@@ -348,6 +334,115 @@ func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedN
 	h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Normal", "ScaledDownToZero", fmt.Sprintf("Successfully scaled %s to zero", targetKind))
 
 	return nil
+}
+
+func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVersion string, targetKind string, targetName string, replicas int32) (bool, error) {
+	// Basic validation
+	if h.kDynamicClient == nil || h.kClient == nil {
+		return false, fmt.Errorf("handler missing clients: kDynamicClient or kClient is nil")
+	}
+
+	if targetKind == "deployments" {
+		targetKind = "Deployment"
+	}
+
+	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
+
+	// Setup a cached discovery + deferred RESTMapper
+	cachedDisc := discocache.NewMemCacheClient(h.kClient.Discovery())
+	restMapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDisc)
+
+	// Parse apiVersion into group/version
+	var gv schema.GroupVersion
+	if targetAPIVersion == "" {
+		return false, fmt.Errorf("empty apiVersion")
+	}
+	// schema.ParseGroupVersion doesn't exist in apimachinery? Use manual splitting
+	// Accept forms: "group/version" or "version" (core)
+	gv, err := schema.ParseGroupVersion(targetAPIVersion)
+	if err != nil {
+		return false, fmt.Errorf("invalid apiVersion %q: %w", targetAPIVersion, err)
+	}
+
+	// Build GroupVersionKind from input
+	gvk := schema.GroupVersionKind{
+		Group:   gv.Group,
+		Version: gv.Version,
+		Kind:    targetKind,
+	}
+
+	// Find RESTMapping (resources) for the GVK
+	mapping, err := restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		// try a fresh discovery refresh and retry once (deferred mapper caches)
+		cachedDisc.Invalidate()
+		restMapper = restmapper.NewDeferredDiscoveryRESTMapper(cachedDisc)
+		mapping, err = restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+		if err != nil {
+			return false, fmt.Errorf("failed to find resource mapping for %s: %w", gvk.String(), err)
+		}
+	}
+
+	gvr := mapping.Resource // group-version-resource
+
+	// Choose the resource interface: namespaced or not
+	var ri dynamic.ResourceInterface
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		ri = h.kDynamicClient.Resource(gvr).Namespace(namespace)
+	} else {
+		ri = h.kDynamicClient.Resource(gvr)
+	}
+
+	// Get the scale subresource via dynamic client: GET .../scale
+	scaleObj, err := ri.Get(ctx, targetName, metav1.GetOptions{}, "scale")
+	if err != nil {
+		return false, fmt.Errorf("failed to get scale subresource for %s/%s (%s): %w", gvr.String(), targetName, namespace, err)
+	}
+
+	// Extract current replicas from the scale subresource
+	h.logger.Info("Scale object retrieved", zap.Any("scaleObj", scaleObj.Object))
+	currentReplicas, found, err := unstructured.NestedInt64(scaleObj.Object, "spec", "replicas")
+	h.logger.Info("currentReplicas result", zap.Int64("replicas", currentReplicas), zap.Bool("found", found), zap.Error(err))
+
+	if err != nil {
+		return false, fmt.Errorf("failed to get current replicas: %w", err)
+	}
+	if !found {
+		return false, nil
+	}
+
+	h.logger.Debug("Target found", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int64("current replicas", currentReplicas), zap.Int32("desired replicas", replicas))
+
+	// Check if already at desired replicas
+	if currentReplicas == int64(replicas) {
+		h.logger.Info("Target already scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
+		return false, nil
+	}
+
+	// Check if already scaled beyond desired (for scale up operations)
+	if replicas > 0 && currentReplicas > int64(replicas) {
+		h.logger.Info("Target already scaled beyond desired replicas",
+			zap.String("kind", targetKind),
+			zap.String("name", targetName),
+			zap.Int64("current replicas", currentReplicas),
+			zap.Int32("desired replicas", replicas))
+		return false, nil
+	}
+
+	// Update the replicas in the scale object
+	err = unstructured.SetNestedField(scaleObj.Object, int64(replicas), "spec", "replicas")
+	if err != nil {
+		return false, fmt.Errorf("failed to set replicas: %w", err)
+	}
+
+	// Update the scale subresource
+	_, err = ri.Update(ctx, scaleObj, metav1.UpdateOptions{}, "scale")
+	if err != nil {
+		return false, fmt.Errorf("failed to update scale: %w", err)
+	}
+
+	h.logger.Info("Target scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
+	return true, nil
 }
 
 // ScaleDeployment scales the deployment to the provided replicas
