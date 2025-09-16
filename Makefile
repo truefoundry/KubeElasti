@@ -65,8 +65,8 @@ fetch-contributors: ## Fetch contributors
 
 .PHONY: build-images
 build-images: ## Build and push images
-	$(MAKE) -C ./operator docker-build IMG=elasti-operator:v1alpha1
-	$(MAKE) -C ./resolver docker-build IMG=elasti-resolver:v1alpha1
+	$(MAKE) -C ./operator docker-build IMG=localhost:5001/elasti-operator:v1alpha1
+	$(MAKE) -C ./resolver docker-build IMG=localhost:5001/elasti-resolver:v1alpha1
 
 .PHONY: reload-images
 reload-images: ## Reload images into kind and restart deployments
@@ -76,4 +76,19 @@ reload-images: ## Reload images into kind and restart deployments
 	@echo "Restarting elasti operator deployment..."
 	@kubectl rollout restart deployment elasti-operator-controller-manager -n elasti
 	@kubectl rollout restart deployment elasti-resolver -n elasti
-	
+
+.PHONY: install-elasti
+install-elasti: ## Install elasti
+	 kubectl create namespace elasti
+	 helm upgrade --install elasti ./charts/elasti -n elasti -f ./playground/infra/elasti-demo-values.yaml
+
+.PHONY: undeploy-elasti
+undeploy-elasti: ## Undeploy elasti
+	 helm delete elasti -n elasti
+
+.PHONY: install-demo-application
+install-demo-application: ## Install demo application
+	 kubectl apply -f ./playground/config/demo-application.yaml
+	 kubectl apply -f ./playground/config/demo-elastiService.yaml -n target
+
+

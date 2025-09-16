@@ -30,6 +30,7 @@ const (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ElastiServiceSpec defines the desired state of ElastiService
+// +kubebuilder:validation:Required={"scaleTargetRef","service"}
 type ElastiServiceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -46,12 +47,13 @@ type ElastiServiceSpec struct {
 	Autoscaler     *AutoscalerSpec `json:"autoscaler,omitempty"`
 }
 
+// +kubebuilder:validation:Required
 type ScaleTargetRef struct {
 	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1
-	APIVersion string `json:"apiVersion"`
+	APIVersion string `json:"apiVersion,omitempty"`
 	// +kubebuilder:validation:Enum=deployments;rollouts;Deployment;StatefulSet;Rollout
-	Kind string `json:"kind"`
-	Name string `json:"name"`
+	Kind string `json:"kind,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 // ElastiServiceStatus defines the observed state of ElastiService
