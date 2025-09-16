@@ -47,13 +47,12 @@ type ElastiServiceSpec struct {
 	Autoscaler     *AutoscalerSpec `json:"autoscaler,omitempty"`
 }
 
-// +kubebuilder:validation:Required
 type ScaleTargetRef struct {
 	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1
-	APIVersion string `json:"apiVersion,omitempty"`
+	APIVersion string `json:"apiVersion"`
 	// +kubebuilder:validation:Enum=deployments;rollouts;Deployment;StatefulSet;Rollout
-	Kind string `json:"kind,omitempty"`
-	Name string `json:"name,omitempty"`
+	Kind string `json:"kind"`
+	Name string `json:"name"`
 }
 
 // ElastiServiceStatus defines the observed state of ElastiService

@@ -83,6 +83,10 @@ spec:
                     type: string
                   name:
                     type: string
+                required:
+                - apiVersion
+                - kind
+                - name
                 type: object
               service:
                 type: string
