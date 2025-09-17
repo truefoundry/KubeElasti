@@ -20,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/discovery"
 	discocache "k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -50,6 +51,8 @@ type ScaleHandler struct {
 
 	logger         *zap.Logger
 	watchNamespace string
+	restMapper     meta.RESTMapper
+	cachedDisc     discovery.CachedDiscoveryInterface
 }
 
 // getMutexForScale returns a mutex for scaling based on the input key
@@ -70,10 +73,16 @@ func NewScaleHandler(logger *zap.Logger, config *rest.Config, watchNamespace str
 		logger.Fatal("Error connecting with kubernetes", zap.Error(err))
 	}
 
+	// Setup a cached discovery + deferred RESTMapper
+	cachedDisc := discocache.NewMemCacheClient(kClient.Discovery())
+	restMapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDisc)
+
 	return &ScaleHandler{
 		logger:         logger.Named("ScaleHandler"),
 		kClient:        kClient,
 		kDynamicClient: kDynamicClient,
+		restMapper:     restMapper,
+		cachedDisc:     cachedDisc,
 		watchNamespace: watchNamespace,
 		EventRecorder:  eventRecorder,
 	}
@@ -338,19 +347,18 @@ func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedN
 
 func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVersion string, targetKind string, targetName string, replicas int32) (bool, error) {
 	// Basic validation
-	if h.kDynamicClient == nil || h.kClient == nil {
+	if h.kDynamicClient == nil {
 		return false, fmt.Errorf("handler missing clients: kDynamicClient or kClient is nil")
 	}
 
+	// NOTE: Required for backwards compatibility, since so far, we have been using "deployments" instead of "Deployment" in exisiting
+	// CRD files. Since calse doesn't recognize "deployments" as a valid kind, we need to convert it to "Deployment".
+	// We can remove it once we have migrated all the existing CRD files to use "Deployment" instead of "deployments".
 	if targetKind == "deployments" {
 		targetKind = "Deployment"
 	}
 
 	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
-
-	// Setup a cached discovery + deferred RESTMapper
-	cachedDisc := discocache.NewMemCacheClient(h.kClient.Discovery())
-	restMapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDisc)
 
 	// Parse apiVersion into group/version
 	var gv schema.GroupVersion
@@ -372,12 +380,12 @@ func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVer
 	}
 
 	// Find RESTMapping (resources) for the GVK
-	mapping, err := restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	mapping, err := h.restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 	if err != nil {
 		// try a fresh discovery refresh and retry once (deferred mapper caches)
-		cachedDisc.Invalidate()
-		restMapper = restmapper.NewDeferredDiscoveryRESTMapper(cachedDisc)
-		mapping, err = restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+		h.cachedDisc.Invalidate()
+		h.restMapper = restmapper.NewDeferredDiscoveryRESTMapper(h.cachedDisc)
+		mapping, err = h.restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err != nil {
 			return false, fmt.Errorf("failed to find resource mapping for %s: %w", gvk.String(), err)
 		}
