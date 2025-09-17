@@ -63,12 +63,12 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 			}
 			totalEndpoints++
 
-			// More comprehensive readiness check
-			isReady := endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready
-			isServing := endpoint.Conditions.Serving == nil || *endpoint.Conditions.Serving
-			isNotTerminating := endpoint.Conditions.Terminating == nil || !*endpoint.Conditions.Terminating
+			// According to K8s docs: "ready" should be marked if endpoint is serving and not terminating
+			// So checking ready alone should be sufficient for most use cases
+			// nil should be interpreted as "true"
+			isReady := endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready
 
-			if isReady && isServing && isNotTerminating {
+			if isReady {
 				activeEndpoints++
 				k.logger.Debug("Found active endpoint",
 					zap.String("service", maskedSvc),
