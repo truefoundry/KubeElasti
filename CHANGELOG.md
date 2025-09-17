@@ -5,7 +5,8 @@
 -->
 
 ## 0.1.16
-* fix: e2e test in 02, which was because of incorrect readiness check of endpointslice by @ramantehlan in https://github.com/truefoundry/elasti/pull/160
+* fix: e2e test "02" due to incorrect readiness check of EndpointSlice by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/189
+
 
 ## 0.1.15
 * Add validation for CRD fields for elasti service by @ramantehlan in https://github.com/truefoundry/elasti/pull/122

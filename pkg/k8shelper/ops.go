@@ -45,9 +45,10 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("CheckIfServiceEndpointSliceActive - GET: %w", err)
 	}
-
+	maskedSvc := logger.MaskMiddle(svc, 4, 4)
+	maskedNS := logger.MaskMiddle(ns, 4, 4)
 	if len(endpointSlices.Items) == 0 {
-		k.logger.Debug("No endpoint slices found", zap.String("service", logger.MaskMiddle(svc, 4, 4)), zap.String("namespace", logger.MaskMiddle(ns, 4, 4)))
+		k.logger.Debug("No endpoint slices found", zap.String("service", maskedSvc), zap.String("namespace", maskedNS))
 		return false, nil
 	}
 
@@ -56,12 +57,11 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 
 	for _, slice := range endpointSlices.Items {
 		for _, endpoint := range slice.Endpoints {
-			totalEndpoints++
-
 			// Check if endpoint has valid addresses
 			if len(endpoint.Addresses) == 0 {
 				continue
 			}
+			totalEndpoints++
 
 			// More comprehensive readiness check
 			isReady := endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready
@@ -71,26 +71,26 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 			if isReady && isServing && isNotTerminating {
 				activeEndpoints++
 				k.logger.Debug("Found active endpoint",
-					zap.String("service", logger.MaskMiddle(svc, 4, 4)),
-					zap.String("namespace", logger.MaskMiddle(ns, 4, 4)),
+					zap.String("service", maskedSvc),
+					zap.String("namespace", maskedNS),
 					zap.Int("activeEndpoints", activeEndpoints),
 					zap.Int("totalEndpoints", totalEndpoints))
 			}
 		}
 	}
 
-	if activeEndpoints > 0 {
+	if activeEndpoints > 0 && activeEndpoints == totalEndpoints {
 		k.logger.Debug("Service has active endpoints",
-			zap.String("service", logger.MaskMiddle(svc, 4, 4)),
-			zap.String("namespace", logger.MaskMiddle(ns, 4, 4)),
+			zap.String("service", maskedSvc),
+			zap.String("namespace", maskedNS),
 			zap.Int("activeEndpoints", activeEndpoints),
 			zap.Int("totalEndpoints", totalEndpoints))
 		return true, nil
 	}
 
 	k.logger.Debug("No active endpoints found",
-		zap.String("service", logger.MaskMiddle(svc, 4, 4)),
-		zap.String("namespace", logger.MaskMiddle(ns, 4, 4)),
+		zap.String("service", maskedSvc),
+		zap.String("namespace", maskedNS),
 		zap.Int("totalEndpoints", totalEndpoints))
 	return false, nil
 }
