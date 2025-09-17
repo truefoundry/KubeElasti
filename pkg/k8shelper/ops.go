@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/truefoundry/elasti/pkg/logger"
 	"go.uber.org/zap"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,38 +45,17 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 		return false, fmt.Errorf("CheckIfServiceEndpointSliceActive - GET: %w", err)
 	}
 
-	if len(endpointSlices.Items) == 0 {
-		k.logger.Debug("No endpoint slices found", zap.String("service", svc), zap.String("namespace", logger.MaskMiddle(ns, 4, 4)))
-		return false, nil
-	}
-
-	activeEndpoints := 0
-	totalEndpoints := 0
-
 	for _, slice := range endpointSlices.Items {
 		for _, endpoint := range slice.Endpoints {
-			// According to K8s docs: "ready" should be marked if endpoint is serving and not terminating
-			// So checking ready alone should be sufficient for most use cases
-			// nil should be interpreted as "true"
-			if endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready {
-				k.logger.Debug("Service endpoint is active", zap.String("service", logger.MaskMiddle(svc, 3, 3)), zap.String("namespace", logger.MaskMiddle(ns, 3, 3)))
+			if endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready {
+				// NOTE: Below line throws a CWE, but we identified it as false positive
+				// As the svc and namespace are used for debugging and are not security sensitive, it is safe to ignore this
+				// See: https://github.com/truefoundry/KubeElasti/pull/177
+				k.logger.Debug("Service endpoint is active", zap.String("service", svc), zap.String("namespace", ns))
 				return true, nil
 			}
 		}
 	}
 
-	if activeEndpoints > 0 {
-		k.logger.Debug("Service has active endpoints",
-			zap.String("service", svc),
-			zap.String("namespace", ns),
-			zap.Int("activeEndpoints", activeEndpoints),
-			zap.Int("totalEndpoints", totalEndpoints))
-		return true, nil
-	}
-
-	k.logger.Debug("No active endpoints found",
-		zap.String("service", svc),
-		zap.String("namespace", ns),
-		zap.Int("totalEndpoints", totalEndpoints))
 	return false, nil
 }
