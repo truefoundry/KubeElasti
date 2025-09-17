@@ -79,8 +79,8 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 		}
 	}
 
-	if activeEndpoints > 0 && activeEndpoints == totalEndpoints {
-		k.logger.Debug("Service has active endpoints",
+	if activeEndpoints > 0 {
+		k.logger.Debug("Service has least one active endpoint",
 			zap.String("service", maskedSvc),
 			zap.String("namespace", maskedNS),
 			zap.Int("activeEndpoints", activeEndpoints),
