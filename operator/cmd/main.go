@@ -261,5 +261,4 @@ func _(mgr ctrl.Manager) healthz.Checker {
 			return fmt.Errorf("controller is not the leader yet")
 		}
 	}
-
 }
