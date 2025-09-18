@@ -85,6 +85,7 @@ install-elasti: ## Install elasti
 .PHONY: undeploy-elasti
 undeploy-elasti: ## Undeploy elasti
 	 helm delete elasti -n elasti
+	 kubectl delete namespace elasti
 
 .PHONY: install-demo-application
 install-demo-application: ## Install demo application
