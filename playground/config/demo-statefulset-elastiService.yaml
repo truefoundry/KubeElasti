@@ -13,7 +13,7 @@ spec:
     name: redis-statefulset
   triggers:
     - metadata:
-        query: round(sum(rate(envoy_http_downstream_rq_total{container="istio-proxy",destination_service_name="redis-statefulset"}[1m])),0.001) or vector(0)
+        query: round(sum(rate(envoy_http_downstream_rq_total{destination_service_name="redis-statefulset"}[1m])),0.001) or vector(0)
         serverAddress: http://prometheus-operated.monitoring.svc.cluster.local:9090
         threshold: "0.01"
       type: prometheus
