@@ -17,21 +17,20 @@ log_failure_details() {
     echo "${RED}--- DETAILED FAILURE ANALYSIS ---${NC}"
 
     # Target EndpointSlice Status
-    echo "${CYAN} Status of target EndpointSlice (service=httpbin):${NC}"
-    kubectl get endpointslice -n "$TARGET_NAMESPACE" -l kubernetes.io/service-name=httpbin -o yaml | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve EndpointSlice status${NC}"
+    echo "${CYAN}  Status of target Private EndpointSlice in ${TARGET_NAMESPACE}:${NC}"
+    kubectl get endpointslice -n "$TARGET_NAMESPACE"   -l endpointslice.kubernetes.io/managed-by=endpointslice-controller.k8s.io -o yaml | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve EndpointSlice status${NC}"
 
-    # Curl Pod Logs
-    echo "${CYAN}  Logs from curl pod ($POD_NAME):${NC}"
-    kubectl logs "$POD_NAME" -n "$NAMESPACE" --tail=10 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve logs${NC}"
+    # Ingress Logs
+    echo "${CYAN}  Logs from ingress:${NC}"
+    kubectl logs -n istio-system deployments/istiod --tail=15 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
 
     # Resolver Logs
     echo "${CYAN}  Logs from elasti-resolver:${NC}"
-    kubectl logs -n elasti -l app=elasti-resolver --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
+    kubectl logs -n elasti -l app=elasti-resolver --tail=15 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
 
-    # Target Application Logs
-    echo "${CYAN}  Logs from target application (app=httpbin):${NC}"
-    kubectl logs -n "$TARGET_NAMESPACE" -l app=httpbin --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
-
+    # Target Deployment Logs
+    echo "${CYAN}  Logs from target deployment (app=httpbin):${NC}"
+    kubectl logs -n "$TARGET_NAMESPACE" deployments/target-deployment  --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
 
     # Verbose Curl Request
     echo "${CYAN}  Attempting verbose request for more details...${NC}"
@@ -105,8 +104,8 @@ failure_count=0
 for i in $(seq 1 $MAX_RETRIES); do
     echo "\n${CYAN}--- Request $i/$MAX_RETRIES ---${NC}"
     echo "  ${CYAN}Time:${NC} $(date)"
+
     echo "  ${CYAN}Executing: kubectl exec -n $NAMESPACE $POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
-    
     start_time=$(date +%s)
     code=$(kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl \
         --max-time "$TIMEOUT" \
