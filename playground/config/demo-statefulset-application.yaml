@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: redis-statefulset
+  namespace: target
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-statefulset
+  namespace: target
+spec:
+  type: ClusterIP
+  selector:
+    app: redis-statefulset
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-statefulset-headless
+  namespace: target
+spec:
+  clusterIP: None
+  selector:
+    app: redis-statefulset
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-statefulset
+  namespace: target
+spec:
+  serviceName: redis-statefulset-headless
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis-statefulset
+  template:
+    metadata:
+      labels:
+        app: redis-statefulset
+    spec:
+      serviceAccountName: redis-statefulset
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          command:
+            - redis-server
+            - --appendonly
+            - "yes"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redis-statefulset-ingress
+  namespace: target
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/upstream-vhost: "redis-statefulset.target.svc.cluster.local"
+    nginx.ingress.kubernetes.io/backend-protocol: "TCP"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /redis(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: redis-statefulset
+                port:
+                  number: 6379

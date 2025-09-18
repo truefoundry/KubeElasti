@@ -77,9 +77,16 @@ spec:
                     enum:
                     - deployments
                     - rollouts
+                    - Deployment
+                    - StatefulSet
+                    - Rollout
                     type: string
                   name:
                     type: string
+                required:
+                - apiVersion
+                - kind
+                - name
                 type: object
               service:
                 type: string
@@ -96,6 +103,9 @@ spec:
                   - type
                   type: object
                 type: array
+            required:
+            - scaleTargetRef
+            - service
             type: object
           status:
             description: ElastiServiceStatus defines the observed state of ElastiService

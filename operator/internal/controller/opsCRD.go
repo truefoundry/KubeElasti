@@ -22,6 +22,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+// Kind is singular and might be in camelCase
+// Resource is plural and is in smallcase
+// Since CRD accept kind, it needs to be converted
+func kindToResource(kind string) string {
+	k := strings.ToLower(kind)
+	// tolerate legacy already-plural inputs
+	if strings.HasSuffix(k, "s") {
+		return k
+	}
+	return k + "s"
+}
+
 func (r *ElastiServiceReconciler) getCRD(ctx context.Context, crdNamespacedName types.NamespacedName) (*v1alpha1.ElastiService, error) {
 	es := &v1alpha1.ElastiService{}
 	if err := r.Get(ctx, crdNamespacedName, es); err != nil {
@@ -142,7 +154,7 @@ func (r *ElastiServiceReconciler) watchScaleTargetRef(ctx context.Context, es *v
 				Namespace:    req.Namespace,
 				CRDName:      req.Name,
 				ResourceName: crd.Spec.ScaleTargetRef.Name,
-				Resource:     strings.ToLower(crd.Spec.ScaleTargetRef.Kind),
+				Resource:     kindToResource(crd.Spec.ScaleTargetRef.Kind),
 			})
 			err := r.InformerManager.StopInformer(key)
 			if err != nil {
@@ -167,7 +179,7 @@ func (r *ElastiServiceReconciler) watchScaleTargetRef(ctx context.Context, es *v
 			GroupVersionResource: &schema.GroupVersionResource{
 				Group:    targetGroup,
 				Version:  targetVersion,
-				Resource: strings.ToLower(es.Spec.ScaleTargetRef.Kind),
+				Resource: kindToResource(es.Spec.ScaleTargetRef.Kind),
 			},
 			Handlers: r.getScaleTargetRefChangeHandler(ctx, es, req),
 		}); err != nil {
