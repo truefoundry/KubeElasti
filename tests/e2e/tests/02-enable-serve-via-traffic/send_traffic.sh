@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Enhanced traffic testing script with comprehensive debugging
-set -e
+set -u
 
 # Validate input
 if [ -z "$1" ]; then
