@@ -136,8 +136,14 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 		return nil // Don't fail the reconciliation, just log and continue
 	}
 
-	if es.Spec.ScaleTargetRef.Kind == "deployments" {
+	// For backward compatibility
+	switch es.Spec.ScaleTargetRef.Kind {
+	case "deployments":
 		es.Spec.ScaleTargetRef.Kind = "Deployment"
+	case "rollouts":
+		es.Spec.ScaleTargetRef.Kind = "Rollout"
+	default:
+		es.Spec.ScaleTargetRef.Kind = es.Spec.ScaleTargetRef.Kind
 	}
 
 	// Extract replica information from the resource
