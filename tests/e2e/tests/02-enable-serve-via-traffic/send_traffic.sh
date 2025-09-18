@@ -109,9 +109,6 @@ for i in $(seq 1 $MAX_RETRIES); do
         # Additional debugging
         echo "Pod logs (last 10 lines):"
         kubectl logs "$POD_NAME" -n "$NAMESPACE" --tail=10 || echo "  - Could not retrieve logs"
-        
-        echo "Pod network info:"
-        kubectl exec -n "$NAMESPACE" "$POD_NAME" -- ip addr show || echo "  - Could not get network info"
 
         echo "Resolver logs (last 30 lines):"
         kubectl logs -n elasti deployments/elasti-resolver --tail=30 || echo "  - Could not retrieve resolver logs"
@@ -120,7 +117,7 @@ for i in $(seq 1 $MAX_RETRIES); do
         echo "Attempting verbose request for debugging..."
         kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl \
             --max-time 10 \
-            -v \
+            -v -s \
             "$URL" 2>&1 | head -20 || echo "  - Verbose request failed"
 
         failure_count=$((failure_count + 1))

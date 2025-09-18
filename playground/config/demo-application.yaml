@@ -37,6 +37,21 @@ spec:
           image: kennethreitz/httpbin
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /status/200
+              port: 80
+            initialDelaySeconds: 1
+            periodSeconds: 3
+            timeoutSeconds: 1
+            failureThreshold: 3
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
