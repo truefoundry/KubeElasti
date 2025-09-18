@@ -3,6 +3,43 @@
 # Enhanced traffic testing script with comprehensive debugging
 set -u
 
+# --- Color Definitions ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# --- Helper Functions ---
+
+# log_failure_details: Centralized function to log detailed debugging information on failure
+log_failure_details() {
+    echo "${RED}--- DETAILED FAILURE ANALYSIS ---${NC}"
+
+    # Target EndpointSlice Status
+    echo "${CYAN} Status of target EndpointSlice (service=httpbin):${NC}"
+    kubectl get endpointslice -n "$TARGET_NAMESPACE" -l kubernetes.io/service-name=httpbin -o yaml | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve EndpointSlice status${NC}"
+
+    # Curl Pod Logs
+    echo "${CYAN}  Logs from curl pod ($POD_NAME):${NC}"
+    kubectl logs "$POD_NAME" -n "$NAMESPACE" --tail=10 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve logs${NC}"
+
+    # Resolver Logs
+    echo "${CYAN}  Logs from elasti-resolver:${NC}"
+    kubectl logs -n elasti -l app=elasti-resolver --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
+
+    # Target Application Logs
+    echo "${CYAN}  Logs from target application (app=httpbin):${NC}"
+    kubectl logs -n "$TARGET_NAMESPACE" -l app=httpbin --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
+
+
+    # Verbose Curl Request
+    echo "${CYAN}  Attempting verbose request for more details...${NC}"
+    kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl --max-time 10 -v -s "$URL" 2>&1 | head -20 | sed 's/^/    /' || echo "${YELLOW}  - Verbose request failed${NC}"
+    
+    echo "${RED}-----------------------------------${NC}"
+}
+
 # Validate input
 if [ -z "$1" ]; then
     echo "ERROR: No URL provided. Usage: $0 <url>"
@@ -12,45 +49,63 @@ fi
 URL="$1"
 POD_NAME="curl-target-gw"
 NAMESPACE="default"
+TARGET_NAMESPACE=""
 MAX_RETRIES=5
 TIMEOUT=30
 
-echo "=== Traffic Test Configuration ==="
-echo "Target URL: $URL"
-echo "Pod: $POD_NAME"
-echo "Namespace: $NAMESPACE"
-echo "Retries: $MAX_RETRIES"
-echo "Timeout: ${TIMEOUT}s"
-echo "Timestamp: $(date)"
-echo "=================================="
+# --- Argument Parsing ---
+shift # Shift past the URL argument
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --namespace)
+            TARGET_NAMESPACE="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
 
-# Check if pod exists and is ready
-echo "Checking pod status..."
+if [ -z "$TARGET_NAMESPACE" ]; then
+    echo "${RED}ERROR: --namespace flag is required.${NC}"
+    exit 5
+fi
+
+echo "${CYAN}=== Traffic Test Configuration ===${NC}"
+echo "  ${CYAN}Target URL:${NC}  $URL"
+echo "  ${CYAN}Curl Pod:${NC}    $POD_NAME (in $NAMESPACE namespace)"
+echo "  ${CYAN}Target App:${NC}  app=httpbin (in $TARGET_NAMESPACE namespace)"
+echo "  ${CYAN}Retries:${NC}     $MAX_RETRIES"
+echo "  ${CYAN}Timeout:${NC}     ${TIMEOUT}s"
+echo "  ${CYAN}Timestamp:${NC}   $(date)"
+echo "${CYAN}==================================${NC}"
+
+# Check if CURL pod exists and is ready
+echo "Checking CURL pod status..."
 if ! kubectl get pod "$POD_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
-    echo "ERROR: Pod $POD_NAME not found in namespace $NAMESPACE"
+    echo "${RED}ERROR: CURL Pod $POD_NAME not found in namespace $NAMESPACE${NC}"
     kubectl get pods -n "$NAMESPACE" || true
     exit 4
 fi
 
 POD_STATUS=$(kubectl get pod "$POD_NAME" -n "$NAMESPACE" -o jsonpath='{.status.phase}')
-echo "Pod status: $POD_STATUS"
+echo "${GREEN}CURL Pod status: $POD_STATUS${NC}"
 
 if [ "$POD_STATUS" != "Running" ]; then
-    echo "WARNING: Pod is not in Running state"
+    echo "${YELLOW}WARNING: CURL Pod is not in Running state. Describing pod...${NC}"
     kubectl describe pod "$POD_NAME" -n "$NAMESPACE" || true
 fi
 
 echo ""
-echo "Starting traffic test..."
+echo "${CYAN}--- Starting Traffic Test ---${NC}"
 
 failure_count=0
 
 for i in $(seq 1 $MAX_RETRIES); do
-    echo "--- Request $i/$MAX_RETRIES ---"
-    echo "Time: $(date)"
-    
-    # Execute curl with detailed output
-    echo "Executing: kubectl exec -n $NAMESPACE $POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
+    echo "\n${CYAN}--- Request $i/$MAX_RETRIES ---${NC}"
+    echo "  ${CYAN}Time:${NC} $(date)"
+    echo "  ${CYAN}Executing: kubectl exec -n $NAMESPACE $POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
     
     start_time=$(date +%s)
     code=$(kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl \
@@ -63,9 +118,9 @@ for i in $(seq 1 $MAX_RETRIES); do
     end_time=$(date +%s)
     duration=$((end_time - start_time))
     
-    echo "Curl exit code: $result"
-    echo "HTTP status code: $code"
-    echo "Request duration: ${duration}s"
+    echo "  ${CYAN}Curl exit code:${NC} $result"
+    echo "  ${CYAN}HTTP status code:${NC} $code"
+    echo "  ${CYAN}Request duration:${NC} ${duration}s"
     
     # Detailed error analysis
     if [ "$result" != "0" ]; then
@@ -79,17 +134,8 @@ for i in $(seq 1 $MAX_RETRIES); do
             28) echo "  - Operation timeout" ;;
             *) echo "  - Unknown curl error" ;;
         esac
-        
-        # Additional debugging
-        echo "Pod logs (last 10 lines):"
-        kubectl logs "$POD_NAME" -n "$NAMESPACE" --tail=10 || echo "  - Could not retrieve logs"
-        
-        echo "Pod network info:"
-        kubectl exec -n "$NAMESPACE" "$POD_NAME" -- ip addr show || echo "  - Could not get network info"
 
-        echo "Resolver logs (last 30 lines):"
-        kubectl logs -n elasti deployments/elasti-resolver --tail=30 || echo "  - Could not retrieve resolver logs"
-
+        log_failure_details
         failure_count=$((failure_count + 1))
         continue
     fi
@@ -106,43 +152,30 @@ for i in $(seq 1 $MAX_RETRIES); do
             *) echo "  - HTTP error response" ;;
         esac
 
-        # Additional debugging
-        echo "Pod logs (last 10 lines):"
-        kubectl logs "$POD_NAME" -n "$NAMESPACE" --tail=10 || echo "  - Could not retrieve logs"
-
-        echo "Resolver logs (last 30 lines):"
-        kubectl logs -n elasti deployments/elasti-resolver --tail=30 || echo "  - Could not retrieve resolver logs"
-        
-        # Try to get more details with verbose curl
-        echo "Attempting verbose request for debugging..."
-        kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl \
-            --max-time 10 \
-            -v -s \
-            "$URL" 2>&1 | head -20 || echo "  - Verbose request failed"
-
+        log_failure_details
         failure_count=$((failure_count + 1))
         continue
     fi
-    
-    echo "SUCCESS: Request $i completed successfully (HTTP $code in ${duration}s)"
+
+    echo "${GREEN}SUCCESS: Request $i completed successfully (HTTP $code in ${duration}s)${NC}"
     
     if [ $i -lt $MAX_RETRIES ]; then
-        echo "Waiting 1 second before next request..."
         sleep 1
     fi
     echo ""
 done
 
-echo "=== Test Summary ==="
+
+echo "\n${CYAN}=== Test Summary ===${NC}"
 if [ "$failure_count" -gt 0 ]; then
-    echo "Test finished with $failure_count failed requests out of $MAX_RETRIES."
-    echo "Target: $URL"
-    echo "Completed at: $(date)"
-    echo "===================="
+    echo "${RED}Test FAILED with $failure_count failed requests out of $MAX_RETRIES.${NC}"
+    echo "  ${CYAN}Target:${NC}      $URL"
+    echo "  ${CYAN}Completed at:${NC} $(date)"
+    echo "${CYAN}====================${NC}"
     exit 1
 else
-    echo "All $MAX_RETRIES requests completed successfully"
-    echo "Target: $URL"
-    echo "Completed at: $(date)"
-    echo "===================="
+    echo "${GREEN}All $MAX_RETRIES requests completed successfully.${NC}"
+    echo "  ${CYAN}Target:${NC}      $URL"
+    echo "  ${CYAN}Completed at:${NC} $(date)"
+    echo "${CYAN}====================${NC}"
 fi
