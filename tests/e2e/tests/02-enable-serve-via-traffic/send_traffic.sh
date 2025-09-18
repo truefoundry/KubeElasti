@@ -43,6 +43,8 @@ fi
 echo ""
 echo "Starting traffic test..."
 
+failure_count=0
+
 for i in $(seq 1 $MAX_RETRIES); do
     echo "--- Request $i/$MAX_RETRIES ---"
     echo "Time: $(date)"
@@ -84,8 +86,12 @@ for i in $(seq 1 $MAX_RETRIES); do
         
         echo "Pod network info:"
         kubectl exec -n "$NAMESPACE" "$POD_NAME" -- ip addr show || echo "  - Could not get network info"
-        
-        exit 1
+
+        echo "Resolver logs (last 30 lines):"
+        kubectl logs -n elasti deployments/elasti-resolver --tail=30 || echo "  - Could not retrieve resolver logs"
+
+        failure_count=$((failure_count + 1))
+        continue
     fi
     
     if [ "$code" != "200" ]; then
@@ -99,6 +105,16 @@ for i in $(seq 1 $MAX_RETRIES); do
             504) echo "  - Gateway Timeout" ;;
             *) echo "  - HTTP error response" ;;
         esac
+
+        # Additional debugging
+        echo "Pod logs (last 10 lines):"
+        kubectl logs "$POD_NAME" -n "$NAMESPACE" --tail=10 || echo "  - Could not retrieve logs"
+        
+        echo "Pod network info:"
+        kubectl exec -n "$NAMESPACE" "$POD_NAME" -- ip addr show || echo "  - Could not get network info"
+
+        echo "Resolver logs (last 30 lines):"
+        kubectl logs -n elasti deployments/elasti-resolver --tail=30 || echo "  - Could not retrieve resolver logs"
         
         # Try to get more details with verbose curl
         echo "Attempting verbose request for debugging..."
@@ -106,8 +122,9 @@ for i in $(seq 1 $MAX_RETRIES); do
             --max-time 10 \
             -v \
             "$URL" 2>&1 | head -20 || echo "  - Verbose request failed"
-        
-        exit 2
+
+        failure_count=$((failure_count + 1))
+        continue
     fi
     
     echo "SUCCESS: Request $i completed successfully (HTTP $code in ${duration}s)"
@@ -120,7 +137,15 @@ for i in $(seq 1 $MAX_RETRIES); do
 done
 
 echo "=== Test Summary ==="
-echo "All $MAX_RETRIES requests completed successfully"
-echo "Target: $URL"
-echo "Completed at: $(date)"
-echo "===================="
+if [ "$failure_count" -gt 0 ]; then
+    echo "Test finished with $failure_count failed requests out of $MAX_RETRIES."
+    echo "Target: $URL"
+    echo "Completed at: $(date)"
+    echo "===================="
+    exit 1
+else
+    echo "All $MAX_RETRIES requests completed successfully"
+    echo "Target: $URL"
+    echo "Completed at: $(date)"
+    echo "===================="
+fi
