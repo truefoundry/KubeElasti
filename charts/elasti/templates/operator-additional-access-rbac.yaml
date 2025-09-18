@@ -6,7 +6,7 @@ metadata:
     {{- include "elasti.labels" . | nindent 4 }}
 rules:
 - apiGroups: ["apps"]
-  resources: ["deployments"]
+  resources: ["deployments", "deployment", "statefulsets", "statefulset"]
   verbs: ["get", "list", "watch", "update", "patch"]
 - apiGroups: ["*"]
   resources: ["*/scale"]
