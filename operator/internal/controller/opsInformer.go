@@ -142,8 +142,6 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 		es.Spec.ScaleTargetRef.Kind = "Deployment"
 	case "rollouts":
 		es.Spec.ScaleTargetRef.Kind = "Rollout"
-	default:
-		es.Spec.ScaleTargetRef.Kind = es.Spec.ScaleTargetRef.Kind
 	}
 
 	// Extract replica information from the resource
