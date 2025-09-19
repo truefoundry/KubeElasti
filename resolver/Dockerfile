@@ -1,5 +1,5 @@
 # Build the resolver bianry
-FROM golang:1.23  AS builder
+FROM golang:1.23 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -24,10 +24,11 @@ COPY ./resolver/ .
 # by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -o resolver cmd/main.go
 
-
-FROM alpine:latest
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
 COPY --from=builder /workspace/resolver .
-EXPOSE 8012
-CMD ["./resolver"]
+USER 65532:65532
 
- 
+ENTRYPOINT ["/resolver"]

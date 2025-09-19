@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/truefoundry/elasti/pkg/logger"
 	"go.uber.org/zap"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,11 +48,11 @@ func (k *Ops) CheckIfServiceEndpointSliceActive(ns, svc string) (bool, error) {
 
 	for _, slice := range endpointSlices.Items {
 		for _, endpoint := range slice.Endpoints {
-			if endpoint.Conditions.Ready != nil && *endpoint.Conditions.Ready {
-				// NOTE: Below line throws a CWE, but we identified it as false positive
-				// As the svc and namespace are used for debugging and are not security sensitive, it is safe to ignore this
-				// See: https://github.com/truefoundry/KubeElasti/pull/177
-				k.logger.Debug("Service endpoint is active", zap.String("service", svc), zap.String("namespace", ns))
+			// According to K8s docs: "ready" should be marked if endpoint is serving and not terminating
+			// So checking ready alone should be sufficient for most use cases
+			// nil should be interpreted as "true"
+			if endpoint.Conditions.Ready == nil || *endpoint.Conditions.Ready {
+				k.logger.Debug("Service endpoint is active", zap.String("service", logger.MaskMiddle(svc, 3, 3)), zap.String("namespace", logger.MaskMiddle(ns, 3, 3)))
 				return true, nil
 			}
 		}

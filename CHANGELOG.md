@@ -4,6 +4,10 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
+## 0.1.16
+* fix: e2e test "02" due to incorrect readiness check of EndpointSlice by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/189
+
+
 ## 0.1.15
 * Add validation for CRD fields for elasti service by @ramantehlan in https://github.com/truefoundry/elasti/pull/122
 * Forward source host to target by @ramantehlan in https://github.com/truefoundry/elasti/pull/123
@@ -43,6 +47,7 @@ All the unreleased changes are listed under `Unreleased` section.
 ## History
 
 - [Changelog](#changelog)
+  - [0.1.16](#0116)
   - [0.1.15](#0115)
   - [0.1.15-beta (2025-07-28)](#0115-beta-2025-07-28)
     - [Fixes](#fixes)
