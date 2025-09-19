@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/scaling"
 
 	"truefoundry/elasti/operator/internal/elastiserver"
@@ -65,10 +66,6 @@ func init() {
 	utilruntime.Must(elastiv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
-
-const (
-	elastiServerPort = ":8013"
-)
 
 func main() {
 	err := mainWithError()
@@ -193,6 +190,7 @@ func mainWithError() error {
 	eServer := elastiserver.NewServer(zapLogger, scaleHandler, 30*time.Second)
 	errChan := make(chan error, 1)
 	go func() {
+		elastiServerPort := fmt.Sprintf(":%d", config.GetOperatorConfig().Port)
 		if err := eServer.Start(elastiServerPort); err != nil {
 			setupLog.Error(err, "elasti server failed to start")
 			sentry.CaptureException(err)

@@ -40,16 +40,6 @@ type (
 	}
 )
 
-const (
-
-	// These are resolver details, ideally in future we can move this to a configmap, or find a better way to serve this
-	// TODO: Move this to configmap
-	resolverNamespace      = "elasti"
-	resolverDeploymentName = "elasti-resolver"
-	resolverServiceName    = "elasti-resolver-service"
-	resolverPort           = 8012
-)
-
 //+kubebuilder:rbac:groups=elasti.truefoundry.com,resources=elastiservices,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=elasti.truefoundry.com,resources=elastiservices/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=elasti.truefoundry.com,resources=elastiservices/finalizers,verbs=update
