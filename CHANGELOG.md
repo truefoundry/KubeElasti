@@ -11,10 +11,10 @@
 * fix: e2e test "02" due to incorrect readiness check of EndpointSlice by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/189
 
 
-
 ## 0.1.15
 * Add validation for CRD fields for elasti service by @ramantehlan in https://github.com/truefoundry/elasti/pull/122
 * Forward source host to target by @ramantehlan in https://github.com/truefoundry/elasti/pull/123
+
 
 ## 0.1.15-beta (2025-07-28)
 
