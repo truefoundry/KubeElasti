@@ -50,7 +50,7 @@ POD_NAME="curl-target-gw"
 NAMESPACE="default"
 TARGET_NAMESPACE=""
 MAX_RETRIES=5
-TIMEOUT=30
+TIMEOUT=120
 
 # --- Argument Parsing ---
 shift # Shift past the URL argument
