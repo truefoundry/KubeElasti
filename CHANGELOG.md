@@ -22,7 +22,6 @@
 * Add announcement and FAQ to the docs by @ramantehlan in [#177](https://github.com/truefoundry/KubeElasti/pull/177)
 * fix e2e workflow and tests by @ramantehlan in [#184](https://github.com/truefoundry/KubeElasti/pull/184)
 
-
 ## 0.1.15
 * Add validation for CRD fields for elasti service by @ramantehlan in [#122](https://github.com/truefoundry/elasti/pull/122)
 * Forward source host to target by @ramantehlan in [#123](https://github.com/truefoundry/elasti/pull/123)
