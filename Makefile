@@ -68,19 +68,19 @@ build-images: ## Build and push images
 	$(MAKE) -C ./operator docker-build IMG=localhost:5001/elasti-operator:v1alpha1
 	$(MAKE) -C ./resolver docker-build IMG=localhost:5001/elasti-resolver:v1alpha1
 
-.PHONY: reload-images
-reload-images: ## Reload images into kind and restart deployments
+.PHONY: deploy-elasti
+deploy-elasti: ## Deploy elasti
+	 kubectl create namespace elasti
+	 helm upgrade --install elasti ./charts/elasti -n elasti -f ./playground/infra/elasti-demo-values.yaml
+
+.PHONY: reload-elasti
+reload-elasti: ## Reload elasti into kind and restart deployments
 	@echo "Loading images into kind cluster..."
 	docker push localhost:5001/elasti-operator:v1alpha1
 	docker push localhost:5001/elasti-resolver:v1alpha1
 	@echo "Restarting elasti operator deployment..."
 	@kubectl rollout restart deployment elasti-operator-controller-manager -n elasti
 	@kubectl rollout restart deployment elasti-resolver -n elasti
-
-.PHONY: install-elasti
-install-elasti: ## Install elasti
-	 kubectl create namespace elasti
-	 helm upgrade --install elasti ./charts/elasti -n elasti -f ./playground/infra/elasti-demo-values.yaml
 
 .PHONY: undeploy-elasti
 undeploy-elasti: ## Undeploy elasti
