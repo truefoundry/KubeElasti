@@ -92,12 +92,10 @@ func (r *ElastiServiceReconciler) handlePublicServiceChanges(ctx context.Context
 
 	// Sync the changes in private service
 	privateSVC.Spec.Selector = publicSVC.Spec.Selector
+	privateSVC.Spec.Ports = make([]v1.ServicePort, len(publicSVC.Spec.Ports))
+	copy(privateSVC.Spec.Ports, publicSVC.Spec.Ports)
 	for port := range privateSVC.Spec.Ports {
-		privateSVC.Spec.Ports[port].Name = publicSVC.Spec.Ports[port].Name
-		privateSVC.Spec.Ports[port].Protocol = publicSVC.Spec.Ports[port].Protocol
-		privateSVC.Spec.Ports[port].Port = publicSVC.Spec.Ports[port].Port
-		privateSVC.Spec.Ports[port].TargetPort = publicSVC.Spec.Ports[port].TargetPort
-		privateSVC.Spec.Ports[port].AppProtocol = publicSVC.Spec.Ports[port].AppProtocol
+		privateSVC.Spec.Ports[port].NodePort = 0
 	}
 
 	// Update the private service

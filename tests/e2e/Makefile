@@ -3,19 +3,19 @@ CLUSTER_NAME := elasti-e2e
 NAMESPACE := test
 ELASTI_NAMESPACE := elasti
 T ?= ./tests
-ISTIO_VERSION := 1.26.1
+ISTIO_VERSION := 1.26.4
 PROMETHEUS_VERSION := 73.2.3
 PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
 TIMEOUT := 400s
 
 .PHONY: all setup destroy test
-all: 
+all:
 	@echo "Run 'make build-images' to build images"
 	@echo "Run 'make setup' to setup environment"
 	@echo "Run 'make test' to run tests"
 	@echo "Run 'make destroy' to destroy environment"
-	
+
 setup: kind-up chmod-scripts apply-deps
 destroy: kind-down
 test:
@@ -54,6 +54,7 @@ kind-up: ## Create Kind cluster
 	fi
 	kind load docker-image elasti-operator:v1alpha1 --name elasti-e2e
 	kind load docker-image elasti-resolver:v1alpha1 --name elasti-e2e
+	kubectl scale --replicas=1 deployment/coredns -n kube-system
 
 .PHONY: kind-down
 kind-down:
@@ -126,7 +127,7 @@ uninstall-ingress:
 	@echo "Istio uninstalled successfully."
 
 .PHONY: apply-keda
-apply-keda: 
+apply-keda:
 	@echo "Installing KEDA..."
 	@kubectl create namespace keda --dry-run=client -o yaml | kubectl apply -f -
 	@helm upgrade --install keda kedacore/keda --namespace keda --create-namespace --version $(KEDA_VERSION) --wait --timeout $(TIMEOUT)
@@ -146,12 +147,12 @@ pf-prom:
 	@kubectl --namespace monitoring port-forward service/prometheus-operated 9090:9090
 
 .PHONY: pf-graf
-pf-graf: 
+pf-graf:
 	@echo "Portforwarding grafana on port 9001..."
 	@kubectl --namespace monitoring port-forward service/kube-prometheus-stack-grafana 9001:80
 
 .PHONY: pf-ingress
-pf-ingress: 
+pf-ingress:
 	@echo "Portforwarding ingress gateway on port 8080..."
 	@kubectl --namespace istio-system port-forward service/istio-ingressgateway 8080:80
 

@@ -42,6 +42,17 @@ spec:
           image: kennethreitz/httpbin:latest
           ports:
             - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /status/200
+              port: 80
+            initialDelaySeconds: 3
+            # Interval between health checks
+            periodSeconds: 3
+            # Amount of time to wait for a response
+            timeoutSeconds: 2
+            # Number of times to fail before marking the pod as unhealthy
+            failureThreshold: 3
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

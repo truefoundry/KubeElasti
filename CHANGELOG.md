@@ -8,6 +8,8 @@
 
 ### Improvements
 * Add support for StatefulSet by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/188
+* fix: e2e test "02" due to incorrect readiness check of EndpointSlice by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/189
+
 
 
 ## 0.1.15
@@ -45,7 +47,6 @@
 * dont scale down new service and handle missing prom data by @shubhamrai1993 in https://github.com/truefoundry/KubeElasti/pull/121
 
 All the unreleased changes are listed under `Unreleased` section.
-
 
 ## Unreleased
 
