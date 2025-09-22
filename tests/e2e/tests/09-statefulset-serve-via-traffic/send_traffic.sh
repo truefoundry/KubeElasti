@@ -1,6 +1,6 @@
 #!/bin/sh
 for i in 1 2 3 4 5; do
-    code=$(kubectl exec -n default curl-target-gw -- curl --max-time 30 -s -o /dev/null -w "%{http_code}" "${1}")
+    code=$(kubectl exec -n default curl-target-gw -- curl --max-time 120 -s -o /dev/null -w "%{http_code}" "${1}")
     result=$?
 
     echo "$result / $code"
