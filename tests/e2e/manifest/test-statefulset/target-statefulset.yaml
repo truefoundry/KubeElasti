@@ -43,6 +43,8 @@ spec:
           image: kennethreitz/httpbin:latest
           ports:
             - containerPort: 80
+          readinessProbe:
+            initialDelaySeconds: 15
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
