@@ -12,17 +12,15 @@ import (
 
 	"k8s.io/client-go/scale"
 
+	"github.com/truefoundry/elasti/pkg/k8shelper"
 	"github.com/truefoundry/elasti/pkg/scaling/scalers"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/discovery"
 	discocache "k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -51,12 +49,10 @@ type ScaleHandler struct {
 
 	scaleLocks sync.Map
 
-	scaleClient *scale.ScalesGetter
+	scaleClient scale.ScalesGetter
 
 	logger         *zap.Logger
 	watchNamespace string
-	restMapper     meta.RESTMapper
-	cachedDisc     discovery.CachedDiscoveryInterface
 }
 
 // getMutexForScale returns a mutex for scaling based on the input key
@@ -91,9 +87,7 @@ func NewScaleHandler(logger *zap.Logger, config *rest.Config, watchNamespace str
 		logger:         logger.Named("ScaleHandler"),
 		kClient:        kClient,
 		kDynamicClient: kDynamicClient,
-		restMapper:     restMapper,
-		cachedDisc:     cachedDisc,
-		scaleClient:    &scaleClient,
+		scaleClient:    scaleClient,
 		watchNamespace: watchNamespace,
 		EventRecorder:  eventRecorder,
 	}
@@ -308,10 +302,6 @@ func (h *ScaleHandler) createScalerForTrigger(trigger *v1alpha1.ScaleTrigger, co
 
 // ScaleTargetFromZero scales the TargetRef to the provided replicas when it's at 0
 func (h *ScaleHandler) ScaleTargetFromZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetAPIVersion string, targetKind, targetName string, replicas int32, elastiServiceName string) error {
-	mutex := h.getMutexForScale(serviceNamespacedName.String())
-	mutex.Lock()
-	defer mutex.Unlock()
-
 	h.logger.Info("Scaling up from zero", zap.String("kind", targetKind), zap.String("namespacedName", serviceNamespacedName.String()), zap.Int32("replicas", replicas))
 
 	scaled, err := h.Scale(ctx, serviceNamespacedName.Namespace, targetAPIVersion, targetKind, targetName, replicas)
@@ -333,10 +323,6 @@ func (h *ScaleHandler) ScaleTargetFromZero(ctx context.Context, serviceNamespace
 
 // ScaleTargetToZero scales the target to zero
 func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetAPIVersion string, targetKind string, targetName string, elastiServiceName string) error {
-	mutex := h.getMutexForScale(serviceNamespacedName.String())
-	mutex.Lock()
-	defer mutex.Unlock()
-
 	h.logger.Info("Scaling down to zero", zap.String("kind", targetKind), zap.String("namespacedName", serviceNamespacedName.String()))
 
 	scaled, err := h.Scale(ctx, serviceNamespacedName.Namespace, targetAPIVersion, targetKind, targetName, 0)
@@ -358,9 +344,14 @@ func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedN
 
 func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVersion string, targetKind string, targetName string, replicas int32) (bool, error) {
 	// Basic validation
-	if h.kDynamicClient == nil {
-		return false, fmt.Errorf("handler missing clients: kDynamicClient or kClient is nil")
+	if targetAPIVersion == "" {
+		return false, fmt.Errorf("empty apiVersion")
 	}
+
+	// Get mutex for the target
+	mutex := h.getMutexForScale("scale" + namespace + "/" + targetKind + "/" + targetName)
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	// NOTE: Required for backwards compatibility, since so far, we have been using "deployments" instead of "Deployment" in exisiting
 	// CRD files. Since calse doesn't recognize "deployments" as a valid kind, we need to convert it to "Deployment".
@@ -369,95 +360,37 @@ func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVer
 		targetKind = "Deployment"
 	}
 
-	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
-
-	// Parse apiVersion into group/version
-	var gv schema.GroupVersion
-	if targetAPIVersion == "" {
-		return false, fmt.Errorf("empty apiVersion")
+	// Get the scale object
+	groupResource := schema.GroupResource{
+		Group:    targetAPIVersion,
+		Resource: k8shelper.KindToResource(targetKind),
 	}
-	// schema.ParseGroupVersion doesn't exist in apimachinery? Use manual splitting
-	// Accept forms: "group/version" or "version" (core)
-	gv, err := schema.ParseGroupVersion(targetAPIVersion)
+	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})
 	if err != nil {
-		return false, fmt.Errorf("invalid apiVersion %q: %w", targetAPIVersion, err)
+		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetKind, targetName, namespace, err)
 	}
-
-	// Build GroupVersionKind from input
-	gvk := schema.GroupVersionKind{
-		Group:   gv.Group,
-		Version: gv.Version,
-		Kind:    targetKind,
-	}
-
-	// Find RESTMapping (resources) for the GVK
-	mapping, err := h.restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		// try a fresh discovery refresh and retry once (deferred mapper caches)
-		h.cachedDisc.Invalidate()
-		h.restMapper = restmapper.NewDeferredDiscoveryRESTMapper(h.cachedDisc)
-		mapping, err = h.restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-		if err != nil {
-			return false, fmt.Errorf("failed to find resource mapping for %s: %w", gvk.String(), err)
-		}
-	}
-
-	gvr := mapping.Resource // group-version-resource
-
-	// Choose the resource interface: namespaced or not
-	var ri dynamic.ResourceInterface
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		ri = h.kDynamicClient.Resource(gvr).Namespace(namespace)
-	} else {
-		ri = h.kDynamicClient.Resource(gvr)
-	}
-
-	// Get the scale subresource via dynamic client: GET .../scale
-	scaleObj, err := ri.Get(ctx, targetName, metav1.GetOptions{}, "scale")
-	if err != nil {
-		return false, fmt.Errorf("failed to get scale subresource for %s/%s (%s): %w", gvr.String(), targetName, namespace, err)
-	}
-
-	// Extract current replicas from the scale subresource
-	h.logger.Info("Scale object retrieved", zap.Any("scaleObj", scaleObj.Object))
-	currentReplicas, found, err := unstructured.NestedInt64(scaleObj.Object, "spec", "replicas")
-	h.logger.Info("currentReplicas result", zap.Int64("replicas", currentReplicas), zap.Bool("found", found), zap.Error(err))
-
-	if err != nil {
-		return false, fmt.Errorf("failed to get current replicas: %w", err)
-	}
-	if !found {
-		return false, nil
-	}
-
-	h.logger.Debug("Target found", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int64("current replicas", currentReplicas), zap.Int32("desired replicas", replicas))
 
 	// Check if already at desired replicas
-	if currentReplicas == int64(replicas) {
+	if currentScale.Spec.Replicas == replicas {
 		h.logger.Info("Target already scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
 		return false, nil
 	}
 
 	// Check if already scaled beyond desired (for scale up operations)
-	if replicas > 0 && currentReplicas > int64(replicas) {
+	if replicas > 0 && currentScale.Spec.Replicas > replicas {
 		h.logger.Info("Target already scaled beyond desired replicas",
 			zap.String("kind", targetKind),
 			zap.String("name", targetName),
-			zap.Int64("current replicas", currentReplicas),
+			zap.Int32("current replicas", currentScale.Spec.Replicas),
 			zap.Int32("desired replicas", replicas))
 		return false, nil
 	}
 
-	// Update the replicas in the scale object
-	err = unstructured.SetNestedField(scaleObj.Object, int64(replicas), "spec", "replicas")
-	if err != nil {
-		return false, fmt.Errorf("failed to set replicas: %w", err)
-	}
+	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
 
-	// Update the scale subresource
-	_, err = ri.Update(ctx, scaleObj, metav1.UpdateOptions{}, "scale")
-	if err != nil {
-		return false, fmt.Errorf("failed to update scale: %w", err)
+	currentScale.Spec.Replicas = replicas
+	if _, err := h.scaleClient.Scales(namespace).Update(ctx, groupResource, currentScale, metav1.UpdateOptions{}); err != nil {
+		return false, fmt.Errorf("failed to update scale for %s/%s (%s): %w", targetKind, targetName, namespace, err)
 	}
 
 	h.logger.Info("Target scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
