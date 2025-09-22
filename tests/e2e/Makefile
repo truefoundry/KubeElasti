@@ -26,6 +26,7 @@ test:
 .PHONY: chmod-scripts
 chmod-scripts:
 	@chmod +x ./manifest/setup.sh
+	@chmod +x ./manifest/setup-statefulset.sh
 
 .PHONY: build-images
 build-images: ## Build and push images
