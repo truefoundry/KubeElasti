@@ -343,11 +343,6 @@ func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedN
 }
 
 func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVersion string, targetKind string, targetName string, replicas int32) (bool, error) {
-	// Basic validation
-	if targetAPIVersion == "" {
-		return false, fmt.Errorf("empty apiVersion")
-	}
-
 	// Get mutex for the target
 	mutex := h.getMutexForScale("scale" + namespace + "/" + targetKind + "/" + targetName)
 	mutex.Lock()
@@ -362,7 +357,7 @@ func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVer
 
 	// Get the scale object
 	groupResource := schema.GroupResource{
-		Group:    targetAPIVersion,
+		Group:    k8shelper.GetGroupFromApiVersion(targetAPIVersion),
 		Resource: k8shelper.KindToResource(targetKind),
 	}
 	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})

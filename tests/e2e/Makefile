@@ -167,3 +167,23 @@ lint-yaml:
 	@echo "Linting k8s manifests and kuttl tests..."
 	@yamllint ./manifest
 	@yamllint ./tests
+
+.PHONY: deploy-demo-application
+deploy-demo-application: ## Install demo application
+	 kubectl apply -f ../../playground/config/demo-application.yaml
+	 kubectl apply -f ../../playground/config/demo-elastiService.yaml -n target
+
+.PHONY: undeploy-demo-application
+undeploy-demo-application: ## Uninstall demo application
+	 kubectl delete -f ../../playground/config/demo-application.yaml
+	 kubectl delete -f ../../playground/config/demo-elastiService.yaml -n target
+
+.PHONY: deploy-demo-statefulset
+deploy-demo-statefulset: ## Install demo statefulset
+	 kubectl apply -f ../../playground/config/demo-statefulset-application.yaml -n target
+	 kubectl apply -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
+
+.PHONY: undeploy-demo-statefulset
+undeploy-demo-statefulset: ## Uninstall demo statefulset
+	 kubectl delete -f ../../playground/config/demo-statefulset-application.yaml -n target
+	 kubectl delete -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
