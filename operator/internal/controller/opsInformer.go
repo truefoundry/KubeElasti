@@ -199,7 +199,9 @@ func (r *ElastiServiceReconciler) isTargetReady(ctx context.Context, obj *unstru
 		return false, fmt.Errorf("failed to get label selector from specs, %w", err)
 	} else if !found {
 		return false, fmt.Errorf("label selector not found in specs, %v", specs)
-	} else if selectorMap == nil {
+	}
+
+	if selectorMap == nil {
 		return false, fmt.Errorf("label selector found in specs but is nil, %v", specs)
 	}
 
