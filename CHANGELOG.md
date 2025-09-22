@@ -5,7 +5,22 @@
 -->
 
 ## 0.1.16
-* fix: e2e test "02" due to incorrect readiness check of EndpointSlice by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/189
+
+### Fixes 
+* fix: first response content after scaling up is truncated by @rethil in https://github.com/truefoundry/KubeElasti/pull/163
+* copying over private service ports from public service directly by @shubhamrai1993 in https://github.com/truefoundry/KubeElasti/pull/190
+* fix 02 e2e test, which was because of incorrect readiness check of endpointslice.  by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/189
+
+### Improvements
+* prometheus scaler: make healthcheck customizable by @rethil in https://github.com/truefoundry/KubeElasti/pull/153
+* resolver: use distroless/static as base image by @rethil in https://github.com/truefoundry/KubeElasti/pull/181
+* resolver: migrate to EndpointSlice API by @rethil in https://github.com/truefoundry/KubeElasti/pull/167
+* security: cleanup roles in helm chart by @rethil in https://github.com/truefoundry/KubeElasti/pull/179
+
+### Other
+* Docs: Add demo video - Contributors section - Discord link by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/172
+* Add announcement and FAQ to the docs by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/177
+* fix e2e workflow and tests by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/184
 
 
 ## 0.1.15
@@ -48,11 +63,14 @@ All the unreleased changes are listed under `Unreleased` section.
 
 - [Changelog](#changelog)
   - [0.1.16](#0116)
-  - [0.1.15](#0115)
-  - [0.1.15-beta (2025-07-28)](#0115-beta-2025-07-28)
     - [Fixes](#fixes)
     - [Improvements](#improvements)
     - [Other](#other)
+  - [0.1.15](#0115)
+  - [0.1.15-beta (2025-07-28)](#0115-beta-2025-07-28)
+    - [Fixes](#fixes-1)
+    - [Improvements](#improvements-1)
+    - [Other](#other-1)
     - [New Contributors](#new-contributors)
   - [0.1.14](#0114)
   - [History](#history)
