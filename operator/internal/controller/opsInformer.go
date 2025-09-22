@@ -182,10 +182,8 @@ func (r *ElastiServiceReconciler) isTargetReady(ctx context.Context, obj *unstru
 	} else if !found {
 		// If replicas are not found and no error, we can assume the resource is not ready
 		return false, nil
-	} else {
-		if replicasVal <= 0 {
-			return false, nil
-		}
+	} else if replicasVal <= 0 {
+		return false, nil
 	}
 
 	// Extract specs from the unstructured object
