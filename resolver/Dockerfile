@@ -1,5 +1,5 @@
 # Build the resolver bianry
-FROM golang:1.25.1  AS builder
+FROM golang:1.24.6  AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
