@@ -12,7 +12,6 @@ help:
 
 .PHONY: generate-manifest
 generate-manifest: ## Generate deploy manifest
-	cd operator && make manifests
 	kustomize build . > ./install.yaml
 
 .PHONY: setup-registry
@@ -62,3 +61,4 @@ build-docs: ## Build docs
 .PHONY: fetch-contributors
 fetch-contributors: ## Fetch contributors
 	python3 docs/scripts/fetch_contributors.py
+

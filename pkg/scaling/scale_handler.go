@@ -357,7 +357,7 @@ func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVer
 
 	// Get the scale object
 	groupResource := schema.GroupResource{
-		Group:    k8shelper.GetGroupFromApiVersion(targetAPIVersion),
+		Group:    k8shelper.GetGroupFromAPIVersion(targetAPIVersion),
 		Resource: k8shelper.KindToResource(targetKind),
 	}
 	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})
