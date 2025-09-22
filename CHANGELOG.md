@@ -26,7 +26,6 @@
 * Add validation for CRD fields for elasti service by @ramantehlan in [#122](https://github.com/truefoundry/elasti/pull/122)
 * Forward source host to target by @ramantehlan in [#123](https://github.com/truefoundry/elasti/pull/123)
 
-
 ## 0.1.15-beta (2025-07-28)
 
 ### Fixes
