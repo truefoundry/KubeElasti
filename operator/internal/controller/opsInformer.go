@@ -7,9 +7,13 @@ import (
 
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"truefoundry/elasti/operator/api/v1alpha1"
 	"truefoundry/elasti/operator/internal/informer"
@@ -137,35 +141,22 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 		return fmt.Errorf("failed to convert ScaleTargetRef to unstructured")
 	}
 
-	// For backward compatibility
-	switch es.Spec.ScaleTargetRef.Kind {
-	case "deployments":
-		es.Spec.ScaleTargetRef.Kind = "Deployment"
-	case "rollouts":
-		es.Spec.ScaleTargetRef.Kind = "Rollout"
+	// Extract replica information from the resource
+	ready, err := r.isTargetReady(ctx, unstructuredObj)
+	if err != nil {
+		return fmt.Errorf("failed to get target ready status: %w", err)
 	}
 
-	// Extract replica information from the resource
-	replicas, readyReplicas, isHealthy := r.extractReplicaInfo(unstructuredObj, es.Spec.ScaleTargetRef.Kind)
-
-	r.Logger.Debug("Target resource status",
-		zap.String("es", req.String()),
-		zap.String("kind", es.Spec.ScaleTargetRef.Kind),
-		zap.String("name", es.Spec.ScaleTargetRef.Name),
-		zap.Int64("replicas", replicas),
-		zap.Int64("readyReplicas", readyReplicas),
-		zap.Bool("isHealthy", isHealthy))
-
 	// Determine mode based on replica status
-	if replicas == 0 {
-		r.Logger.Info("ScaleTargetRef has 0 replicas, switching to proxy mode",
+	if !ready {
+		r.Logger.Info("ScaleTargetRef has 0 replicas or not ready, switching to proxy mode",
 			zap.String("kind", es.Spec.ScaleTargetRef.Kind),
 			zap.String("name", es.Spec.ScaleTargetRef.Name),
 			zap.String("es", req.String()))
 		if err := r.switchMode(ctx, req, values.ProxyMode); err != nil {
 			return fmt.Errorf("failed to switch to proxy mode: %w", err)
 		}
-	} else if readyReplicas > 0 && isHealthy {
+	} else if ready {
 		r.Logger.Info("ScaleTargetRef has ready replicas and is healthy, switching to serve mode",
 			zap.String("kind", es.Spec.ScaleTargetRef.Kind),
 			zap.String("name", es.Spec.ScaleTargetRef.Name),
@@ -178,45 +169,83 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 	return nil
 }
 
-// extractReplicaInfo extracts replica information from any resource type
-func (r *ElastiServiceReconciler) extractReplicaInfo(obj *unstructured.Unstructured, kind string) (replicas, readyReplicas int64, isHealthy bool) {
-	// Default to healthy unless we have specific health checks
-	isHealthy = true
-
+// isTargetReady to check if the target resource has 1 running pod
+func (r *ElastiServiceReconciler) isTargetReady(ctx context.Context, obj *unstructured.Unstructured) (bool, error) {
 	// Extract status from the unstructured object
 	status, found, err := unstructured.NestedMap(obj.Object, "status")
 	if !found || err != nil {
-		r.Logger.Debug("No status found in target resource", zap.String("kind", kind), zap.Error(err))
-		return 0, 0, false
+		return false, fmt.Errorf("no status found in target resource, %w", err)
 	}
 
-	// Extract replicas - try common field names
-	if replicasVal, found, err := unstructured.NestedInt64(status, "replicas"); found && err == nil {
-		replicas = replicasVal
-	}
-
-	// Extract ready replicas - try common field names
-	if readyVal, found, err := unstructured.NestedInt64(status, "readyReplicas"); found && err == nil {
-		readyReplicas = readyVal
-	}
-
-	// Handle specific resource types for health checks
-	switch kind {
-	case "Rollout":
-		// For Argo Rollouts, check the phase
-		if phase, found, err := unstructured.NestedString(status, "phase"); found && err == nil {
-			isHealthy = (phase == values.ArgoPhaseHealthy)
+	if replicasVal, found, err := unstructured.NestedInt64(status, "replicas"); err != nil {
+		return false, fmt.Errorf("failed to get replicas from status, %w", err)
+	} else if !found {
+		// If replicas are not found and no error, we can assume the resource is not ready
+		return false, nil
+	} else {
+		if replicasVal <= 0 {
+			return false, nil
 		}
-	case "Deployment":
-		// For Deployments, we consider it healthy if readyReplicas > 0
-		isHealthy = readyReplicas > 0
-	case "StatefulSet":
-		// For StatefulSets, check if readyReplicas matches replicas
-		isHealthy = readyReplicas > 0
-	default:
-		// For other resource types, consider healthy if readyReplicas > 0
-		isHealthy = readyReplicas > 0
 	}
 
-	return replicas, readyReplicas, isHealthy
+	// Extract specs from the unstructured object
+	specs, found, err := unstructured.NestedMap(obj.Object, "spec")
+	if err != nil {
+		return false, fmt.Errorf("no specs found in target resource, %w", err)
+	} else if !found {
+		return false, fmt.Errorf("specs not found in target resource")
+	}
+
+	selectorMap, found, err := unstructured.NestedMap(specs, "selector")
+	if err != nil {
+		return false, fmt.Errorf("failed to get label selector from specs, %w", err)
+	} else if !found {
+		return false, fmt.Errorf("label selector not found in specs, %v", specs)
+	} else if selectorMap == nil {
+		return false, fmt.Errorf("label selector found in specs but is nil, %v", specs)
+	}
+
+	labelSelector := &metav1.LabelSelector{}
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(selectorMap, labelSelector); err != nil {
+		return false, fmt.Errorf("failed to convert selector map to LabelSelector, %w", err)
+	}
+	r.Logger.Debug("Successfully extracted label selector", zap.String("selector", metav1.FormatLabelSelector(labelSelector)))
+
+	// Get ready replicas of a pod using selector and namespace
+	selector, err := metav1.LabelSelectorAsSelector(labelSelector)
+	if err != nil {
+		return false, fmt.Errorf("failed to convert label selector to selector, %w", err)
+	}
+
+	podList := &corev1.PodList{}
+	listOptions := []client.ListOption{
+		client.InNamespace(obj.GetNamespace()),
+		client.MatchingLabelsSelector{Selector: selector},
+	}
+
+	if err := r.List(ctx, podList, listOptions...); err != nil {
+		return false, fmt.Errorf("failed to list pods for label selector, %w", err)
+	}
+
+	// Default to healthy unless we have specific health checks
+	ready := false
+	for _, pod := range podList.Items {
+		// Skip terminating pods
+		if pod.DeletionTimestamp != nil {
+			continue
+		}
+
+		for _, condition := range pod.Status.Conditions {
+			if condition.Type == corev1.PodReady && condition.Status == corev1.ConditionTrue {
+				ready = true
+				break
+			}
+		}
+
+		if ready {
+			break
+		}
+	}
+
+	return ready, nil
 }

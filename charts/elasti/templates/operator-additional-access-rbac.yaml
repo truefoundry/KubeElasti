@@ -26,3 +26,6 @@ rules:
 - apiGroups: ["keda.sh"]
   resources: ["scaledobjects"]
   verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]

@@ -111,8 +111,13 @@ You can also run specific parts of the testing process:
 | `make apply-prometheus`  | Install only Prometheus (with Grafana) |
 | `make apply-ingress`     | Install only Istio ingress gateway |
 | `make apply-keda`        | Install only KEDA |
-| `make uninstall-ingress` | Uninstall Istio components |
 | `make uninstall-keda`    | Uninstall KEDA components |
+| `make uninstall-elasti`  | Uninstall Elasti components |
+| `make uninstall-ingress` | Uninstall Istio components |
 | `make pf-prom`           | Port-forward the Prometheus service to localhost:9090 |
 | `make pf-graf`           | Port-forward the Grafana service to localhost:9001 |
 | `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080 |
+| `make apply-demo-application` | Install demo application |
+| `make apply-demo-statefulset` | Install demo statefulset |
+| `make uninstall-demo-application` | Uninstall demo application |
+| `make uninstall-demo-statefulset` | Uninstall demo statefulset |

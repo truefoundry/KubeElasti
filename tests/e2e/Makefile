@@ -119,13 +119,6 @@ apply-ingress:
 	@kubectl apply -f ./manifest/global/istio-gateway.yaml -n istio-system
 	@echo "Istio installed successfully."
 
-.PHONY: uninstall-ingress
-uninstall-ingress:
-	@echo "Uninstalling Istio..."
-	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system
-	@kubectl delete namespace istio-system
-	@echo "Istio uninstalled successfully."
-
 .PHONY: apply-keda
 apply-keda:
 	@echo "Installing KEDA..."
@@ -140,6 +133,20 @@ uninstall-keda:
 	@helm uninstall keda -n keda
 	@kubectl delete namespace keda
 	@echo "KEDA uninstalled successfully."
+
+.PHONY: uninstall-elasti
+uninstall-elasti:
+	@echo "Uninstalling Elasti..."
+	@helm uninstall elasti -n $(ELASTI_NAMESPACE)
+	@kubectl delete namespace $(ELASTI_NAMESPACE)
+	@echo "Elasti uninstalled successfully."
+
+.PHONY: uninstall-ingress
+uninstall-ingress:
+	@echo "Uninstalling Istio..."
+	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system
+	@kubectl delete namespace istio-system
+	@echo "Istio uninstalled successfully."
 
 .PHONY: pf-prom
 pf-prom:
@@ -168,22 +175,22 @@ lint-yaml:
 	@yamllint ./manifest
 	@yamllint ./tests
 
-.PHONY: deploy-demo-application
-deploy-demo-application: ## Install demo application
+.PHONY: apply-demo-application
+apply-demo-application: ## Install demo application
 	 kubectl apply -f ../../playground/config/demo-application.yaml
 	 kubectl apply -f ../../playground/config/demo-elastiService.yaml -n target
 
-.PHONY: undeploy-demo-application
-undeploy-demo-application: ## Uninstall demo application
+.PHONY: remove-demo-application
+remove-demo-application: ## Uninstall demo application
 	 kubectl delete -f ../../playground/config/demo-application.yaml
 	 kubectl delete -f ../../playground/config/demo-elastiService.yaml -n target
 
-.PHONY: deploy-demo-statefulset
-deploy-demo-statefulset: ## Install demo statefulset
+.PHONY: apply-demo-statefulset
+apply-demo-statefulset: ## Install demo statefulset
 	 kubectl apply -f ../../playground/config/demo-statefulset-application.yaml -n target
 	 kubectl apply -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
 
-.PHONY: undeploy-demo-statefulset
-undeploy-demo-statefulset: ## Uninstall demo statefulset
+.PHONY: remove-demo-statefulset
+remove-demo-statefulset: ## Uninstall demo statefulset
 	 kubectl delete -f ../../playground/config/demo-statefulset-application.yaml -n target
 	 kubectl delete -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
