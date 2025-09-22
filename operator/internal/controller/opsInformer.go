@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/truefoundry/elasti/pkg/values"
@@ -132,8 +133,8 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 	// Convert to unstructured to work with any resource type
 	unstructuredObj, ok := obj.(*unstructured.Unstructured)
 	if !ok {
-		r.Logger.Error("Failed to convert object to unstructured", zap.String("es", req.String()))
-		return nil // Don't fail the reconciliation, just log and continue
+		r.Logger.Error("Failed to convert ScaleTargetRef to unstructured", zap.String("es", req.String()))
+		return fmt.Errorf("failed to convert ScaleTargetRef to unstructured")
 	}
 
 	// For backward compatibility
@@ -156,13 +157,13 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 		zap.Bool("isHealthy", isHealthy))
 
 	// Determine mode based on replica status
-	if replicas == 0 || readyReplicas == 0 {
-		r.Logger.Info("ScaleTargetRef has no ready replicas, switching to proxy mode",
+	if replicas == 0 {
+		r.Logger.Info("ScaleTargetRef has 0 replicas, switching to proxy mode",
 			zap.String("kind", es.Spec.ScaleTargetRef.Kind),
 			zap.String("name", es.Spec.ScaleTargetRef.Name),
 			zap.String("es", req.String()))
 		if err := r.switchMode(ctx, req, values.ProxyMode); err != nil {
-			return err
+			return fmt.Errorf("failed to switch to proxy mode: %w", err)
 		}
 	} else if readyReplicas > 0 && isHealthy {
 		r.Logger.Info("ScaleTargetRef has ready replicas and is healthy, switching to serve mode",
@@ -170,7 +171,7 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 			zap.String("name", es.Spec.ScaleTargetRef.Name),
 			zap.String("es", req.String()))
 		if err := r.switchMode(ctx, req, values.ServeMode); err != nil {
-			return err
+			return fmt.Errorf("failed to switch to serve mode: %w", err)
 		}
 	}
 

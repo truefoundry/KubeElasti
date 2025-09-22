@@ -10,6 +10,8 @@ import (
 	"time"
 	"truefoundry/elasti/operator/api/v1alpha1"
 
+	"k8s.io/client-go/scale"
+
 	"github.com/truefoundry/elasti/pkg/scaling/scalers"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
@@ -49,6 +51,8 @@ type ScaleHandler struct {
 
 	scaleLocks sync.Map
 
+	scaleClient *scale.ScalesGetter
+
 	logger         *zap.Logger
 	watchNamespace string
 	restMapper     meta.RESTMapper
@@ -76,6 +80,12 @@ func NewScaleHandler(logger *zap.Logger, config *rest.Config, watchNamespace str
 	// Setup a cached discovery + deferred RESTMapper
 	cachedDisc := discocache.NewMemCacheClient(kClient.Discovery())
 	restMapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDisc)
+	kindResolver := scale.NewDiscoveryScaleKindResolver(cachedDisc)
+
+	scaleClient, err := scale.NewForConfig(config, restMapper, dynamic.LegacyAPIPathResolverFunc, kindResolver)
+	if err != nil {
+		logger.Fatal("Error connecting with kubernetes", zap.Error(err))
+	}
 
 	return &ScaleHandler{
 		logger:         logger.Named("ScaleHandler"),
@@ -83,6 +93,7 @@ func NewScaleHandler(logger *zap.Logger, config *rest.Config, watchNamespace str
 		kDynamicClient: kDynamicClient,
 		restMapper:     restMapper,
 		cachedDisc:     cachedDisc,
+		scaleClient:    &scaleClient,
 		watchNamespace: watchNamespace,
 		EventRecorder:  eventRecorder,
 	}
@@ -450,80 +461,6 @@ func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVer
 	}
 
 	h.logger.Info("Target scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
-	return true, nil
-}
-
-// ScaleDeployment scales the deployment to the provided replicas
-// TODO: use a generic logic to perform scaling similar to HPA/KEDA
-func (h *ScaleHandler) ScaleDeployment(ctx context.Context, namespace, targetName string, replicas int32) (bool, error) {
-	deploymentClient := h.kClient.AppsV1().Deployments(namespace)
-	deploy, err := deploymentClient.Get(ctx, targetName, metav1.GetOptions{})
-	if err != nil {
-		return false, fmt.Errorf("ScaleDeployment - GET: %w", err)
-	}
-
-	h.logger.Debug("Deployment found", zap.String("deployment", targetName), zap.Int32("current replicas", *deploy.Spec.Replicas), zap.Int32("desired replicas", replicas))
-	if deploy.Spec.Replicas == nil {
-		return false, fmt.Errorf("ScaleDeployment - no replicas found for deployment %s", targetName)
-	}
-	if *deploy.Spec.Replicas == replicas {
-		h.logger.Info("Deployment already scaled", zap.String("deployment", targetName), zap.Int32("current replicas", *deploy.Spec.Replicas))
-		return false, nil
-	}
-	if replicas > 0 && *deploy.Spec.Replicas > replicas {
-		h.logger.Info(
-			"Deployment already scaled beyond desired replicas",
-			zap.String("deployment", targetName),
-			zap.Int32("current replicas", *deploy.Spec.Replicas),
-			zap.Int32("desired replicas", replicas),
-		)
-		return false, nil
-	}
-
-	patchBytes := []byte(fmt.Sprintf(`{"spec":{"replicas":%d}}`, replicas))
-	_, err = deploymentClient.Patch(ctx, targetName, types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{})
-	if err != nil {
-		return false, fmt.Errorf("ScaleDeployment - Patch: %w", err)
-	}
-	h.logger.Info("Deployment scaled", zap.String("deployment", targetName), zap.Int32("replicas", replicas))
-	return true, nil
-}
-
-// ScaleArgoRollout scales the rollout to the provided replicas
-func (h *ScaleHandler) ScaleArgoRollout(ctx context.Context, namespace, targetName string, replicas int32) (bool, error) {
-	rollout, err := h.kDynamicClient.Resource(values.RolloutGVR).Namespace(namespace).Get(ctx, targetName, metav1.GetOptions{})
-	if err != nil {
-		return false, fmt.Errorf("ScaleArgoRollout - GET: %w", err)
-	}
-
-	if rollout.Object["spec"] == nil || rollout.Object["spec"].(map[string]interface{})["replicas"] == nil {
-		return false, fmt.Errorf("ScaleArgoRollout - no replicas found for rollout %s", targetName)
-	}
-	currentReplicas := rollout.Object["spec"].(map[string]interface{})["replicas"].(int64)
-	h.logger.Info("Rollout found", zap.String("rollout", targetName), zap.Int64("current replicas", currentReplicas), zap.Int32("desired replicas", replicas))
-
-	if currentReplicas == int64(replicas) {
-		h.logger.Info("Rollout already scaled", zap.String("rollout", targetName), zap.Int64("current replicas", currentReplicas))
-		return false, nil
-	}
-
-	if replicas > 0 && currentReplicas > int64(replicas) {
-		h.logger.Info("Rollout already scaled beyond desired replicas", zap.String("rollout", targetName), zap.Int64("current replicas", currentReplicas), zap.Int32("desired replicas", replicas))
-		return false, nil
-	}
-
-	patchBytes := []byte(fmt.Sprintf(`{"spec":{"replicas":%d}}`, replicas))
-	_, err = h.kDynamicClient.Resource(values.RolloutGVR).Namespace(namespace).Patch(
-		ctx,
-		targetName,
-		types.MergePatchType,
-		patchBytes,
-		metav1.PatchOptions{},
-	)
-	if err != nil {
-		return false, fmt.Errorf("ScaleArgoRollout - Patch: %w", err)
-	}
-	h.logger.Info("Rollout scaled", zap.String("rollout", targetName), zap.Int32("replicas", replicas))
 	return true, nil
 }
 
