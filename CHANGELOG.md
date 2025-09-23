@@ -4,6 +4,12 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
+## 0.1.17
+
+### Improvements
+* Add support for StatefulSet as a scale target reference by @ramantehlan in [#188](https://github.com/truefoundry/KubeElasti/pull/188)
+
+
 ## 0.1.16 (2025-09-22)
 
 ### Fixes 

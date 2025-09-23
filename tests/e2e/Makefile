@@ -9,15 +9,15 @@ PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
 TIMEOUT := 400s
 
-.PHONY: all setup destroy test
+.PHONY: all setup clear test
 all:
 	@echo "Run 'make build-images' to build images"
 	@echo "Run 'make setup' to setup environment"
 	@echo "Run 'make test' to run tests"
-	@echo "Run 'make destroy' to destroy environment"
+	@echo "Run 'make clear' to clear environment"
 
 setup: kind-up chmod-scripts apply-deps
-destroy: kind-down
+clear: kind-down
 test:
 	@echo "Running KUTTL tests..."
 	@kubectl kuttl test --start-kind=false --test $(T)
@@ -138,15 +138,15 @@ uninstall-keda:
 .PHONY: uninstall-elasti
 uninstall-elasti:
 	@echo "Uninstalling Elasti..."
-	@helm uninstall elasti -n $(ELASTI_NAMESPACE)
-	@kubectl delete namespace $(ELASTI_NAMESPACE)
+	@helm uninstall elasti -n $(ELASTI_NAMESPACE) || true
+	@kubectl delete namespace $(ELASTI_NAMESPACE) --ignore-not-found=true
 	@echo "Elasti uninstalled successfully."
 
 .PHONY: uninstall-ingress
 uninstall-ingress:
 	@echo "Uninstalling Istio..."
-	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system
-	@kubectl delete namespace istio-system
+	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system || true
+	@kubectl delete namespace istio-system --ignore-not-found=true
 	@echo "Istio uninstalled successfully."
 
 .PHONY: pf-prom

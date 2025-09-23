@@ -15,8 +15,6 @@ require (
 	sigs.k8s.io/controller-runtime v0.19.0
 )
 
-require github.com/evanphx/json-patch v5.6.0+incompatible // indirect
-
 replace github.com/truefoundry/elasti/pkg v0.0.0 => ../pkg
 
 require (

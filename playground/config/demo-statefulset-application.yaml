@@ -75,7 +75,7 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1Gi
+            storage: 100Mi
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

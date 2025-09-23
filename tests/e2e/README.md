@@ -103,7 +103,7 @@ You can also run specific parts of the testing process:
 | `make setup`             | Sets up the environment (registry and Kind cluster with dependencies) |
 | `make test`              | Run the KUTTL E2E tests |
 | `make reload-images`     | Use the newly built image of Elasti operator and resolver images |
-| `make destroy`           | Delete Kind cluster and stop registry |
+| `make clear`             | Delete Kind cluster and stop registry |
 | `make kind-up`           | Create a Kind cluster with the name `elasti-e2e`|
 | `make kind-down`         | Delete the Kind cluster |
 | `make apply-deps`        | Install all dependencies (Istio, Prometheus, Elasti) |
