@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -65,14 +66,14 @@ func (r *ElastiServiceReconciler) getResolverChangeHandler(ctx context.Context) 
 			//
 			// Another situation is, if the resolver has some issues, and is restarting.
 			// In that case, we can wait for the resolver to come back up, and in the meanwhile, we can move to the serve mode
-			r.Logger.Warn("Resolver deployment deleted", zap.String("deployment_name", resolverDeploymentName))
+			r.Logger.Warn("Resolver deployment deleted", zap.String("deployment_name", config.GetResolverConfig().DeploymentName))
 		},
 	}
 }
 
 func (r *ElastiServiceReconciler) getPublicServiceChangeHandler(ctx context.Context, es *v1alpha1.ElastiService, req ctrl.Request) cache.ResourceEventHandlerFuncs {
 	key := r.InformerManager.GetKey(informer.KeyParams{
-		Namespace:    resolverNamespace,
+		Namespace:    config.GetResolverConfig().Namespace,
 		CRDName:      req.Name,
 		ResourceName: es.Spec.Service,
 		Resource:     values.KindService,

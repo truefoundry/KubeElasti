@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/utils"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
@@ -18,7 +19,7 @@ import (
 func (r *ElastiServiceReconciler) getIPsForResolver(ctx context.Context) ([]string, error) {
 	resolverSlices := &networkingv1.EndpointSliceList{}
 	if err := r.List(ctx, resolverSlices, client.MatchingLabels{
-		"kubernetes.io/service-name": resolverServiceName,
+		"kubernetes.io/service-name": config.GetResolverConfig().ServiceName,
 	}); err != nil {
 		r.Logger.Error("Failed to get Resolver endpoint slices", zap.Error(err))
 		return nil, fmt.Errorf("getIPsForResolver: %w", err)
@@ -96,7 +97,7 @@ func (r *ElastiServiceReconciler) createOrUpdateEndpointsliceToResolver(ctx cont
 				Name:     ptr.To(service.Spec.Ports[0].Name),
 				Protocol: ptr.To(v1.ProtocolTCP),
 				// Make this dynamic too
-				Port: ptr.To(int32(resolverPort)),
+				Port: ptr.To(config.GetResolverConfig().ReverseProxyPort),
 			},
 		},
 	}

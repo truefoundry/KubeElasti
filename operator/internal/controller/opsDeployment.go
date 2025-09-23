@@ -6,6 +6,7 @@ import (
 	"strings"
 	"truefoundry/elasti/operator/internal/crddirectory"
 
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/k8shelper"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
@@ -20,7 +21,7 @@ func (r *ElastiServiceReconciler) handleResolverChanges(ctx context.Context, obj
 	if err != nil {
 		return fmt.Errorf("failed to convert unstructured to deployment: %w", err)
 	}
-	if resolverDeployment.Name != resolverDeploymentName {
+	if resolverDeployment.Name != config.GetResolverConfig().DeploymentName {
 		return nil
 	}
 

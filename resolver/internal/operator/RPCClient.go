@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/truefoundry/elasti/resolver/internal/prom"
 
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/messages"
 	"go.uber.org/zap"
 
@@ -33,10 +35,14 @@ type Client struct {
 
 // NewOperatorClient returns a new OperatorClient
 func NewOperatorClient(logger *zap.Logger, retryDuration time.Duration) *Client {
+	operatorConfig := config.GetOperatorConfig()
+	operatorHost := operatorConfig.ServiceName + "." + operatorConfig.Namespace + ".svc." + config.GetKubernetesClusterDomain()
+	operatorHostPort := net.JoinHostPort(operatorHost, strconv.Itoa(int(operatorConfig.Port)))
+
 	return &Client{
 		logger:                  logger.With(zap.String("component", "operatorRPC")),
 		retryDuration:           retryDuration,
-		operatorURL:             "http://elasti-operator-controller-service:8013",
+		operatorURL:             "http://" + operatorHostPort,
 		incomingRequestEndpoint: "/informer/incoming-request",
 		client:                  http.Client{},
 	}
