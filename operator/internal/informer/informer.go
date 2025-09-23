@@ -11,6 +11,7 @@ import (
 	"time"
 	"truefoundry/elasti/operator/internal/prom"
 
+	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,14 +27,6 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-)
-
-const (
-	// TODO: Move to configMap
-	resolverNamespace      = "elasti"
-	resolverDeploymentName = "elasti-resolver"
-	resolverServiceName    = "elasti-resolver-service"
-	resolverPort           = 8012
 )
 
 type (
@@ -94,16 +87,18 @@ func (m *Manager) InitializeResolverInformer(handlers cache.ResourceEventHandler
 		Resource: "deployments",
 	}
 
+	resolverConfig := config.GetResolverConfig()
+
 	m.resolver.Informer = cache.NewSharedInformer(
 		&cache.ListWatch{
 			ListFunc: func(_ metav1.ListOptions) (kRuntime.Object, error) {
-				return m.dynamicClient.Resource(deploymentGVR).Namespace(resolverNamespace).List(context.Background(), metav1.ListOptions{
-					FieldSelector: "metadata.name=" + resolverDeploymentName,
+				return m.dynamicClient.Resource(deploymentGVR).Namespace(resolverConfig.Namespace).List(context.Background(), metav1.ListOptions{
+					FieldSelector: "metadata.name=" + resolverConfig.DeploymentName,
 				})
 			},
 			WatchFunc: func(_ metav1.ListOptions) (watch.Interface, error) {
-				return m.dynamicClient.Resource(deploymentGVR).Namespace(resolverNamespace).Watch(context.Background(), metav1.ListOptions{
-					FieldSelector: "metadata.name=" + resolverDeploymentName,
+				return m.dynamicClient.Resource(deploymentGVR).Namespace(resolverConfig.Namespace).Watch(context.Background(), metav1.ListOptions{
+					FieldSelector: "metadata.name=" + resolverConfig.DeploymentName,
 				})
 			},
 		},

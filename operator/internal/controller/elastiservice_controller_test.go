@@ -22,6 +22,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/truefoundry/elasti/pkg/config"
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -54,6 +55,12 @@ var _ = Describe("ElastiService Controller", func() {
 		service := &corev1.Service{}
 
 		BeforeEach(func() {
+			GinkgoT().Setenv(config.EnvResolverNamespace, namespace)
+			GinkgoT().Setenv(config.EnvResolverDeploymentName, "resolver-deployment")
+			GinkgoT().Setenv(config.EnvResolverServiceName, "resolver-service")
+			GinkgoT().Setenv(config.EnvResolverPort, "1234")
+			GinkgoT().Setenv(config.EnvResolverProxyPort, "4321")
+
 			By("creating a new Deployment")
 			deployment = &v1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
