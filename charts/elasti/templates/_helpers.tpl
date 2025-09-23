@@ -49,3 +49,29 @@ Selector labels
 app.kubernetes.io/name: {{ include "elasti.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Common env values
+*/}}
+{{- define "elasti.commonEnvValues" -}}
+- name: KUBERNETES_CLUSTER_DOMAIN
+  value: {{ .Values.global.kubernetesClusterDomain | quote }}
+- name: ELASTI_OPERATOR_NAMESPACE
+  value: {{ .Release.Namespace }}
+- name: ELASTI_OPERATOR_DEPLOYMENT_NAME
+  value: {{ include "elasti.fullname" . }}-operator-controller-manager
+- name: ELASTI_OPERATOR_SERVICE_NAME
+  value: {{ include "elasti.fullname" . }}-operator-controller-service
+- name: ELASTI_OPERATOR_PORT
+  value: {{ .Values.elastiController.service.port | quote }}
+- name: ELASTI_RESOLVER_NAMESPACE
+  value: {{ .Release.Namespace }}
+- name: ELASTI_RESOLVER_DEPLOYMENT_NAME
+  value: {{ include "elasti.fullname" . }}-resolver
+- name: ELASTI_RESOLVER_SERVICE_NAME
+  value: {{ include "elasti.fullname" . }}-resolver-service
+- name: ELASTI_RESOLVER_PORT
+  value: {{ .Values.elastiResolver.service.port | quote }}
+- name: ELASTI_RESOLVER_PROXY_PORT
+  value: {{ .Values.elastiResolver.reverseProxyService.port | quote }}
+{{- end }}
