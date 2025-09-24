@@ -76,7 +76,7 @@ func (r *ElastiServiceReconciler) getPublicServiceChangeHandler(ctx context.Cont
 		Namespace:    config.GetResolverConfig().Namespace,
 		CRDName:      req.Name,
 		ResourceName: es.Spec.Service,
-		Resource:     values.KindService,
+		ResourceType: values.ResourceService,
 	})
 
 	return cache.ResourceEventHandlerFuncs{
@@ -114,8 +114,8 @@ func (r *ElastiServiceReconciler) getScaleTargetRefChangeHandler(ctx context.Con
 	key := r.InformerManager.GetKey(informer.KeyParams{
 		Namespace:    req.Namespace,
 		CRDName:      req.Name,
-		ResourceName: es.Spec.ScaleTargetRef.Kind,
-		Resource:     es.Spec.ScaleTargetRef.Name,
+		ResourceName: es.Spec.ScaleTargetRef.Name,
+		ResourceType: es.Spec.ScaleTargetRef.Kind,
 	})
 	return cache.ResourceEventHandlerFuncs{
 		UpdateFunc: func(_, newObj interface{}) {
@@ -149,6 +149,8 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 	}
 
 	// Determine mode based on replica status
+	// If NOT ready, switch to proxy mode
+	// else, switch to serve mode
 	if !ready {
 		r.Logger.Info("ScaleTargetRef has 0 replicas or not ready, switching to proxy mode",
 			zap.String("kind", es.Spec.ScaleTargetRef.Kind),
@@ -157,7 +159,7 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 		if err := r.switchMode(ctx, req, values.ProxyMode); err != nil {
 			return fmt.Errorf("failed to switch to proxy mode: %w", err)
 		}
-	} else if ready {
+	} else {
 		r.Logger.Info("ScaleTargetRef has ready replicas and is healthy, switching to serve mode",
 			zap.String("kind", es.Spec.ScaleTargetRef.Kind),
 			zap.String("name", es.Spec.ScaleTargetRef.Name),
@@ -174,8 +176,11 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 func (r *ElastiServiceReconciler) isTargetReady(ctx context.Context, obj *unstructured.Unstructured) (bool, error) {
 	// Extract status from the unstructured object
 	status, found, err := unstructured.NestedMap(obj.Object, "status")
-	if !found || err != nil {
+	if err != nil {
 		return false, fmt.Errorf("no status found in target resource, %w", err)
+	} else if !found {
+		// If status is not found and no error, we can assume the resource is not ready
+		return false, nil
 	}
 
 	if replicasVal, found, err := unstructured.NestedInt64(status, "replicas"); err != nil {

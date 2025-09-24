@@ -28,12 +28,3 @@ func KindToResource(kind string) string {
 	}
 	return k + "s"
 }
-
-// GetGroupFromAPIVersion returns the group from the API version
-func GetGroupFromAPIVersion(apiVersion string) string {
-	if !strings.Contains(apiVersion, "/") {
-		// This is a core API group.
-		return ""
-	}
-	return strings.Split(apiVersion, "/")[0]
-}

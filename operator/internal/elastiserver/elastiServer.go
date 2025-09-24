@@ -166,7 +166,15 @@ func (s *Server) scaleTargetForService(ctx context.Context, serviceName, namespa
 		}
 	}
 
-	if err := s.scaleHandler.ScaleTargetFromZero(ctx, namespacedName, crd.Spec.ScaleTargetRef.APIVersion, crd.Spec.ScaleTargetRef.Kind, crd.Spec.ScaleTargetRef.Name, crd.Spec.MinTargetReplicas, crd.CRDName); err != nil {
+	scaleTargetRef := crd.Spec.GetScaleTargetRef()
+
+	if _, err := s.scaleHandler.Scale(ctx,
+		namespace,
+		scaleTargetRef.APIVersion,
+		scaleTargetRef.Kind,
+		scaleTargetRef.Name,
+		crd.Spec.MinTargetReplicas,
+	); err != nil {
 		prom.TargetScaleCounter.WithLabelValues(serviceName, namespace, crd.Spec.ScaleTargetRef.Kind+"-"+crd.Spec.ScaleTargetRef.Name, err.Error()).Inc()
 		return fmt.Errorf("scaleTargetForService - error: %w, targetRefKind: %s, targetRefName: %s", err, crd.Spec.ScaleTargetRef.Kind, crd.Spec.ScaleTargetRef.Name)
 	}

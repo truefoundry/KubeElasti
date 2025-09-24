@@ -1,5 +1,5 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands: # Response without Content-Length
-  - command: ./send_traffic.sh 'http://target-deployment.$NAMESPACE.svc.cluster.local/stream/1000'
+  - command: ../manifest/send_traffic.sh 'http://target-deployment.$NAMESPACE.svc.cluster.local/stream/1000' --target-resource statefulsets --target-name target-statefulset
     namespaced: true

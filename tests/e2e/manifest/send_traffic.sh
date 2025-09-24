@@ -3,6 +3,53 @@
 # Enhanced traffic testing script with comprehensive debugging
 set -u
 
+# Validate input
+if [ -z "$1" ]; then
+    echo "ERROR: No URL provided. Usage: $0 <url>"
+    exit 3
+fi
+
+URL="$1"
+POD_NAME="curl-target-gw"
+NAMESPACE="default"
+TARGET_NAMESPACE=""
+TARGET_RESOURCE=""
+TARGET_NAME=""
+MAX_RETRIES=5
+TIMEOUT=120
+
+# --- Argument Parsing ---
+shift # Shift past the URL argument
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --namespace)
+            TARGET_NAMESPACE="$2"
+            shift 2
+            ;;
+        --target-resource)
+            TARGET_RESOURCE="$2"
+            shift 2
+            ;;
+        --target-name)
+            TARGET_NAME="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$TARGET_NAMESPACE" ]; then
+    echo "${RED}ERROR: --namespace flag is required.${NC}"
+    exit 5
+fi
+
+if [ -z "$TARGET_RESOURCE" ] || [ -z "$TARGET_NAME" ]; then
+    echo "${RED}ERROR: --target-resource and --target-name flags are required.${NC}"
+    exit 5
+fi
+
 # --- Color Definitions ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -28,9 +75,9 @@ log_failure_details() {
     echo "${CYAN}  Logs from elasti-resolver:${NC}"
     kubectl logs -n elasti -l app=elasti-resolver --tail=15 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
 
-    # Target Deployment Logs
-    echo "${CYAN}  Logs from target deployment (app=httpbin):${NC}"
-    kubectl logs -n "$TARGET_NAMESPACE" deployments/target-deployment  --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
+    # Target Logs
+    echo "${CYAN}  Logs from target (${TARGET_RESOURCE}/${TARGET_NAME}):${NC}"
+    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
 
     # Verbose Curl Request
     echo "${CYAN}  Attempting verbose request for more details...${NC}"
@@ -38,38 +85,6 @@ log_failure_details() {
     
     echo "${RED}-----------------------------------${NC}"
 }
-
-# Validate input
-if [ -z "$1" ]; then
-    echo "ERROR: No URL provided. Usage: $0 <url>"
-    exit 3
-fi
-
-URL="$1"
-POD_NAME="curl-target-gw"
-NAMESPACE="default"
-TARGET_NAMESPACE=""
-MAX_RETRIES=5
-TIMEOUT=120
-
-# --- Argument Parsing ---
-shift # Shift past the URL argument
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        --namespace)
-            TARGET_NAMESPACE="$2"
-            shift 2
-            ;;
-        *)
-            shift
-            ;;
-    esac
-done
-
-if [ -z "$TARGET_NAMESPACE" ]; then
-    echo "${RED}ERROR: --namespace flag is required.${NC}"
-    exit 5
-fi
 
 echo "${CYAN}=== Traffic Test Configuration ===${NC}"
 echo "  ${CYAN}Target URL:${NC}  $URL"

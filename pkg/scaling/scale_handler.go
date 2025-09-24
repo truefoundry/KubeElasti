@@ -138,15 +138,13 @@ func (h *ScaleHandler) checkAndScale(ctx context.Context) error {
 		if err != nil {
 			h.logger.Error("failed to calculate scale direction", zap.String("service", es.Spec.Service), zap.String("namespace", es.Namespace), zap.Error(err))
 			continue
-		}
-
-		if scaleDirection == NoScale {
+		} else if scaleDirection == NoScale {
 			continue
 		}
 
 		switch scaleDirection {
 		case ScaleDown:
-			err := h.handleScaleToZero(ctx, cooldownPeriod, es)
+			err := h.handleScaleToZero(ctx, es)
 			if err != nil {
 				h.logger.Error("failed to scale target to zero", zap.String("service", es.Spec.Service), zap.String("namespace", es.Namespace), zap.Error(err))
 				continue
@@ -218,17 +216,14 @@ func (h *ScaleHandler) calculateScaleDirection(ctx context.Context, cooldownPeri
 	return ScaleDown, nil
 }
 
-func (h *ScaleHandler) handleScaleToZero(ctx context.Context, cooldownPeriod time.Duration, es *v1alpha1.ElastiService) error {
-	serviceNamespacedName := types.NamespacedName{
-		Name:      es.Spec.Service,
-		Namespace: es.Namespace,
-	}
-
+func (h *ScaleHandler) handleScaleToZero(ctx context.Context, es *v1alpha1.ElastiService) error {
 	// If the cooldown period is not met, we skip the scale down
+	cooldownPeriod := resolveCooldownPeriod(es)
+	spec := es.GetSpec()
 	if es.Status.LastScaledUpTime != nil {
 		if time.Since(es.Status.LastScaledUpTime.Time) < cooldownPeriod {
 			h.logger.Debug("Skipping scale down as minimum cooldownPeriod not met",
-				zap.String("service", serviceNamespacedName.String()),
+				zap.String("service", spec.Service),
 				zap.Duration("cooldown", cooldownPeriod),
 				zap.Time("last scaled up time", es.Status.LastScaledUpTime.Time))
 			return nil
@@ -236,14 +231,20 @@ func (h *ScaleHandler) handleScaleToZero(ctx context.Context, cooldownPeriod tim
 	}
 
 	// Pause the KEDA ScaledObject
-	if es.Spec.Autoscaler != nil && strings.ToLower(es.Spec.Autoscaler.Type) == "keda" {
-		err := h.UpdateKedaScaledObjectPausedState(ctx, es.Spec.Autoscaler.Name, es.Namespace, true)
+	if spec.Autoscaler != nil && strings.ToLower(spec.Autoscaler.Type) == "keda" {
+		err := h.UpdateKedaScaledObjectPausedState(ctx, spec.Autoscaler.Name, es.Namespace, true)
 		if err != nil {
-			return fmt.Errorf("failed to update Keda ScaledObject for service %s: %w", serviceNamespacedName.String(), err)
+			return fmt.Errorf("failed to update Keda ScaledObject for service %s: %w", spec.Service, err)
 		}
 	}
 
-	if err := h.ScaleTargetToZero(ctx, serviceNamespacedName, es.Spec.ScaleTargetRef.APIVersion, es.Spec.ScaleTargetRef.Kind, es.Spec.ScaleTargetRef.Name, es.Name); err != nil {
+	if _, err := h.Scale(ctx,
+		es.Namespace,
+		spec.ScaleTargetRef.APIVersion,
+		spec.ScaleTargetRef.Kind,
+		spec.ScaleTargetRef.Name,
+		0,
+	); err != nil {
 		return fmt.Errorf("failed to scale target to zero: %w", err)
 	}
 	return nil
@@ -258,25 +259,27 @@ func resolveCooldownPeriod(es *v1alpha1.ElastiService) time.Duration {
 }
 
 func (h *ScaleHandler) handleScaleFromZero(ctx context.Context, es *v1alpha1.ElastiService) error {
-	serviceNamespacedName := types.NamespacedName{
-		Name:      es.Spec.Service,
-		Namespace: es.Namespace,
-	}
-
+	spec := es.GetSpec()
 	// We update the last scaled up time every time we evaluate that the trigger evaluates to scale-up. This means even if the scale-up is not successful, we update the last scaled up time to avoid the cooldown period increment
 	if err := h.UpdateLastScaledUpTime(ctx, es.Name, es.Namespace); err != nil {
-		h.logger.Error("Failed to update LastScaledUpTime", zap.Error(err), zap.String("namespacedName", serviceNamespacedName.String()))
+		h.logger.Error("Failed to update LastScaledUpTime", zap.Error(err), zap.String("service", spec.Service), zap.String("namespace", es.Namespace))
 	}
 
 	// Unpause the KEDA ScaledObject if it's paused
-	if es.Spec.Autoscaler != nil && strings.ToLower(es.Spec.Autoscaler.Type) == "keda" {
-		err := h.UpdateKedaScaledObjectPausedState(ctx, es.Spec.Autoscaler.Name, es.Namespace, false)
+	if spec.Autoscaler != nil && strings.ToLower(spec.Autoscaler.Type) == "keda" {
+		err := h.UpdateKedaScaledObjectPausedState(ctx, spec.Autoscaler.Name, es.Namespace, false)
 		if err != nil {
-			return fmt.Errorf("failed to update Keda ScaledObject for service %s: %w", serviceNamespacedName.String(), err)
+			return fmt.Errorf("failed to update Keda ScaledObject for service %s in namespace %s: %w", spec.Service, es.Namespace, err)
 		}
 	}
 
-	if err := h.ScaleTargetFromZero(ctx, serviceNamespacedName, es.Spec.ScaleTargetRef.APIVersion, es.Spec.ScaleTargetRef.Kind, es.Spec.ScaleTargetRef.Name, es.Spec.MinTargetReplicas, es.Name); err != nil {
+	if _, err := h.Scale(ctx,
+		es.Namespace,
+		spec.ScaleTargetRef.APIVersion,
+		spec.ScaleTargetRef.Kind,
+		spec.ScaleTargetRef.Name,
+		spec.MinTargetReplicas,
+	); err != nil {
 		return fmt.Errorf("failed to scale target from zero: %w", err)
 	}
 
@@ -300,95 +303,63 @@ func (h *ScaleHandler) createScalerForTrigger(trigger *v1alpha1.ScaleTrigger, co
 	return scaler, nil
 }
 
-// ScaleTargetFromZero scales the TargetRef to the provided replicas when it's at 0
-func (h *ScaleHandler) ScaleTargetFromZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetAPIVersion string, targetKind, targetName string, replicas int32, elastiServiceName string) error {
-	h.logger.Info("Scaling up from zero", zap.String("kind", targetKind), zap.String("namespacedName", serviceNamespacedName.String()), zap.Int32("replicas", replicas))
-
-	scaled, err := h.Scale(ctx, serviceNamespacedName.Namespace, targetAPIVersion, targetKind, targetName, replicas)
-
-	if err != nil {
-		h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Warning", "ScaleFromZeroFailed", fmt.Sprintf("Failed to scale %s from zero to %d replicas: %v", targetKind, replicas, err))
-		return fmt.Errorf("ScaleTargetFromZero - %s: %w", targetKind, err)
-	}
-
-	if !scaled {
-		// Returning nil as the scale target is already scaled
-		return nil
-	}
-
-	h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Normal", "ScaledUpFromZero", fmt.Sprintf("Successfully scaled %s from zero to %d replicas", targetKind, replicas))
-
-	return nil
-}
-
-// ScaleTargetToZero scales the target to zero
-func (h *ScaleHandler) ScaleTargetToZero(ctx context.Context, serviceNamespacedName types.NamespacedName, targetAPIVersion string, targetKind string, targetName string, elastiServiceName string) error {
-	h.logger.Info("Scaling down to zero", zap.String("kind", targetKind), zap.String("namespacedName", serviceNamespacedName.String()))
-
-	scaled, err := h.Scale(ctx, serviceNamespacedName.Namespace, targetAPIVersion, targetKind, targetName, 0)
-
-	if err != nil {
-		h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
-		return fmt.Errorf("ScaleTargetToZero - %s: %w", targetKind, err)
-	}
-
-	if !scaled {
-		// Returning nil as the scale target is already scaled down to zero
-		return nil
-	}
-
-	h.createEvent(serviceNamespacedName.Namespace, elastiServiceName, "Normal", "ScaledDownToZero", fmt.Sprintf("Successfully scaled %s to zero", targetKind))
-
-	return nil
-}
-
-func (h *ScaleHandler) Scale(ctx context.Context, namespace string, targetAPIVersion string, targetKind string, targetName string, replicas int32) (bool, error) {
+func (h *ScaleHandler) Scale(ctx context.Context,
+	namespace string,
+	targetAPIVersion string,
+	targetKind string,
+	targetName string,
+	desiredReplicas int32) (bool, error) {
 	// Get mutex for the target
-	mutex := h.getMutexForScale("scale" + namespace + "/" + targetKind + "/" + targetName)
+	mutex := h.getMutexForScale(namespace + "/" + targetKind + "/" + targetName)
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	// NOTE: Required for backwards compatibility, since so far, we have been using "deployments" instead of "Deployment" in exisiting
-	// CRD files. Since calse doesn't recognize "deployments" as a valid kind, we need to convert it to "Deployment".
-	// We can remove it once we have migrated all the existing CRD files to use "Deployment" instead of "deployments".
-	if targetKind == "deployments" {
-		targetKind = "Deployment"
+	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("desired replicas", desiredReplicas))
+
+	gv, err := schema.ParseGroupVersion(targetAPIVersion)
+	if err != nil {
+		h.createEvent(namespace, "", "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
+		return false, fmt.Errorf("failed to parse group version: %w", err)
 	}
 
 	// Get the scale object
 	groupResource := schema.GroupResource{
-		Group:    k8shelper.GetGroupFromAPIVersion(targetAPIVersion),
+		Group:    gv.Group,
 		Resource: k8shelper.KindToResource(targetKind),
 	}
 	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})
 	if err != nil {
+		h.createEvent(namespace, "", "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
 		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetKind, targetName, namespace, err)
 	}
 
 	// Check if already at desired replicas
-	if currentScale.Spec.Replicas == replicas {
-		h.logger.Info("Target already scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
+	if currentScale.Spec.Replicas == desiredReplicas {
+		h.logger.Info("Target already scaled",
+			zap.String("kind", targetKind),
+			zap.String("name", targetName),
+			zap.Int32("replicas", desiredReplicas))
 		return false, nil
 	}
 
 	// Check if already scaled beyond desired (for scale up operations)
-	if replicas > 0 && currentScale.Spec.Replicas > replicas {
+	if desiredReplicas > 0 && currentScale.Spec.Replicas > desiredReplicas {
 		h.logger.Info("Target already scaled beyond desired replicas",
 			zap.String("kind", targetKind),
 			zap.String("name", targetName),
 			zap.Int32("current replicas", currentScale.Spec.Replicas),
-			zap.Int32("desired replicas", replicas))
+			zap.Int32("desired replicas", desiredReplicas))
 		return false, nil
 	}
 
-	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
-
-	currentScale.Spec.Replicas = replicas
+	currentScale.Spec.Replicas = desiredReplicas
 	if _, err := h.scaleClient.Scales(namespace).Update(ctx, groupResource, currentScale, metav1.UpdateOptions{}); err != nil {
+		h.createEvent(namespace, "", "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
 		return false, fmt.Errorf("failed to update scale for %s/%s (%s): %w", targetKind, targetName, namespace, err)
 	}
 
-	h.logger.Info("Target scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", replicas))
+	h.createEvent(namespace, "", "Normal", "ScaledDownToZero", fmt.Sprintf("Successfully scaled %s to zero", targetKind))
+	h.logger.Info("Target scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
 	return true, nil
 }
 
