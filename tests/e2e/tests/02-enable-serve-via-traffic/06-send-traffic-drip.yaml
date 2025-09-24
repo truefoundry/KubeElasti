@@ -1,5 +1,5 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands: # Small response is sent in delayed chunks
-  - command: ../manifest/send_traffic.sh "http://target-deployment.$NAMESPACE.svc.cluster.local/drip?duration=2&numbytes=10&code=200&delay=2" --target-resource statefulsets --target-name target-statefulset
+  - command: sh ../../manifest/send_traffic.sh "http://target-deployment.$NAMESPACE.svc.cluster.local/drip?duration=2&numbytes=10&code=200&delay=2" --target-resource deployments --target-name target-deployment
     namespaced: true

@@ -16,7 +16,7 @@ TARGET_NAMESPACE=""
 TARGET_RESOURCE=""
 TARGET_NAME=""
 MAX_RETRIES=5
-TIMEOUT=120
+TIMEOUT=160
 
 # --- Argument Parsing ---
 shift # Shift past the URL argument
