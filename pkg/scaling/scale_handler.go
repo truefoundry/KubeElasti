@@ -328,18 +328,11 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	mutex := h.getMutexForScale(namespace + "/" + targetGVK.Kind + "/" + targetName)
 	mutex.Lock()
 	defer mutex.Unlock()
-
 	h.logger.Debug("Scaling", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("desired replicas", desiredReplicas))
-
-	gv, err := schema.ParseGroupVersion(targetGVK.GroupVersion().String())
-	if err != nil {
-		h.createEvent(namespace, targetName, "Warning", "ScaleFailed", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
-		return false, fmt.Errorf("failed to parse group version: %w", err)
-	}
 
 	// Get the scale object
 	groupResource := schema.GroupResource{
-		Group:    gv.Group,
+		Group:    targetGVK.Group,
 		Resource: k8shelper.KindToResource(targetGVK.Kind),
 	}
 	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})

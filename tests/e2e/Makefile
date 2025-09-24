@@ -9,15 +9,15 @@ PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
 TIMEOUT := 400s
 
-.PHONY: all setup clear test
+.PHONY: all setup clean test
 all:
 	@echo "Run 'make build-images' to build images"
 	@echo "Run 'make setup' to setup environment"
 	@echo "Run 'make test' to run tests"
-	@echo "Run 'make clear' to clear environment"
+	@echo "Run 'make clean' to clean environment"
 
 setup: kind-up chmod-scripts apply-deps
-clear: kind-down
+clean: kind-down
 test:
 	@echo "Running KUTTL tests..."
 	@kubectl kuttl test --start-kind=false --test $(T)

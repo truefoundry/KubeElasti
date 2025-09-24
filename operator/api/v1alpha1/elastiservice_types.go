@@ -80,7 +80,7 @@ type ElastiServiceStatus struct {
 	LastReconciledTime metav1.Time `json:"lastReconciledTime,omitempty"`
 	// Last time the ElastiService was scaled up
 	LastScaledUpTime *metav1.Time `json:"lastScaledUpTime,omitempty"`
-	// Current mode of the ElastiService, either "proxy" or "server".
+	// Current mode of the ElastiService, either "proxy" or "serve".
 	// "proxy" mode is when the ScaleTargetRef is scaled to 0 replicas.
 	// "serve" mode is when the ScaleTargetRef is scaled to at least 1 replica.
 	Mode string `json:"mode,omitempty"`
