@@ -128,26 +128,26 @@ apply-keda:
 	@echo "KEDA installed successfully."
 
 # This is for locally testing, not used in CI
-.PHONY: uninstall-keda
-uninstall-keda:
-	@echo "Uninstalling KEDA..."
+.PHONY: remove-keda
+remove-keda:
+	@echo "Removing KEDA..."
 	@helm uninstall keda -n keda
 	@kubectl delete namespace keda
-	@echo "KEDA uninstalled successfully."
+	@echo "KEDA removed successfully."
 
-.PHONY: uninstall-elasti
-uninstall-elasti:
-	@echo "Uninstalling Elasti..."
+.PHONY: remove-elasti
+remove-elasti:
+	@echo "Removing Elasti..."
 	@helm uninstall elasti -n $(ELASTI_NAMESPACE) || true
 	@kubectl delete namespace $(ELASTI_NAMESPACE) --ignore-not-found=true
-	@echo "Elasti uninstalled successfully."
+	@echo "Elasti removed successfully."
 
-.PHONY: uninstall-ingress
-uninstall-ingress:
-	@echo "Uninstalling Istio..."
+.PHONY: remove-ingress
+remove-ingress:
+	@echo "Removing Istio..."
 	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system || true
 	@kubectl delete namespace istio-system --ignore-not-found=true
-	@echo "Istio uninstalled successfully."
+	@echo "Istio removed successfully."
 
 .PHONY: pf-prom
 pf-prom:
@@ -182,7 +182,7 @@ apply-demo-application: ## Install demo application
 	 kubectl apply -f ../../playground/config/demo-elastiService.yaml -n target
 
 .PHONY: remove-demo-application
-remove-demo-application: ## Uninstall demo application
+remove-demo-application: ## Remove demo application
 	 kubectl delete -f ../../playground/config/demo-application.yaml
 	 kubectl delete -f ../../playground/config/demo-elastiService.yaml -n target
 
@@ -192,6 +192,6 @@ apply-demo-statefulset: ## Install demo statefulset
 	 kubectl apply -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
 
 .PHONY: remove-demo-statefulset
-remove-demo-statefulset: ## Uninstall demo statefulset
+remove-demo-statefulset: ## Remove demo statefulset
 	 kubectl delete -f ../../playground/config/demo-statefulset-application.yaml -n target
 	 kubectl delete -f ../../playground/config/demo-statefulset-elastiService.yaml -n target

@@ -14,6 +14,7 @@ import (
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/truefoundry/elasti/pkg/scaling"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
 	"truefoundry/elasti/operator/internal/crddirectory"
@@ -168,10 +169,18 @@ func (s *Server) scaleTargetForService(ctx context.Context, serviceName, namespa
 
 	scaleTargetRef := crd.Spec.GetScaleTargetRef()
 
+	gv, err := schema.ParseGroupVersion(scaleTargetRef.APIVersion)
+	if err != nil {
+		return fmt.Errorf("failed to parse API version: %w", err)
+	}
+	targetGVK := schema.GroupVersionKind{
+		Group:   gv.Group,
+		Version: gv.Version,
+		Kind:    scaleTargetRef.Kind,
+	}
 	if _, err := s.scaleHandler.Scale(ctx,
 		namespace,
-		scaleTargetRef.APIVersion,
-		scaleTargetRef.Kind,
+		targetGVK,
 		scaleTargetRef.Name,
 		crd.Spec.MinTargetReplicas,
 	); err != nil {

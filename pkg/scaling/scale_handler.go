@@ -238,10 +238,18 @@ func (h *ScaleHandler) handleScaleToZero(ctx context.Context, es *v1alpha1.Elast
 		}
 	}
 
+	gv, err := schema.ParseGroupVersion(spec.ScaleTargetRef.APIVersion)
+	if err != nil {
+		return fmt.Errorf("failed to parse API version: %w", err)
+	}
+	targetGVK := schema.GroupVersionKind{
+		Group:   gv.Group,
+		Version: gv.Version,
+		Kind:    spec.ScaleTargetRef.Kind,
+	}
 	if _, err := h.Scale(ctx,
 		es.Namespace,
-		spec.ScaleTargetRef.APIVersion,
-		spec.ScaleTargetRef.Kind,
+		targetGVK,
 		spec.ScaleTargetRef.Name,
 		0,
 	); err != nil {
@@ -273,10 +281,18 @@ func (h *ScaleHandler) handleScaleFromZero(ctx context.Context, es *v1alpha1.Ela
 		}
 	}
 
+	gv, err := schema.ParseGroupVersion(spec.ScaleTargetRef.APIVersion)
+	if err != nil {
+		return fmt.Errorf("failed to parse API version: %w", err)
+	}
+	targetGVK := schema.GroupVersionKind{
+		Group:   gv.Group,
+		Version: gv.Version,
+		Kind:    spec.ScaleTargetRef.Kind,
+	}
 	if _, err := h.Scale(ctx,
 		es.Namespace,
-		spec.ScaleTargetRef.APIVersion,
-		spec.ScaleTargetRef.Kind,
+		targetGVK,
 		spec.ScaleTargetRef.Name,
 		spec.MinTargetReplicas,
 	); err != nil {
@@ -305,38 +321,37 @@ func (h *ScaleHandler) createScalerForTrigger(trigger *v1alpha1.ScaleTrigger, co
 
 func (h *ScaleHandler) Scale(ctx context.Context,
 	namespace string,
-	targetAPIVersion string,
-	targetKind string,
+	targetGVK schema.GroupVersionKind,
 	targetName string,
 	desiredReplicas int32) (bool, error) {
 	// Get mutex for the target
-	mutex := h.getMutexForScale(namespace + "/" + targetKind + "/" + targetName)
+	mutex := h.getMutexForScale(namespace + "/" + targetGVK.Kind + "/" + targetName)
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	h.logger.Debug("Scaling", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("desired replicas", desiredReplicas))
+	h.logger.Debug("Scaling", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("desired replicas", desiredReplicas))
 
-	gv, err := schema.ParseGroupVersion(targetAPIVersion)
+	gv, err := schema.ParseGroupVersion(targetGVK.GroupVersion().String())
 	if err != nil {
-		h.createEvent(namespace, "", "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
+		h.createEvent(namespace, targetName, "Warning", "ScaleFailed", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
 		return false, fmt.Errorf("failed to parse group version: %w", err)
 	}
 
 	// Get the scale object
 	groupResource := schema.GroupResource{
 		Group:    gv.Group,
-		Resource: k8shelper.KindToResource(targetKind),
+		Resource: k8shelper.KindToResource(targetGVK.Kind),
 	}
 	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})
 	if err != nil {
-		h.createEvent(namespace, "", "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
-		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetKind, targetName, namespace, err)
+		h.createEvent(namespace, targetName, "Warning", "ScaleTOFailed", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
 	// Check if already at desired replicas
 	if currentScale.Spec.Replicas == desiredReplicas {
 		h.logger.Info("Target already scaled",
-			zap.String("kind", targetKind),
+			zap.String("kind", targetGVK.Kind),
 			zap.String("name", targetName),
 			zap.Int32("replicas", desiredReplicas))
 		return false, nil
@@ -345,7 +360,7 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	// Check if already scaled beyond desired (for scale up operations)
 	if desiredReplicas > 0 && currentScale.Spec.Replicas > desiredReplicas {
 		h.logger.Info("Target already scaled beyond desired replicas",
-			zap.String("kind", targetKind),
+			zap.String("kind", targetGVK.Kind),
 			zap.String("name", targetName),
 			zap.Int32("current replicas", currentScale.Spec.Replicas),
 			zap.Int32("desired replicas", desiredReplicas))
@@ -354,12 +369,12 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 
 	currentScale.Spec.Replicas = desiredReplicas
 	if _, err := h.scaleClient.Scales(namespace).Update(ctx, groupResource, currentScale, metav1.UpdateOptions{}); err != nil {
-		h.createEvent(namespace, "", "Warning", "ScaleToZeroFailed", fmt.Sprintf("Failed to scale %s to zero: %v", targetKind, err))
-		return false, fmt.Errorf("failed to update scale for %s/%s (%s): %w", targetKind, targetName, namespace, err)
+		h.createEvent(namespace, targetName, "Warning", "ScaleFailed", fmt.Sprintf("Failed to scale %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		return false, fmt.Errorf("failed to update scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
-	h.createEvent(namespace, "", "Normal", "ScaledDownToZero", fmt.Sprintf("Successfully scaled %s to zero", targetKind))
-	h.logger.Info("Target scaled", zap.String("kind", targetKind), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
+	h.createEvent(namespace, targetName, "Normal", "ScaledSuccess", fmt.Sprintf("Successfully scaled %d replicas for %s/%s", desiredReplicas, targetGVK.Kind, targetName))
+	h.logger.Info("Target scaled", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
 	return true, nil
 }
 

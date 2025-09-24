@@ -135,7 +135,7 @@ spec:
                 description: |-
                   Current mode of the ElastiService, either "proxy" or "server".
                   "proxy" mode is when the ScaleTargetRef is scaled to 0 replicas.
-                  "server" mode is when the ScaleTargetRef is scaled to at least 1 replica.
+                  "serve" mode is when the ScaleTargetRef is scaled to at least 1 replica.
                 type: string
             type: object
         type: object

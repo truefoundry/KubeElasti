@@ -10,8 +10,8 @@ if [ -z "$1" ]; then
 fi
 
 URL="$1"
-POD_NAME="curl-target-gw"
-NAMESPACE="default"
+CURL_POD_NAME="curl-target-gw"
+CURL_NAMESPACE="default"
 TARGET_NAMESPACE=""
 TARGET_RESOURCE=""
 TARGET_NAME=""
@@ -81,14 +81,14 @@ log_failure_details() {
 
     # Verbose Curl Request
     echo "${CYAN}  Attempting verbose request for more details...${NC}"
-    kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl --max-time 10 -v -s "$URL" 2>&1 | head -20 | sed 's/^/    /' || echo "${YELLOW}  - Verbose request failed${NC}"
+    kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl --max-time 10 -v -s "$URL" 2>&1 | head -20 | sed 's/^/    /' || echo "${YELLOW}  - Verbose request failed${NC}"
     
     echo "${RED}-----------------------------------${NC}"
 }
 
 echo "${CYAN}=== Traffic Test Configuration ===${NC}"
 echo "  ${CYAN}Target URL:${NC}  $URL"
-echo "  ${CYAN}Curl Pod:${NC}    $POD_NAME (in $NAMESPACE namespace)"
+echo "  ${CYAN}Curl Pod:${NC}    $CURL_POD_NAME (in $CURL_NAMESPACE namespace)"
 echo "  ${CYAN}Target App:${NC}  app=httpbin (in $TARGET_NAMESPACE namespace)"
 echo "  ${CYAN}Retries:${NC}     $MAX_RETRIES"
 echo "  ${CYAN}Timeout:${NC}     ${TIMEOUT}s"
@@ -97,18 +97,18 @@ echo "${CYAN}==================================${NC}"
 
 # Check if CURL pod exists and is ready
 echo "Checking CURL pod status..."
-if ! kubectl get pod "$POD_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
-    echo "${RED}ERROR: CURL Pod $POD_NAME not found in namespace $NAMESPACE${NC}"
-    kubectl get pods -n "$NAMESPACE" || true
+if ! kubectl get pod "$CURL_POD_NAME" -n "$CURL_NAMESPACE" >/dev/null 2>&1; then
+    echo "${RED}ERROR: CURL Pod $CURL_POD_NAME not found in namespace $CURL_NAMESPACE${NC}"
+    kubectl get pods -n "$CURL_NAMESPACE" || true
     exit 4
 fi
 
-POD_STATUS=$(kubectl get pod "$POD_NAME" -n "$NAMESPACE" -o jsonpath='{.status.phase}')
+POD_STATUS=$(kubectl get pod "$CURL_POD_NAME" -n "$CURL_NAMESPACE" -o jsonpath='{.status.phase}')
 echo "${GREEN}CURL Pod status: $POD_STATUS${NC}"
 
 if [ "$POD_STATUS" != "Running" ]; then
     echo "${YELLOW}WARNING: CURL Pod is not in Running state. Describing pod...${NC}"
-    kubectl describe pod "$POD_NAME" -n "$NAMESPACE" || true
+    kubectl describe pod "$CURL_POD_NAME" -n "$CURL_NAMESPACE" || true
 fi
 
 echo ""
@@ -120,9 +120,9 @@ for i in $(seq 1 $MAX_RETRIES); do
     echo "\n${CYAN}--- Request $i/$MAX_RETRIES ---${NC}"
     echo "  ${CYAN}Time:${NC} $(date)"
 
-    echo "  ${CYAN}Executing: kubectl exec -n $NAMESPACE $POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
+    echo "  ${CYAN}Executing: kubectl exec -n $CURL_NAMESPACE $CURL_POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
     start_time=$(date +%s)
-    code=$(kubectl exec -n "$NAMESPACE" "$POD_NAME" -- curl \
+    code=$(kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl \
         --max-time "$TIMEOUT" \
         -s \
         -o /dev/null \
