@@ -138,13 +138,13 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 	r.Logger.Info("ScaleTargetRef changes detected", zap.String("es", req.String()), zap.Any("scaleTargetRef", es.Spec.ScaleTargetRef))
 
 	// Get the scale subresource for the target
-	scale, err := r.getScale(ctx, obj, req)
+	updatedObj, err := r.getUpdateObjInfo(ctx, obj, req)
 	if err != nil {
 		return fmt.Errorf("failed to get scale for target resource: %w", err)
 	}
 
 	// Extract replica information from the resource
-	ready, err := r.isTargetReady(ctx, scale)
+	ready, err := r.isTargetReady(ctx, updatedObj)
 	if err != nil {
 		return fmt.Errorf("failed to get target ready status: %w", err)
 	}
@@ -181,7 +181,7 @@ type updateObjInfo struct {
 	name           string
 }
 
-func (r *ElastiServiceReconciler) getScale(_ context.Context, obj interface{}, req ctrl.Request) (*updateObjInfo, error) {
+func (r *ElastiServiceReconciler) getUpdateObjInfo(_ context.Context, obj interface{}, req ctrl.Request) (*updateObjInfo, error) {
 	// Convert to unstructured to work with any resource type
 	objInfo, ok := obj.(*unstructured.Unstructured)
 	if !ok {
