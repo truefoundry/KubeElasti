@@ -43,8 +43,7 @@ type ElastiServiceSpec struct {
 	CooldownPeriod int32 `json:"cooldownPeriod,omitempty"`
 	// Triggers to scale the target resource
 	// +kubebuilder:validation:MinItems=1
-	Triggers []ScaleTrigger `json:"triggers,omitempty"`
-	// Autoscaler to scale the target resource
+	Triggers   []ScaleTrigger  `json:"triggers,omitempty"`
 	Autoscaler *AutoscalerSpec `json:"autoscaler,omitempty"`
 }
 
@@ -123,10 +122,8 @@ type ScaleTrigger struct {
 }
 
 type AutoscalerSpec struct {
-	// Type of the autoscaler, currently only hpa and keda are supported
 	// +kubebuilder:validation:Enum=hpa;keda
 	Type string `json:"type"`
-	// Name of the ScaledObject/HorizontalPodAutoscaler
 	Name string `json:"name"`
 }
 

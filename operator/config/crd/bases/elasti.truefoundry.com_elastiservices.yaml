@@ -39,14 +39,10 @@ spec:
           spec:
             properties:
               autoscaler:
-                description: Autoscaler to scale the target resource
                 properties:
                   name:
-                    description: Name of the ScaledObject/HorizontalPodAutoscaler
                     type: string
                   type:
-                    description: Type of the autoscaler, currently only hpa and keda
-                      are supported
                     enum:
                     - hpa
                     - keda

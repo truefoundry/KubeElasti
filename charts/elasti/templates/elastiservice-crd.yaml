@@ -40,21 +40,17 @@ spec:
           spec:
             properties:
               autoscaler:
-                description: Autoscaler to scale the target resource
                 properties:
                   name:
-                    description: Name of the ScaledObject/HorizontalPodAutoscaler
                     type: string
                   type:
-                    description: Type of the autoscaler, currently only hpa and keda
-                      are supported
                     enum:
-                      - hpa
-                      - keda
+                    - hpa
+                    - keda
                     type: string
                 required:
-                  - name
-                  - type
+                - name
+                - type
                 type: object
               cooldownPeriod:
                 default: 900
@@ -76,25 +72,25 @@ spec:
                   apiVersion:
                     description: API version of the target resource
                     enum:
-                      - apps/v1
-                      - argoproj.io/v1alpha1
+                    - apps/v1
+                    - argoproj.io/v1alpha1
                     type: string
                   kind:
                     description: Kind of the target resource
                     enum:
-                      - deployments
-                      - rollouts
-                      - Deployment
-                      - StatefulSet
-                      - Rollout
+                    - deployments
+                    - rollouts
+                    - Deployment
+                    - StatefulSet
+                    - Rollout
                     type: string
                   name:
                     description: Name of the target resource
                     type: string
                 required:
-                  - apiVersion
-                  - kind
-                  - name
+                - apiVersion
+                - kind
+                - name
                 type: object
               service:
                 description: Service to scale
@@ -111,15 +107,15 @@ spec:
                       description: Type of the trigger, currently only prometheus
                         is supported
                       enum:
-                        - prometheus
+                      - prometheus
                       type: string
                   required:
-                    - type
+                  - type
                   type: object
                 type: array
             required:
-              - scaleTargetRef
-              - service
+            - scaleTargetRef
+            - service
             type: object
           status:
             properties:
