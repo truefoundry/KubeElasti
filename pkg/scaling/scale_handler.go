@@ -342,7 +342,7 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	}
 
 	// Check if already at desired replicas
-	if currentScale.Spec.Replicas == desiredReplicas {
+	if currentScale.Status.Replicas == desiredReplicas {
 		h.logger.Info("Target already scaled",
 			zap.String("kind", targetGVK.Kind),
 			zap.String("name", targetName),
@@ -351,11 +351,11 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	}
 
 	// Check if already scaled beyond desired (for scale up operations)
-	if desiredReplicas > 0 && currentScale.Spec.Replicas > desiredReplicas {
+	if desiredReplicas > 0 && currentScale.Status.Replicas > desiredReplicas {
 		h.logger.Info("Target already scaled beyond desired replicas",
 			zap.String("kind", targetGVK.Kind),
 			zap.String("name", targetName),
-			zap.Int32("current replicas", currentScale.Spec.Replicas),
+			zap.Int32("current replicas", currentScale.Status.Replicas),
 			zap.Int32("desired replicas", desiredReplicas))
 		return false, nil
 	}
