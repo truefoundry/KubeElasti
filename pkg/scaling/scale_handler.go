@@ -349,7 +349,7 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	}
 
 	if err != nil {
-		h.createEvent(namespace, targetGVK.GroupVersion().String(), "Warning", "FailedToScale", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		h.createEvent(namespace, targetName, "Warning", "FailedToScale", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
 		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
@@ -374,11 +374,11 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 
 	currentScale.Spec.Replicas = desiredReplicas
 	if _, err := h.scaleClient.Scales(namespace).Update(ctx, groupResource, currentScale, metav1.UpdateOptions{}); err != nil {
-		h.createEvent(namespace, targetGVK.GroupVersion().String(), "Warning", "FailedToScale", fmt.Sprintf("Failed to scale %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		h.createEvent(namespace, targetName, "Warning", "FailedToScale", fmt.Sprintf("Failed to scale %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
 		return false, fmt.Errorf("failed to update scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
-	h.createEvent(namespace, targetGVK.GroupVersion().String(), "Normal", "SuccessToScale", fmt.Sprintf("Successfully scaled %d replicas for %s/%s", desiredReplicas, targetGVK.Kind, targetName))
+	h.createEvent(namespace, targetName, "Normal", "SuccessToScale", fmt.Sprintf("Successfully scaled %d replicas for %s/%s", desiredReplicas, targetGVK.Kind, targetName))
 	h.logger.Info("Target scaled", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
 	return true, nil
 }
