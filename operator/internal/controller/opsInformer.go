@@ -137,7 +137,7 @@ func (r *ElastiServiceReconciler) getScaleTargetRefChangeHandler(ctx context.Con
 func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Context, es *v1alpha1.ElastiService, req ctrl.Request, obj interface{}) error {
 	r.Logger.Info("ScaleTargetRef changes detected", zap.String("es", req.String()), zap.Any("scaleTargetRef", es.Spec.ScaleTargetRef))
 
-	// Get the scale subresource for the target
+	// Gather target object info (replicas, selector) from the updated resource
 	updatedObj, err := r.getUpdateObjInfo(ctx, obj, req)
 	if err != nil {
 		return fmt.Errorf("failed to get scale for target resource: %w", err)
@@ -174,8 +174,8 @@ func (r *ElastiServiceReconciler) handleScaleTargetRefChanges(ctx context.Contex
 }
 
 type updateObjInfo struct {
-	specReplicas   int32
-	statusReplicas int32
+	specReplicas   int64
+	statusReplicas int64
 	selector       map[string]interface{}
 	namespace      string
 	name           string
@@ -189,49 +189,54 @@ func (r *ElastiServiceReconciler) getUpdateObjInfo(_ context.Context, obj interf
 		return nil, fmt.Errorf("failed to convert ScaleTargetRef to unstructured")
 	}
 
+	scaleObj := &updateObjInfo{
+		specReplicas:   0,
+		statusReplicas: 0,
+		selector:       nil,
+		namespace:      req.Namespace,
+		name:           req.Name,
+	}
+
 	specReplicasVal, found, err := unstructured.NestedInt64(objInfo.Object, "spec", "replicas")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get replicas from spec, %w", err)
 	} else if !found {
 		// If replicas are not found and no error, we can assume the resource is not ready
-		return nil, fmt.Errorf("replicas not found")
+		r.Logger.Warn("spec replicas not found")
+		return scaleObj, nil
 	}
+	scaleObj.specReplicas = specReplicasVal
 
 	statusReplicasVal, found, err := unstructured.NestedInt64(objInfo.Object, "status", "replicas")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get replicas from spec, %w", err)
 	} else if !found {
 		// If replicas are not found and no error, we can assume the resource is not ready
-		return nil, fmt.Errorf("replicas not found")
+		r.Logger.Warn("status replicas not found")
+		return scaleObj, nil
 	}
+	scaleObj.statusReplicas = statusReplicasVal
 
-	selectorVal, found, err := unstructured.NestedMap(objInfo.Object, "spec", "selector", "matchLabels")
+	selectorVal, found, err := unstructured.NestedMap(objInfo.Object, "spec", "selector")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get selector from spec, %w", err)
 	} else if !found {
 		// If selector is not found and no error, we can assume the resource is not ready
-		return nil, fmt.Errorf("selector not found")
+		r.Logger.Warn("selector not found")
+		return scaleObj, nil
 	}
-
-	scaleObj := &updateObjInfo{
-		specReplicas:   int32(specReplicasVal),
-		statusReplicas: int32(statusReplicasVal),
-		selector:       selectorVal,
-		namespace:      req.Namespace,
-		name:           req.Name,
-	}
+	scaleObj.selector = selectorVal
 
 	return scaleObj, nil
 }
 
 // isTargetReady to check if the target resource has 1 running pod
 func (r *ElastiServiceReconciler) isTargetReady(ctx context.Context, obj *updateObjInfo) (bool, error) {
-	if obj.specReplicas <= 0 {
+	if obj.specReplicas <= 0 || obj.statusReplicas <= 0 {
 		return false, nil
-	}
-
-	if obj.selector == nil {
-		return false, fmt.Errorf("label selector is empty, object %v", obj)
+	} else if obj.selector == nil {
+		r.Logger.Warn("selector is empty", zap.Any("obj", obj))
+		return false, nil
 	}
 
 	labelSelector := &metav1.LabelSelector{}

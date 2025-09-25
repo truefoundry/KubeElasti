@@ -16,7 +16,9 @@ import (
 	"github.com/truefoundry/elasti/pkg/scaling/scalers"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -50,6 +52,7 @@ type ScaleHandler struct {
 	scaleLocks sync.Map
 
 	scaleClient scale.ScalesGetter
+	restMapper  *restmapper.DeferredDiscoveryRESTMapper
 
 	logger         *zap.Logger
 	watchNamespace string
@@ -88,6 +91,7 @@ func NewScaleHandler(logger *zap.Logger, config *rest.Config, watchNamespace str
 		kClient:        kClient,
 		kDynamicClient: kDynamicClient,
 		scaleClient:    scaleClient,
+		restMapper:     restMapper,
 		watchNamespace: watchNamespace,
 		EventRecorder:  eventRecorder,
 	}
@@ -238,14 +242,9 @@ func (h *ScaleHandler) handleScaleToZero(ctx context.Context, es *v1alpha1.Elast
 		}
 	}
 
-	gv, err := schema.ParseGroupVersion(spec.ScaleTargetRef.APIVersion)
+	targetGVK, err := k8shelper.APIVersionStrToGVK(spec.ScaleTargetRef.APIVersion, spec.ScaleTargetRef.Kind)
 	if err != nil {
 		return fmt.Errorf("failed to parse API version: %w", err)
-	}
-	targetGVK := schema.GroupVersionKind{
-		Group:   gv.Group,
-		Version: gv.Version,
-		Kind:    spec.ScaleTargetRef.Kind,
 	}
 	if _, err := h.Scale(ctx,
 		es.Namespace,
@@ -281,14 +280,9 @@ func (h *ScaleHandler) handleScaleFromZero(ctx context.Context, es *v1alpha1.Ela
 		}
 	}
 
-	gv, err := schema.ParseGroupVersion(spec.ScaleTargetRef.APIVersion)
+	targetGVK, err := k8shelper.APIVersionStrToGVK(spec.ScaleTargetRef.APIVersion, spec.ScaleTargetRef.Kind)
 	if err != nil {
 		return fmt.Errorf("failed to parse API version: %w", err)
-	}
-	targetGVK := schema.GroupVersionKind{
-		Group:   gv.Group,
-		Version: gv.Version,
-		Kind:    spec.ScaleTargetRef.Kind,
 	}
 	if _, err := h.Scale(ctx,
 		es.Namespace,
@@ -335,9 +329,27 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 		Group:    targetGVK.Group,
 		Resource: k8shelper.KindToResource(targetGVK.Kind),
 	}
-	currentScale, err := h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})
+
+	var err error
+	var currentScale *autoscalingv1.Scale
+	for i := 0; i < 2; i++ {
+		currentScale, err = h.scaleClient.Scales(namespace).Get(ctx, groupResource, targetName, metav1.GetOptions{})
+		if err == nil {
+			break
+		}
+		if meta.IsNoMatchError(err) {
+			h.logger.Info("retrying scale operation after resetting RESTMapper cache due to NoMatchError",
+				zap.String("kind", targetGVK.Kind),
+				zap.String("name", targetName),
+				zap.Error(err))
+			h.restMapper.Reset()
+			continue
+		}
+		break
+	}
+
 	if err != nil {
-		h.createEvent(namespace, targetName, "Warning", "ScaleTOFailed", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		h.createEvent(namespace, targetGVK.GroupVersion().String(), "Warning", "FailedToScale", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
 		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
@@ -362,11 +374,11 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 
 	currentScale.Spec.Replicas = desiredReplicas
 	if _, err := h.scaleClient.Scales(namespace).Update(ctx, groupResource, currentScale, metav1.UpdateOptions{}); err != nil {
-		h.createEvent(namespace, targetName, "Warning", "ScaleFailed", fmt.Sprintf("Failed to scale %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		h.createEvent(namespace, targetGVK.GroupVersion().String(), "Warning", "FailedToScale", fmt.Sprintf("Failed to scale %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
 		return false, fmt.Errorf("failed to update scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
-	h.createEvent(namespace, targetName, "Normal", "ScaledSuccess", fmt.Sprintf("Successfully scaled %d replicas for %s/%s", desiredReplicas, targetGVK.Kind, targetName))
+	h.createEvent(namespace, targetGVK.GroupVersion().String(), "Normal", "SuccessToScale", fmt.Sprintf("Successfully scaled %d replicas for %s/%s", desiredReplicas, targetGVK.Kind, targetName))
 	h.logger.Info("Target scaled", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
 	return true, nil
 }
