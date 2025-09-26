@@ -4,6 +4,12 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
+## 0.1.17
+
+### Improvements
+* Add support for StatefulSet as a scale target reference by @ramantehlan in [#188](https://github.com/truefoundry/KubeElasti/pull/188)
+
+
 ## 0.1.16 (2025-09-22)
 
 ### Fixes 
@@ -22,10 +28,10 @@
 * Add announcement and FAQ to the docs by @ramantehlan in [#177](https://github.com/truefoundry/KubeElasti/pull/177)
 * fix e2e workflow and tests by @ramantehlan in [#184](https://github.com/truefoundry/KubeElasti/pull/184)
 
-
 ## 0.1.15
 * Add validation for CRD fields for elasti service by @ramantehlan in [#122](https://github.com/truefoundry/elasti/pull/122)
 * Forward source host to target by @ramantehlan in [#123](https://github.com/truefoundry/elasti/pull/123)
+
 
 ## 0.1.15-beta (2025-07-28)
 

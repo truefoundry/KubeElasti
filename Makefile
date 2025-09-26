@@ -62,4 +62,3 @@ build-docs: ## Build docs
 fetch-contributors: ## Fetch contributors
 	python3 docs/scripts/fetch_contributors.py
 
-

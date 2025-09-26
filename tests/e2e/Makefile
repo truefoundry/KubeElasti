@@ -9,15 +9,15 @@ PROMETHEUS_PUSHGATEWAY_VERSION := 3.4.1
 KEDA_VERSION := 2.17.1
 TIMEOUT := 400s
 
-.PHONY: all setup destroy test
+.PHONY: all setup clean test
 all:
 	@echo "Run 'make build-images' to build images"
 	@echo "Run 'make setup' to setup environment"
 	@echo "Run 'make test' to run tests"
-	@echo "Run 'make destroy' to destroy environment"
+	@echo "Run 'make clean' to clean environment"
 
 setup: kind-up chmod-scripts apply-deps
-destroy: kind-down
+clean: kind-down
 test:
 	@echo "Running KUTTL tests..."
 	@kubectl kuttl test --start-kind=false --test $(T)
@@ -26,6 +26,7 @@ test:
 .PHONY: chmod-scripts
 chmod-scripts:
 	@chmod +x ./manifest/setup.sh
+	@chmod +x ./manifest/setup-statefulset.sh
 
 .PHONY: build-images
 build-images: ## Build and push images
@@ -119,13 +120,6 @@ apply-ingress:
 	@kubectl apply -f ./manifest/global/istio-gateway.yaml -n istio-system
 	@echo "Istio installed successfully."
 
-.PHONY: uninstall-ingress
-uninstall-ingress:
-	@echo "Uninstalling Istio..."
-	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system
-	@kubectl delete namespace istio-system
-	@echo "Istio uninstalled successfully."
-
 .PHONY: apply-keda
 apply-keda:
 	@echo "Installing KEDA..."
@@ -134,12 +128,26 @@ apply-keda:
 	@echo "KEDA installed successfully."
 
 # This is for locally testing, not used in CI
-.PHONY: uninstall-keda
-uninstall-keda:
-	@echo "Uninstalling KEDA..."
+.PHONY: remove-keda
+remove-keda:
+	@echo "Removing KEDA..."
 	@helm uninstall keda -n keda
 	@kubectl delete namespace keda
-	@echo "KEDA uninstalled successfully."
+	@echo "KEDA removed successfully."
+
+.PHONY: remove-elasti
+remove-elasti:
+	@echo "Removing Elasti..."
+	@helm uninstall elasti -n $(ELASTI_NAMESPACE) || true
+	@kubectl delete namespace $(ELASTI_NAMESPACE) --ignore-not-found=true
+	@echo "Elasti removed successfully."
+
+.PHONY: remove-ingress
+remove-ingress:
+	@echo "Removing Istio..."
+	@helm uninstall istio-base istiod istio-ingressgateway -n istio-system || true
+	@kubectl delete namespace istio-system --ignore-not-found=true
+	@echo "Istio removed successfully."
 
 .PHONY: pf-prom
 pf-prom:
@@ -167,3 +175,23 @@ lint-yaml:
 	@echo "Linting k8s manifests and kuttl tests..."
 	@yamllint ./manifest
 	@yamllint ./tests
+
+.PHONY: apply-demo-application
+apply-demo-application: ## Install demo application
+	 kubectl apply -f ../../playground/config/demo-application.yaml
+	 kubectl apply -f ../../playground/config/demo-elastiService.yaml -n target
+
+.PHONY: remove-demo-application
+remove-demo-application: ## Remove demo application
+	 kubectl delete -f ../../playground/config/demo-application.yaml
+	 kubectl delete -f ../../playground/config/demo-elastiService.yaml -n target
+
+.PHONY: apply-demo-statefulset
+apply-demo-statefulset: ## Install demo statefulset
+	 kubectl apply -f ../../playground/config/demo-statefulset-application.yaml -n target
+	 kubectl apply -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
+
+.PHONY: remove-demo-statefulset
+remove-demo-statefulset: ## Remove demo statefulset
+	 kubectl delete -f ../../playground/config/demo-statefulset-application.yaml -n target
+	 kubectl delete -f ../../playground/config/demo-statefulset-elastiService.yaml -n target

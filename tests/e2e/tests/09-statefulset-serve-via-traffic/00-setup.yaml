@@ -1,0 +1,5 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: ../../manifest/setup-statefulset.sh --manifest-dir ../../manifest
+    namespaced: true

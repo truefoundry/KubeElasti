@@ -1,5 +1,5 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestStep
 commands: # Small response with Content-Length
-  - command: ./send_traffic.sh 'http://target-deployment.$NAMESPACE.svc.cluster.local/ip'
+  - command: sh ../../manifest/send_traffic.sh 'http://target-deployment.$NAMESPACE.svc.cluster.local/ip' --target-resource deployments --target-name target-deployment
     namespaced: true

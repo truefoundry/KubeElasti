@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"truefoundry/elasti/operator/api/v1alpha1"
 	"truefoundry/elasti/operator/internal/crddirectory"
@@ -11,7 +10,6 @@ import (
 	"truefoundry/elasti/operator/internal/prom"
 
 	"github.com/truefoundry/elasti/pkg/k8shelper"
-	"github.com/truefoundry/elasti/pkg/utils"
 	"github.com/truefoundry/elasti/pkg/values"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -142,7 +140,7 @@ func (r *ElastiServiceReconciler) watchScaleTargetRef(ctx context.Context, es *v
 				Namespace:    req.Namespace,
 				CRDName:      req.Name,
 				ResourceName: crd.Spec.ScaleTargetRef.Name,
-				Resource:     strings.ToLower(crd.Spec.ScaleTargetRef.Kind),
+				ResourceType: k8shelper.KindToResource(crd.Spec.ScaleTargetRef.Kind),
 			})
 			err := r.InformerManager.StopInformer(key)
 			if err != nil {
@@ -155,7 +153,7 @@ func (r *ElastiServiceReconciler) watchScaleTargetRef(ctx context.Context, es *v
 
 	var informerErr error
 	r.getMutexForInformerStart(r.getMutexKeyForTargetRef(req)).Do(func() {
-		targetGroup, targetVersion, err := utils.ParseAPIVersion(es.Spec.ScaleTargetRef.APIVersion)
+		gv, err := schema.ParseGroupVersion(es.Spec.ScaleTargetRef.APIVersion)
 		if err != nil {
 			informerErr = fmt.Errorf("failed to parse API version: %w", err)
 			return
@@ -165,9 +163,9 @@ func (r *ElastiServiceReconciler) watchScaleTargetRef(ctx context.Context, es *v
 			ResourceName:      es.Spec.ScaleTargetRef.Name,
 			ResourceNamespace: req.Namespace,
 			GroupVersionResource: &schema.GroupVersionResource{
-				Group:    targetGroup,
-				Version:  targetVersion,
-				Resource: strings.ToLower(es.Spec.ScaleTargetRef.Kind),
+				Group:    gv.Group,
+				Version:  gv.Version,
+				Resource: k8shelper.KindToResource(es.Spec.ScaleTargetRef.Kind),
 			},
 			Handlers: r.getScaleTargetRefChangeHandler(ctx, es, req),
 		}); err != nil {

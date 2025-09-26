@@ -6,8 +6,12 @@ metadata:
     {{- include "elasti.labels" . | nindent 4 }}
 rules:
 - apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "watch", "update", "patch"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch"]
+# Required to scale any resource
+- apiGroups: ["*"]
+  resources: ["*/scale"]
+  verbs: ["get", "update", "patch"]
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]
   verbs: ["get", "list", "watch", "update", "patch", "delete", "create"]
@@ -23,3 +27,7 @@ rules:
 - apiGroups: ["keda.sh"]
   resources: ["scaledobjects"]
   verbs: ["get", "list", "watch", "update", "patch"]
+# Required to get pod details in informer
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]

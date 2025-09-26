@@ -26,43 +26,63 @@ const (
 	ElastiServiceFinalizer = "elasti.truefoundry.com/finalizer"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-// ElastiServiceSpec defines the desired state of ElastiService
+// +kubebuilder:validation:Required={"scaleTargetRef","service"}
 type ElastiServiceSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	// +kubebuilder:validation:Required
-	ScaleTargetRef ScaleTargetRef `json:"scaleTargetRef,omitempty"`
-	// +kubebuilder:validation:Required
-	Service string `json:"service,omitempty"`
+	// ScaleTargetRef of the target resource to scale
+	ScaleTargetRef ScaleTargetRef `json:"scaleTargetRef"`
+	// Service to scale
+	Service string `json:"service"`
+	// Minimum number of replicas to scale to
 	// +kubebuilder:validation:Minimum=1
 	MinTargetReplicas int32 `json:"minTargetReplicas,omitempty" default:"1"`
-	// This is the cooldown period in seconds
+	// Cooldown period in seconds.
+	// It tells how long a target resource can be idle before scaling it down
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:validation:Maximum=604800
 	// +kubebuilder:default=900
-	CooldownPeriod int32           `json:"cooldownPeriod,omitempty"`
-	Triggers       []ScaleTrigger  `json:"triggers,omitempty"`
-	Autoscaler     *AutoscalerSpec `json:"autoscaler,omitempty"`
+	CooldownPeriod int32 `json:"cooldownPeriod,omitempty"`
+	// Triggers to scale the target resource
+	// +kubebuilder:validation:MinItems=1
+	Triggers   []ScaleTrigger  `json:"triggers,omitempty"`
+	Autoscaler *AutoscalerSpec `json:"autoscaler,omitempty"`
+}
+
+func (es *ElastiServiceSpec) GetScaleTargetRef() ScaleTargetRef {
+	// NOTE: Required for backwards compatibility, since so far, we have been using "deployments" instead of "Deployment" in exisiting
+	// CRD files. Since calse doesn't recognize "deployments" as a valid kind, we need to convert it to "Deployment".
+	// We can remove it once we have migrated all the existing CRD files to use "Deployment" instead of "deployments".
+	switch es.ScaleTargetRef.Kind {
+	case "deployments":
+		es.ScaleTargetRef.Kind = "Deployment"
+	case "rollouts":
+		es.ScaleTargetRef.Kind = "Rollout"
+	default:
+		return es.ScaleTargetRef
+	}
+
+	return es.ScaleTargetRef
 }
 
 type ScaleTargetRef struct {
+	// API version of the target resource
 	// +kubebuilder:validation:Enum=apps/v1;argoproj.io/v1alpha1
-	APIVersion string `json:"apiVersion,omitempty"`
-	// +kubebuilder:validation:Enum=deployments;rollouts
-	Kind string `json:"kind,omitempty"`
-	Name string `json:"name,omitempty"`
+	APIVersion string `json:"apiVersion"`
+	// Kind of the target resource
+	// +kubebuilder:validation:Enum=deployments;rollouts;Deployment;StatefulSet;Rollout
+	Kind string `json:"kind"`
+	// Name of the target resource
+	Name string `json:"name"`
 }
 
-// ElastiServiceStatus defines the observed state of ElastiService
 type ElastiServiceStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	LastReconciledTime metav1.Time  `json:"lastReconciledTime,omitempty"`
-	LastScaledUpTime   *metav1.Time `json:"lastScaledUpTime,omitempty"`
-	Mode               string       `json:"mode,omitempty"`
+	// Last time the ElastiService was reconciled
+	LastReconciledTime metav1.Time `json:"lastReconciledTime,omitempty"`
+	// Last time the ElastiService was scaled up
+	LastScaledUpTime *metav1.Time `json:"lastScaledUpTime,omitempty"`
+	// Current mode of the ElastiService, either "proxy" or "serve".
+	// "proxy" mode is when the ScaleTargetRef is scaled to 0 replicas.
+	// "serve" mode is when the ScaleTargetRef is scaled to at least 1 replica.
+	Mode string `json:"mode,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -77,6 +97,11 @@ type ElastiService struct {
 	Status ElastiServiceStatus `json:"status,omitempty"`
 }
 
+func (es *ElastiService) GetSpec() ElastiServiceSpec {
+	es.Spec.ScaleTargetRef = es.Spec.GetScaleTargetRef()
+	return es.Spec
+}
+
 //+kubebuilder:object:root=true
 
 // ElastiServiceList contains a list of ElastiService
@@ -87,8 +112,10 @@ type ElastiServiceList struct {
 }
 
 type ScaleTrigger struct {
+	// Type of the trigger, currently only prometheus is supported
 	// +kubebuilder:validation:Enum=prometheus
 	Type string `json:"type"`
+	// Metadata like query, serverAddress, threshold, uptimeFilter etc.
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	Metadata json.RawMessage `json:"metadata,omitempty"`
@@ -97,7 +124,7 @@ type ScaleTrigger struct {
 type AutoscalerSpec struct {
 	// +kubebuilder:validation:Enum=hpa;keda
 	Type string `json:"type"`
-	Name string `json:"name"` // Name of the ScaledObject/HorizontalPodAutoscaler
+	Name string `json:"name"`
 }
 
 func init() {
