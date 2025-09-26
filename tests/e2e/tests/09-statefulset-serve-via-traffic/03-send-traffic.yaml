@@ -1,0 +1,5 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: sh ../../manifest/send_traffic.sh http://target-statefulset.$NAMESPACE.svc.cluster.local --target-resource statefulsets --target-name target-statefulset
+    namespaced: true

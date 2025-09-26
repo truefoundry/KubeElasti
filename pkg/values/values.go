@@ -7,12 +7,7 @@ import (
 )
 
 const (
-	ArgoPhaseHealthy              = "Healthy"
-	DeploymentConditionStatusTrue = "True"
-
-	KindDeployments = "deployments"
-	KindRollout     = "rollouts"
-	KindService     = "services"
+	ResourceService = "services"
 
 	ServeMode = "serve"
 	ProxyMode = "proxy"
@@ -24,12 +19,6 @@ const (
 )
 
 var (
-	RolloutGVR = schema.GroupVersionResource{
-		Group:    "argoproj.io",
-		Version:  "v1alpha1",
-		Resource: "rollouts",
-	}
-
 	ServiceGVR = schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",

@@ -5,3 +5,6 @@ testDirs:
   - ./tests/
 timeout: 600
 parallel: 1
+commands:
+  - command: kubectl apply -f ./manifest/global/pod-curl-target-gw.yaml -n default
+  - command: kubectl wait --for=condition=Ready pods -l app=curl-target-gw -n default --timeout=400s

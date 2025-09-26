@@ -221,22 +221,6 @@ func (m *Manager) monitorInformers() {
 	})
 }
 
-// WatchDeployment is to add a watch on a deployment
-func (m *Manager) WatchDeployment(req ctrl.Request, deploymentName, namespace string, handlers cache.ResourceEventHandlerFuncs) error {
-	request := &RequestWatch{
-		Req:               req,
-		ResourceName:      deploymentName,
-		ResourceNamespace: namespace,
-		GroupVersionResource: &schema.GroupVersionResource{
-			Group:    "apps",
-			Version:  "v1",
-			Resource: "deployments",
-		},
-		Handlers: handlers,
-	}
-	return m.Add(request)
-}
-
 // Add is to add a watch on a resource
 func (m *Manager) Add(req *RequestWatch) (err error) {
 	key := m.getKeyFromRequestWatch(req)
@@ -337,7 +321,7 @@ func (m *Manager) getKeyFromRequestWatch(req *RequestWatch) string {
 type KeyParams struct {
 	Namespace    string
 	CRDName      string
-	Resource     string
+	ResourceType string
 	ResourceName string
 }
 
@@ -346,7 +330,7 @@ func (m *Manager) GetKey(param KeyParams) string {
 	return fmt.Sprintf("%s/%s/%s/%s",
 		strings.ToLower(param.CRDName),      // CRD Name
 		strings.ToLower(param.Namespace),    // Namespace
-		strings.ToLower(param.Resource),     // Resource Type
+		strings.ToLower(param.ResourceType), // Resource Type
 		strings.ToLower(param.ResourceName)) // Resource Name
 }
 

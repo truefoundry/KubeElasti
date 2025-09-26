@@ -3,8 +3,4 @@ kind: TestStep
 commands:
   - command: ../../manifest/setup.sh --manifest-dir ../../manifest
     namespaced: true
-  - command: kubectl apply -f ../../manifest/global/pod-curl-target-gw.yaml -n default
-    namespaced: false
-  - command: kubectl wait --for=condition=Ready pods -l app=curl-target-gw -n default --timeout=400s
-    namespaced: false
   - command: sleep 5

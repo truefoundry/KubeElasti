@@ -103,7 +103,7 @@ You can also run specific parts of the testing process:
 | `make setup`             | Sets up the environment (registry and Kind cluster with dependencies) |
 | `make test`              | Run the KUTTL E2E tests |
 | `make reload-images`     | Use the newly built image of Elasti operator and resolver images |
-| `make destroy`           | Delete Kind cluster and stop registry |
+| `make clear`             | Delete Kind cluster |
 | `make kind-up`           | Create a Kind cluster with the name `elasti-e2e`|
 | `make kind-down`         | Delete the Kind cluster |
 | `make apply-deps`        | Install all dependencies (Istio, Prometheus, Elasti) |
@@ -111,8 +111,13 @@ You can also run specific parts of the testing process:
 | `make apply-prometheus`  | Install only Prometheus (with Grafana) |
 | `make apply-ingress`     | Install only Istio ingress gateway |
 | `make apply-keda`        | Install only KEDA |
-| `make uninstall-ingress` | Uninstall Istio components |
-| `make uninstall-keda`    | Uninstall KEDA components |
+| `make remove-keda`       | Remove KEDA components |
+| `make remove-elasti`     | Remove Elasti components |
+| `make remove-ingress`    | Remove Istio components |
 | `make pf-prom`           | Port-forward the Prometheus service to localhost:9090 |
 | `make pf-graf`           | Port-forward the Grafana service to localhost:9001 |
 | `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080 |
+| `make apply-demo-application` | Install demo application |
+| `make apply-demo-statefulset` | Install demo statefulset |
+| `make remove-demo-application` | Remove demo application |
+| `make remove-demo-statefulset` | Remove demo statefulset |

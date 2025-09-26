@@ -1,0 +1,11 @@
+apiVersion: elasti.truefoundry.com/v1alpha1
+kind: ElastiService
+metadata:
+  name: target-elastiservice
+status:
+  mode: proxy
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+# give operator time — 60s is reasonable here
+timeout: 60

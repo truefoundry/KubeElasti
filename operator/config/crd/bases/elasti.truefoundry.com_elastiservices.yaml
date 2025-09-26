@@ -37,7 +37,6 @@ spec:
           metadata:
             type: object
           spec:
-            description: ElastiServiceSpec defines the desired state of ElastiService
             properties:
               autoscaler:
                 properties:
@@ -54,65 +53,85 @@ spec:
                 type: object
               cooldownPeriod:
                 default: 900
-                description: This is the cooldown period in seconds
+                description: |-
+                  Cooldown period in seconds.
+                  It tells how long a target resource can be idle before scaling it down
                 format: int32
                 maximum: 604800
                 minimum: 0
                 type: integer
               minTargetReplicas:
+                description: Minimum number of replicas to scale to
                 format: int32
                 minimum: 1
                 type: integer
               scaleTargetRef:
-                description: |-
-                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
+                description: ScaleTargetRef of the target resource to scale
                 properties:
                   apiVersion:
+                    description: API version of the target resource
                     enum:
                     - apps/v1
                     - argoproj.io/v1alpha1
                     type: string
                   kind:
+                    description: Kind of the target resource
                     enum:
                     - deployments
                     - rollouts
+                    - Deployment
+                    - StatefulSet
+                    - Rollout
                     type: string
                   name:
+                    description: Name of the target resource
                     type: string
+                required:
+                - apiVersion
+                - kind
+                - name
                 type: object
               service:
+                description: Service to scale
                 type: string
               triggers:
+                description: Triggers to scale the target resource
                 items:
                   properties:
                     metadata:
+                      description: Metadata like query, serverAddress, threshold,
+                        uptimeFilter etc.
                       x-kubernetes-preserve-unknown-fields: true
                     type:
+                      description: Type of the trigger, currently only prometheus
+                        is supported
                       enum:
                       - prometheus
                       type: string
                   required:
                   - type
                   type: object
+                minItems: 1
                 type: array
             required:
             - scaleTargetRef
             - service
             type: object
           status:
-            description: ElastiServiceStatus defines the observed state of ElastiService
             properties:
               lastReconciledTime:
-                description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
+                description: Last time the ElastiService was reconciled
                 format: date-time
                 type: string
               lastScaledUpTime:
+                description: Last time the ElastiService was scaled up
                 format: date-time
                 type: string
               mode:
+                description: |-
+                  Current mode of the ElastiService, either "proxy" or "serve".
+                  "proxy" mode is when the ScaleTargetRef is scaled to 0 replicas.
+                  "serve" mode is when the ScaleTargetRef is scaled to at least 1 replica.
                 type: string
             type: object
         type: object
