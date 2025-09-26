@@ -183,8 +183,8 @@ apply-demo-deployment: ## Install demo application
 
 .PHONY: remove-demo-deployment
 remove-demo-deployment: ## Remove demo application
-	 kubectl delete -f ../../playground/config/demo-deployment-target.yaml -n target
-	 kubectl delete -f ../../playground/config/demo-deployment-elastiService.yaml -n target
+	 kubectl delete -f ../../playground/config/demo-deployment-target.yaml -n target --ignore-not-found=true
+	 kubectl delete -f ../../playground/config/demo-deployment-elastiService.yaml -n target --ignore-not-found=true
 
 .PHONY: apply-demo-statefulset
 apply-demo-statefulset: ## Install demo statefulset
@@ -193,5 +193,5 @@ apply-demo-statefulset: ## Install demo statefulset
 
 .PHONY: remove-demo-statefulset
 remove-demo-statefulset: ## Remove demo statefulset
-	 kubectl delete -f ../../playground/config/demo-statefulset-target.yaml -n target
-	 kubectl delete -f ../../playground/config/demo-statefulset-elastiService.yaml -n target
+	 kubectl delete -f ../../playground/config/demo-statefulset-target.yaml -n target --ignore-not-found=true
+	 kubectl delete -f ../../playground/config/demo-statefulset-elastiService.yaml -n target --ignore-not-found=true
