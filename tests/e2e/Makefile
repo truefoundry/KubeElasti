@@ -178,13 +178,13 @@ lint-yaml:
 
 .PHONY: apply-demo-application
 apply-demo-application: ## Install demo application
-	 kubectl apply -f ../../playground/config/demo-application.yaml
-	 kubectl apply -f ../../playground/config/demo-elastiService.yaml -n target
+	 kubectl apply -f ../../playground/config/demo-deployment-target.yaml -n target
+	 kubectl apply -f ../../playground/config/demo-deployment-elastiService.yaml -n target
 
 .PHONY: remove-demo-application
 remove-demo-application: ## Remove demo application
-	 kubectl delete -f ../../playground/config/demo-application.yaml
-	 kubectl delete -f ../../playground/config/demo-elastiService.yaml -n target
+	 kubectl delete -f ../../playground/config/demo-deployment-target.yaml -n target
+	 kubectl delete -f ../../playground/config/demo-deployment-elastiService.yaml -n target
 
 .PHONY: apply-demo-statefulset
 apply-demo-statefulset: ## Install demo statefulset

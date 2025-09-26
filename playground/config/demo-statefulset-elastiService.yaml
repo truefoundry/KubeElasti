@@ -1,8 +1,7 @@
 apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
-  name: redis-statefulset
-  namespace: target
+  name: target-statefulset
 spec:
   service: redis-statefulset
   minTargetReplicas: 1
