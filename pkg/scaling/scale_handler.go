@@ -322,7 +322,7 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	mutex := h.getMutexForScale(namespace + "/" + targetGVK.Kind + "/" + targetName)
 	mutex.Lock()
 	defer mutex.Unlock()
-	h.logger.Debug("Scaling", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("desired replicas", desiredReplicas))
+	h.logger.Debug("Scaling", zap.String("kind", targetGVK.Kind), zap.String("namespace", namespace), zap.String("name", targetName), zap.Int32("desired replicas", desiredReplicas))
 
 	// Get the scale object
 	groupResource := schema.GroupResource{
@@ -340,6 +340,7 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 		if meta.IsNoMatchError(err) {
 			h.logger.Info("retrying scale operation after resetting RESTMapper cache due to NoMatchError",
 				zap.String("kind", targetGVK.Kind),
+				zap.String("namespace", namespace),
 				zap.String("name", targetName),
 				zap.Error(err))
 			h.restMapper.Reset()
@@ -349,14 +350,15 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	}
 
 	if err != nil {
-		h.createEvent(namespace, targetName, "Warning", "FailedToScale", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
+		h.createEvent(namespace, targetName, "Error", "FailedToScale", fmt.Sprintf("Failed to scale to %d replicas for %s/%s: %v", desiredReplicas, targetGVK.Kind, targetName, err))
 		return false, fmt.Errorf("failed to get scale for %s/%s (%s): %w", targetGVK.Kind, targetName, namespace, err)
 	}
 
 	// Check if already at desired replicas
 	if currentScale.Status.Replicas == desiredReplicas {
-		h.logger.Info("Target already scaled",
+		h.logger.Info("No scale required. Target already at desired replicas",
 			zap.String("kind", targetGVK.Kind),
+			zap.String("namespace", namespace),
 			zap.String("name", targetName),
 			zap.Int32("replicas", desiredReplicas))
 		return false, nil
@@ -364,8 +366,9 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 
 	// Check if already scaled beyond desired (for scale up operations)
 	if desiredReplicas > 0 && currentScale.Status.Replicas > desiredReplicas {
-		h.logger.Info("Target already scaled beyond desired replicas",
+		h.logger.Info("No scale required. Target already scaled beyond desired replicas",
 			zap.String("kind", targetGVK.Kind),
+			zap.String("namespace", namespace),
 			zap.String("name", targetName),
 			zap.Int32("current replicas", currentScale.Status.Replicas),
 			zap.Int32("desired replicas", desiredReplicas))
@@ -379,7 +382,7 @@ func (h *ScaleHandler) Scale(ctx context.Context,
 	}
 
 	h.createEvent(namespace, targetName, "Normal", "SuccessToScale", fmt.Sprintf("Successfully scaled %d replicas for %s/%s", desiredReplicas, targetGVK.Kind, targetName))
-	h.logger.Info("Target scaled", zap.String("kind", targetGVK.Kind), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
+	h.logger.Info("Target scaled", zap.String("kind", targetGVK.Kind), zap.String("namespace", namespace), zap.String("name", targetName), zap.Int32("replicas", desiredReplicas))
 	return true, nil
 }
 
@@ -413,6 +416,7 @@ func (h *ScaleHandler) UpdateKedaScaledObjectPausedState(ctx context.Context, sc
 }
 
 func (h *ScaleHandler) UpdateLastScaledUpTime(ctx context.Context, crdName, namespace string) error {
+	h.logger.Debug("Updating LastScaledUpTime", zap.String("service", crdName), zap.String("namespace", namespace))
 	now := metav1.Now()
 	patchBytes := []byte(fmt.Sprintf(`{"status": {"lastScaledUpTime": "%s"}}`, now.Format(time.RFC3339Nano)))
 

@@ -81,7 +81,7 @@ log_failure_details() {
 
     # Target Logs
     echo "${CYAN}  Logs from target (${TARGET_RESOURCE}/${TARGET_NAME}):${NC}"
-    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
+    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=120 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
 
     # Verbose Curl Request
     echo "${CYAN}  Attempting verbose request for more details...${NC}"
