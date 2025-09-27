@@ -1,19 +1,18 @@
 apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
-  name: redis-statefulset
-  namespace: target
+  name: target-statefulset
 spec:
-  service: redis-statefulset
+  service: target-statefulset
   minTargetReplicas: 1
-  cooldownPeriod: 100
+  cooldownPeriod: 300
   scaleTargetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: redis-statefulset
+    name: target-statefulset
   triggers:
     - metadata:
-        query: round(sum(rate(envoy_http_downstream_rq_total{destination_service_name="redis-statefulset"}[1m])),0.001) or vector(0)
+        query: round(sum(rate(envoy_http_downstream_rq_total{destination_service_name="target-statefulset"}[1m])),0.001) or vector(0)
         serverAddress: http://prometheus-operated.monitoring.svc.cluster.local:9090
         threshold: "0.01"
       type: prometheus

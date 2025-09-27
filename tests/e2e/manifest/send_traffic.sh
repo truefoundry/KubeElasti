@@ -73,15 +73,15 @@ log_failure_details() {
 
     # Resolver Logs
     echo "${CYAN}  Logs from elasti-resolver:${NC}"
-    kubectl logs -n elasti -l app=elasti-resolver --tail=20 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
+    kubectl logs -n elasti services/elasti-resolver-service --tail=20 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
 
     # Controller Logs
     echo "${CYAN}  Logs from elasti-controller:${NC}"
-    kubectl logs -n elasti -l app=elasti-controller --tail=20 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve controller logs${NC}"
+    kubectl logs -n elasti services/elasti-operator-controller-service --tail=20 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve controller logs${NC}"
 
     # Target Logs
     echo "${CYAN}  Logs from target (${TARGET_RESOURCE}/${TARGET_NAME}):${NC}"
-    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=30 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
+    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=120 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
 
     # Verbose Curl Request
     echo "${CYAN}  Attempting verbose request for more details...${NC}"

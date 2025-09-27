@@ -58,7 +58,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /${NAMESPACE}/httpbin(/|$)(.*)
+          - path: /httpbin(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:

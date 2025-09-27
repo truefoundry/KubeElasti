@@ -122,7 +122,7 @@ Run a demo application in your cluster. We will use a sample httpbin service to 
 
 ```bash
 kubectl create namespace target
-kubectl apply -f ./playground/config/demo-application.yaml -n target
+kubectl apply -f ./playground/config/demo-deployment-target.yaml -n target
 ```
 
 Add virtual service if you are using istio.
@@ -140,7 +140,7 @@ This will deploy a httpbin service in the `target` namespace.
 Using the [ElastiService Definition](/src/gs-configure-elastiservice/), create a manifest file for your service and apply it. For demo, we use the below manifest.
 
 ```bash
-kubectl -n target apply -f ./playground/config/demo-elastiService.yaml
+kubectl -n target apply -f ./playground/config/demo-deployment-elastiService.yaml
 ```
 
 
@@ -193,7 +193,7 @@ In case you want to redeploy KubeElasti, with your latest changes, you can use t
 
 ### 11.1 Delete the ElastiService
 ```bash
-kubectl -n target delete -f ./playground/config/demo-elastiService.yaml
+kubectl -n target delete -f ./playground/config/demo-deployment-elastiService.yaml
 ```
 
 ### 11.2 Delete the KubeElasti

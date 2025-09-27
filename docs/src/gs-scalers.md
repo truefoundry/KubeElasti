@@ -28,7 +28,7 @@ Here we will see how to integrate KubeElasti with KEDA to build a complete scali
 Let's create a keda scaler for the httpbin service.
 
 ``` shell
-kubectl apply -f ./playground/config/demo-application-keda.yaml
+kubectl apply -f ./playground/config/demo-keda.yaml
 ```
 Note that the same prometheus query is used as in the [getting started](/src/gs-setup/) guide for ElastiService and the namespace is the same as the namespace that the ElastiService is created in.
 

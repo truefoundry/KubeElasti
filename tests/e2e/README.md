@@ -117,7 +117,7 @@ You can also run specific parts of the testing process:
 | `make pf-prom`           | Port-forward the Prometheus service to localhost:9090 |
 | `make pf-graf`           | Port-forward the Grafana service to localhost:9001 |
 | `make pf-ingress`        | Port-forward the ingress gateway service to localhost:8080 |
-| `make apply-demo-application` | Install demo application |
+| `make apply-demo-deployment` | Install demo deployment |
 | `make apply-demo-statefulset` | Install demo statefulset |
-| `make remove-demo-application` | Remove demo application |
+| `make remove-demo-deployment` | Remove demo deployment |
 | `make remove-demo-statefulset` | Remove demo statefulset |
