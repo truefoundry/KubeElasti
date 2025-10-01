@@ -63,13 +63,13 @@ NC='\033[0m' # No Color
 log_failure_details() {
     echo "${RED}--- DETAILED FAILURE ANALYSIS ---${NC}"
 
-    # Target EndpointSlice Status
-    echo "${CYAN}  Status of target Private EndpointSlice in ${TARGET_NAMESPACE}:${NC}"
-    kubectl get endpointslice -n "$TARGET_NAMESPACE"   -l endpointslice.kubernetes.io/managed-by=endpointslice-controller.k8s.io -o yaml | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve EndpointSlice status${NC}"
+    # # Target EndpointSlice Status
+    # echo "${CYAN}  Status of target Private EndpointSlice in ${TARGET_NAMESPACE}:${NC}"
+    # kubectl get endpointslice -n "$TARGET_NAMESPACE"   -l endpointslice.kubernetes.io/managed-by=endpointslice-controller.k8s.io -o yaml | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve EndpointSlice status${NC}"
 
-    # Ingress Logs
-    echo "${CYAN}  Logs from ingress:${NC}"
-    kubectl logs -n istio-system deployments/istiod --tail=15 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
+    # # Ingress Logs
+    # echo "${CYAN}  Logs from ingress:${NC}"
+    # kubectl logs -n istio-system deployments/istiod --tail=15 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
 
     # Resolver Logs
     echo "${CYAN}  Logs from elasti-resolver:${NC}"
@@ -83,9 +83,9 @@ log_failure_details() {
     echo "${CYAN}  Logs from target (${TARGET_RESOURCE}/${TARGET_NAME}):${NC}"
     kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=120 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
 
-    # Verbose Curl Request
-    echo "${CYAN}  Attempting verbose request for more details...${NC}"
-    kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl --max-time 10 -v -s "$URL" 2>&1 | head -20 | sed 's/^/    /' || echo "${YELLOW}  - Verbose request failed${NC}"
+    # # Verbose Curl Request
+    # echo "${CYAN}  Attempting verbose request for more details...${NC}"
+    # kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl --max-time 10 -v -s "$URL" 2>&1 | head -20 | sed 's/^/    /' || echo "${YELLOW}  - Verbose request failed${NC}"
     
     echo "${RED}-----------------------------------${NC}"
 }
@@ -128,6 +128,7 @@ for i in $(seq 1 $MAX_RETRIES); do
     start_time=$(date +%s)
     code=$(kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl \
         --max-time "$TIMEOUT" \
+        --retry 3 \
         -s \
         -o /dev/null \
         -w "%{http_code}" \
