@@ -51,10 +51,14 @@ spec:
           if [ "$HTTP_CODE" -eq 200 ]; then
             echo "Successfully registered installation with PostHog"
             echo "Response: $RESPONSE_BODY"
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "Successfully registered installation with PostHog"
+            echo "Response: $RESPONSE_BODY"
           else
             echo "Failed to register with PostHog. HTTP Code: $HTTP_CODE"
             echo "Response: $RESPONSE_BODY"
-            exit 1
+            echo "Continuing installation despite telemetry failure..."
+            exit 0
           fi
         env:
         - name: POSTHOG_API_KEY
