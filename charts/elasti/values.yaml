@@ -4,6 +4,10 @@ global:
   fullnameOverride: ""
   enableMonitoring: false
   secretName: elasti-secret
+  posthog:
+    enabled: false
+    apiKey: "phc_hlVTQvSWqDUBwXrsph0v8xhfc5lsSK9lvejrlZ5AiOG"
+    host: "https://us.posthog.com"
 elastiController:
   manager:
     args:

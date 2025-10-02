@@ -51,6 +51,16 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Generate installation ID once per release
+*/}}
+{{- define "elasti.installationId" -}}
+{{- if not .Values.global.installationId }}
+{{- $_ := set .Values.global "installationId" (uuidv4) }}
+{{- end }}
+{{- .Values.global.installationId }}
+{{- end }}
+
+{{/*
 Common env values
 */}}
 {{- define "elasti.commonEnvValues" -}}

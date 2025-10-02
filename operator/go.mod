@@ -15,6 +15,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.19.0
 )
 
+require github.com/stretchr/testify v1.10.0 // indirect
+
 replace github.com/truefoundry/elasti/pkg v0.0.0 => ../pkg
 
 require (

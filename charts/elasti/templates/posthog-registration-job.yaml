@@ -1,0 +1,96 @@
+{{- if .Values.global.posthog.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "elasti.fullname" . }}-posthog-registration
+  namespace: '{{ .Release.Namespace }}'
+  labels:
+    {{- include "elasti.labels" . | nindent 4 }}
+    app.kubernetes.io/component: posthog-registration
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "elasti.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: posthog-registration
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: posthog-registration
+        image: curlimages/curl:8.4.0
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Registering Elasti installation with PostHog..."
+          
+          # Prepare the event data
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ")
+          
+          echo "Sending installation event to PostHog..."
+          echo "Installation ID: ${INSTALLATION_ID}"
+          echo "Version: ${ELASTI_VERSION}"
+          echo "Namespace: ${ELASTI_NAMESPACE}"
+          
+          # Create JSON payload inline and send to PostHog
+          PAYLOAD="{\"api_key\":\"${POSTHOG_API_KEY}\",\"event\":\"elasti_installation_registered\",\"properties\":{\"distinct_id\":\"${INSTALLATION_ID}\",\"installation_id\":\"${INSTALLATION_ID}\",\"version\":\"${ELASTI_VERSION}\",\"namespace\":\"${ELASTI_NAMESPACE}\",\"release_name\":\"${RELEASE_NAME}\",\"chart_version\":\"${CHART_VERSION}\",\"timestamp\":\"${TIMESTAMP}\"},\"timestamp\":\"${TIMESTAMP}\"}"
+          
+          # Send the event to PostHog
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${POSTHOG_HOST}/capture/" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          RESPONSE_BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "Successfully registered installation with PostHog"
+            echo "Response: $RESPONSE_BODY"
+          else
+            echo "Failed to register with PostHog. HTTP Code: $HTTP_CODE"
+            echo "Response: $RESPONSE_BODY"
+            exit 1
+          fi
+        env:
+        - name: POSTHOG_API_KEY
+          value: {{ .Values.global.posthog.apiKey | quote }}
+        - name: POSTHOG_HOST
+          value: {{ .Values.global.posthog.host | quote }}
+        - name: INSTALLATION_ID
+          value: {{ include "elasti.installationId" . | quote }}
+        - name: ELASTI_VERSION
+          value: {{ .Chart.AppVersion | quote }}
+        - name: ELASTI_NAMESPACE
+          value: {{ .Release.Namespace | quote }}
+        - name: RELEASE_NAME
+          value: {{ .Release.Name | quote }}
+        - name: CHART_VERSION
+          value: {{ .Chart.Version | quote }}
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 50m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+{{- end }}
+
