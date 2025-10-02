@@ -43,18 +43,18 @@ echo "Using namespace: $NAMESPACE"
 apply_template() {
   local template_file="$1"
   local target_namespace="$2"
-
+  
   echo "Applying template: $(basename "$template_file")"
-
+  
   # Substitute all variables and apply
-  sed -e "s/\${NAMESPACE}/$target_namespace/g" "$template_file" | kubectl apply -n $target_namespace -f -
+  sed -e "s/\${NAMESPACE}/$target_namespace/g" "$template_file" | kubectl apply -n $target_namespace -f - 
 }
 
 # 1. Apply target deployment
 apply_template "$MANIFEST_DIR/test-template/target-deployment.yaml" "$NAMESPACE"
 kubectl wait --for=condition=Ready pods -l app=target-deployment -n $NAMESPACE --timeout=${TIMEOUT}s
 
-# 2. Apply keda ScaledObject in KEDA for Target
+# 2. Apply keda ScaledObject in KEDA for Target  
 apply_template "$MANIFEST_DIR/test-template/keda-scaledObject-Target.yaml" "$NAMESPACE"
 kubectl wait --for=condition=Ready scaledobject/target-scaled-object -n $NAMESPACE --timeout=${TIMEOUT}s
 
@@ -66,6 +66,3 @@ apply_template "$MANIFEST_DIR/test-template/target-elastiservice.yaml" "$NAMESPA
 
 # Label namespace for istio injection
 kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
-
-# 5. Correct elasti drift
-helm get manifest -n elasti elasti | kubectl apply -f -
