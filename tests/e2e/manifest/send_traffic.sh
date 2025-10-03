@@ -123,6 +123,10 @@ echo "${CYAN}--- Starting Traffic Test ---${NC}"
 failure_count=0
 
 for i in $(seq 1 $MAX_RETRIES); do
+    if [ $i -lt 2 ]; then
+        sleep 5
+    fi
+
     echo "\n${CYAN}--- Request $i/$MAX_RETRIES ---${NC}"
     echo "  ${CYAN}Time:${NC} $(date)"
 
@@ -131,6 +135,8 @@ for i in $(seq 1 $MAX_RETRIES); do
     start_time_rfc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     code=$(kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl \
         --max-time "$TIMEOUT" \
+        --retry 2 \
+        --retry-delay 1 \
         -s \
         -o /dev/null \
         -w "%{http_code}" \

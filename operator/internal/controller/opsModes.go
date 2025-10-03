@@ -55,6 +55,7 @@ func (r *ElastiServiceReconciler) switchMode(ctx context.Context, req ctrl.Reque
 	return nil
 }
 
+// TODO: Add atomicity to this, all-or-nothing
 func (r *ElastiServiceReconciler) enableProxyMode(ctx context.Context, req ctrl.Request, es *v1alpha1.ElastiService) error {
 	targetNamespacedName := types.NamespacedName{
 		Name:      es.Spec.Service,
@@ -70,16 +71,16 @@ func (r *ElastiServiceReconciler) enableProxyMode(ctx context.Context, req ctrl.
 	}
 	r.Logger.Info("1. Checked and created private service", zap.String("public service", targetSVC.Name), zap.String("private service", PVTName))
 
+	if err = r.createOrUpdateEndpointsliceToResolver(ctx, targetSVC); err != nil {
+		return fmt.Errorf("failed to create or update endpointslice to resolver: %w ", err)
+	}
+	r.Logger.Info("2. Created or updated endpointslice to resolver", zap.String("service", targetSVC.Name))
+
 	// Check if Public Service is present, and has not changed from the values in CRDDirectory
 	if err := r.watchPublicService(ctx, es, req); err != nil {
 		return fmt.Errorf("failed to add watch on public service: %w", err)
 	}
-	r.Logger.Info("2. Added watch on public service", zap.String("service", targetSVC.Name))
-
-	if err = r.createOrUpdateEndpointsliceToResolver(ctx, targetSVC); err != nil {
-		return fmt.Errorf("failed to create or update endpointslice to resolver: %w ", err)
-	}
-	r.Logger.Info("3. Created or updated endpointslice to resolver", zap.String("service", targetSVC.Name))
+	r.Logger.Info("3. Added watch on public service", zap.String("service", targetSVC.Name))
 
 	return nil
 }
