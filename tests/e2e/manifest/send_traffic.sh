@@ -61,6 +61,8 @@ NC='\033[0m' # No Color
 
 # log_failure_details: Centralized function to log detailed debugging information on failure
 log_failure_details() {
+    start_time="${1}"
+
     echo "${RED}--- DETAILED FAILURE ANALYSIS ---${NC}"
 
     # Target EndpointSlice Status
@@ -69,24 +71,24 @@ log_failure_details() {
 
     # Ingress Logs
     echo "${CYAN}  Logs from ingress:${NC}"
-    kubectl logs -n istio-system deployments/istiod --tail=15 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
+    kubectl logs -n istio-system deployments/istiod --since-time="${start_time}" | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve ingress logs${NC}"
 
     # Resolver Logs
     echo "${CYAN}  Logs from elasti-resolver:${NC}"
-    kubectl logs -n elasti services/elasti-resolver-service --tail=20 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
+    kubectl logs -n elasti services/elasti-resolver-service --since-time="${start_time}" --all-pods=true | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve resolver logs${NC}"
 
     # Controller Logs
     echo "${CYAN}  Logs from elasti-controller:${NC}"
-    kubectl logs -n elasti services/elasti-operator-controller-service --tail=20 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve controller logs${NC}"
+    kubectl logs -n elasti services/elasti-operator-controller-service --since-time="${start_time}" | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve controller logs${NC}"
 
     # Target Logs
     echo "${CYAN}  Logs from target (${TARGET_RESOURCE}/${TARGET_NAME}):${NC}"
-    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --tail=120 | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
+    kubectl logs -n "$TARGET_NAMESPACE" "${TARGET_RESOURCE}/${TARGET_NAME}"  --since-time="${start_time}" | sed 's/^/    /' || echo "${YELLOW}    - Could not retrieve target pod logs${NC}"
 
     # Verbose Curl Request
     echo "${CYAN}  Attempting verbose request for more details...${NC}"
     kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl --max-time 10 -v -s "$URL" 2>&1 | head -20 | sed 's/^/    /' || echo "${YELLOW}  - Verbose request failed${NC}"
-    
+
     echo "${RED}-----------------------------------${NC}"
 }
 
@@ -121,13 +123,20 @@ echo "${CYAN}--- Starting Traffic Test ---${NC}"
 failure_count=0
 
 for i in $(seq 1 $MAX_RETRIES); do
+    if [ $i -lt 2 ]; then
+        sleep 5
+    fi
+
     echo "\n${CYAN}--- Request $i/$MAX_RETRIES ---${NC}"
     echo "  ${CYAN}Time:${NC} $(date)"
 
-    echo "  ${CYAN}Executing: kubectl exec -n $CURL_NAMESPACE $CURL_POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
+    echo "  ${CYAN}Executing: kubectl exec -n $CURL_NAMESPACE $CURL_POD_NAME -- curl --max-time $TIMEOUT --retry 2 --retry-delay 1 -s -o /dev/null -w \"%{http_code}\" \"$URL\""
     start_time=$(date +%s)
+    start_time_rfc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     code=$(kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl \
         --max-time "$TIMEOUT" \
+        --retry 2 \
+        --retry-delay 1 \
         -s \
         -o /dev/null \
         -w "%{http_code}" \
@@ -135,11 +144,11 @@ for i in $(seq 1 $MAX_RETRIES); do
     result=$?
     end_time=$(date +%s)
     duration=$((end_time - start_time))
-    
+
     echo "  ${CYAN}Curl exit code:${NC} $result"
     echo "  ${CYAN}HTTP status code:${NC} $code"
     echo "  ${CYAN}Request duration:${NC} ${duration}s"
-    
+
     # Detailed error analysis
     if [ "$result" != "0" ]; then
         echo "ERROR: Curl command failed with exit code $result"
@@ -153,11 +162,11 @@ for i in $(seq 1 $MAX_RETRIES); do
             *) echo "  - Unknown curl error" ;;
         esac
 
-        log_failure_details
+        log_failure_details "${start_time_rfc}"
         failure_count=$((failure_count + 1))
         continue
     fi
-    
+
     if [ "$code" != "200" ]; then
         echo "ERROR: Expected HTTP 200, got $code"
         case $code in
@@ -170,13 +179,13 @@ for i in $(seq 1 $MAX_RETRIES); do
             *) echo "  - HTTP error response" ;;
         esac
 
-        log_failure_details
+        log_failure_details "${start_time_rfc}"
         failure_count=$((failure_count + 1))
         continue
     fi
 
     echo "${GREEN}SUCCESS: Request $i completed successfully (HTTP $code in ${duration}s)${NC}"
-    
+
     if [ $i -lt $MAX_RETRIES ]; then
         sleep 1
     fi
