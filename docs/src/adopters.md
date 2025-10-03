@@ -14,4 +14,5 @@ If you would like to be included in this table, please open an issue and your in
 | Aviso AI | Development | [link](https://aviso.com/) | Used as part of the Truefoundry platform |
 | Brainfish AI | Development | [link](https://brainfishai.com/) | Used as part of the Truefoundry platform |
 | Prodigal Tech | Development | [link](https://prodigaltech.com/) | Used as part of the Truefoundry platform |
-| Zurich Labs | Production | [link](https://zurichlabs.ai/) | Used as part of the Truefoundry platform |
+| Zurich Lab | Production | [link](https://www.zurichlab.in) | Used as part of the Truefoundry platform |
+| VXPlain | Production | [link](https://www.vxplain.com/) | Uses kubeelasti for scale to zero |
