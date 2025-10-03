@@ -130,7 +130,7 @@ for i in $(seq 1 $MAX_RETRIES); do
     echo "\n${CYAN}--- Request $i/$MAX_RETRIES ---${NC}"
     echo "  ${CYAN}Time:${NC} $(date)"
 
-    echo "  ${CYAN}Executing: kubectl exec -n $CURL_NAMESPACE $CURL_POD_NAME -- curl --max-time $TIMEOUT -s -o /dev/null -w \"%{http_code}\" \"$URL\""
+    echo "  ${CYAN}Executing: kubectl exec -n $CURL_NAMESPACE $CURL_POD_NAME -- curl --max-time $TIMEOUT --retry 2 --retry-delay 1 -s -o /dev/null -w \"%{http_code}\" \"$URL\""
     start_time=$(date +%s)
     start_time_rfc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     code=$(kubectl exec -n "$CURL_NAMESPACE" "$CURL_POD_NAME" -- curl \
