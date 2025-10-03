@@ -141,5 +141,6 @@ nav:
       - Test Monitoring: src/dev-test-monitoring.md
       - Contributors: src/dev-contributors.md
   - Comparisons: src/comparisons.md
+  - Adopters: src/adopters.md
   - Blog: 
       - Blog: blog/index.md
