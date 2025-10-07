@@ -1,15 +1,13 @@
-<p align="center">
+<div align="center">
 <img src="./docs/images/logo/banner.png" alt="KubeElasti Banner">
-</p>
+</div>
 
-<p align="center">
- <a>
-    <img src="https://img.shields.io/badge/license-MIT-blue" align="center">
- </a>
- <a>
-    <img src="https://github.com/truefoundry/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg" align="center">
- </a>
-</p>
+<div align="center">
+
+![](https://github.com/truefoundry/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue)
+[![Docs](https://img.shields.io/badge/Docs-kubeelasti.dev-blue)](https://kubeelasti.dev)
+</div>
 
 # Why use KubeElasti?
 
@@ -34,6 +32,7 @@ Kubernetes clusters can become costly, especially when running multiple services
 - [Monitoring](#monitoring)
 - [Development](#development)
 - [Contribution](#contribution)
+- [Adopters](#adopters)
 - [Getting Help](#getting-help)
 - [Roadmap](#roadmap)
   - [Star History](#star-history)
@@ -79,6 +78,11 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for more details.
 # Contribution
 
 Contribution details can be found in the [Contribution](./CONTRIBUTING.md) guide.
+
+# Adopters
+
+See the list of organizations who are using KubeElasti in Production or in Staging in the [Adopters](./docs/src/adopters.md) guide.
+
 
 # Getting Help
 
