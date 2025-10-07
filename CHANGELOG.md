@@ -8,6 +8,16 @@
 
 ### Improvements
 * Add support for StatefulSet as a scale target reference by @ramantehlan in [#188](https://github.com/truefoundry/KubeElasti/pull/188)
+* helm: forward values to elasti trough env variables by @rethil in [#178](https://github.com/truefoundry/KubeElasti/pull/178)
+
+### Fixes
+* Fix: 02 and 09 test for on traffic scale by @ramantehlan in [#194](https://github.com/truefoundry/KubeElasti/pull/194)
+* e2e: fix 02 test failure by @rethil in [#195](https://github.com/truefoundry/KubeElasti/pull/195)
+
+### Other
+* added adopters.md to document adopters by @shubhamrai1993 in [#197](https://github.com/truefoundry/KubeElasti/pull/197)
+* add link to star github repo by @shubhamrai1993 in [#198](https://github.com/truefoundry/KubeElasti/pull/198)
+* chore: upgrade go modules & 3pp used for building by @rethil in [#186](https://github.com/truefoundry/KubeElasti/pull/186)
 
 
 ## 0.1.16 (2025-09-22)
