@@ -4,7 +4,7 @@
 
 <div align="center">
 
-![](https://github.com/truefoundry/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
+![Lint and Test](https://github.com/truefoundry/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![Docs](https://img.shields.io/badge/Docs-kubeelasti.dev-blue)](https://kubeelasti.dev)
 </div>

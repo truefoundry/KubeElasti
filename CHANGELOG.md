@@ -20,9 +20,6 @@
 * added adopters.md to document adopters by @shubhamrai1993 in [#197](https://github.com/truefoundry/KubeElasti/pull/197)
 * add link to star github repo by @shubhamrai1993 in [#198](https://github.com/truefoundry/KubeElasti/pull/198)
 * chore: upgrade go modules & 3pp used for building by @rethil in [#186](https://github.com/truefoundry/KubeElasti/pull/186)
-* added adopters.md to document adopters by @shubhamrai1993 in [#197](https://github.com/truefoundry/KubeElasti/pull/197)
-* add link to star github repo by @shubhamrai1993 in [#198](https://github.com/truefoundry/KubeElasti/pull/198)
-* chore: upgrade go modules & 3pp used for building by @rethil in [#186](https://github.com/truefoundry/KubeElasti/pull/186)
 
 
 ## 0.1.16 (2025-09-22)
