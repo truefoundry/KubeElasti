@@ -8,7 +8,7 @@
 
 ### Improvements
 * Add support for StatefulSet as a scale target reference by @ramantehlan in [#188](https://github.com/truefoundry/KubeElasti/pull/188)
-* helm: forward values to elasti trough env variables by @rethil in [#178](https://github.com/truefoundry/KubeElasti/pull/178)
+* helm: forward values to elasti through env variables by @rethil in [#178](https://github.com/truefoundry/KubeElasti/pull/178)
 
 ### Fixes
 * Fix: 02 and 09 test for on traffic scale by @ramantehlan in [#194](https://github.com/truefoundry/KubeElasti/pull/194)
