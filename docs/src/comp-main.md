@@ -1,5 +1,5 @@
 ---
-title: "KubeElasti vs Knative vs OpenFaaS - Kubernetes Serverless Comparison"
+title: "KubeElasti vs Other Solutions"
 description: "Compare KubeElasti with Knative, OpenFaaS, and KEDA HTTP Add-on. Feature comparison table for Kubernetes serverless and scale-to-zero solutions."
 keywords:
   - KubeElasti vs Knative

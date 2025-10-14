@@ -1,24 +1,19 @@
 ---
-title: "KubeElasti vs KEDA"
-description: "Detailed technical comparison between KubeElasti and KEDA HTTP Add-on. Architecture, scaling mechanisms, resource management, and operational differences."
+title: "KubeElasti vs KEDA HTTP Add-on"
+description: "Comprehensive technical comparison between KubeElasti and KEDA HTTP Add-on. Architecture, scaling mechanisms, resource management, and operational differences."
 keywords:
-  - KubeElasti vs KEDA
-  - KEDA HTTP Add-on comparison
-  - Kubernetes auto-scaling
-  - scale to zero architecture
-  - HTTP proxy scaling
-  - event-driven autoscaling
-tags:
-  - comparison
-  - keda
-  - architecture
-  - scaling
-  - technical
+- KubeElasti vs KEDA
+- KEDA Alternative
+- KEDA HTTP Add-on comparison
+- Kubernetes auto-scaling
+- scale to zero architecture
+- HTTP proxy scaling
+- event-driven autoscaling
 ---
 
-# KubeElasti vs KEDA Technical Comparison
+# KubeElasti vs KEDA HTTP Add-on
 
-This document provides a comprehensive technical comparison between KubeElasti and KEDA (Kubernetes Event-Driven Autoscaling), specifically focusing on the KEDA HTTP Add-on for HTTP-based scaling scenarios.
+This document provides a comprehensive technical comparison between KubeElasti and KEDA HTTP Add-on, specifically focusing on HTTP-based scaling scenarios with scale-to-zero capabilities.
 
 ## Architecture Overview
 
@@ -26,100 +21,64 @@ This document provides a comprehensive technical comparison between KubeElasti a
 
 KubeElasti implements a dual-mode architecture with intelligent traffic management:
 
-- **Controller**: Manages ElastiService CRDs and orchestrates scaling decisions
-- **Resolver**: Acts as HTTP proxy/load balancer with dynamic routing
-- **Dual Mode Operation**: Switches between proxy mode (scale-from-zero) and serve mode (direct routing)
+- **Controller/Operator**: Manages ElastiService CRDs and orchestrates scaling decisions based on configurable triggers
+- **Resolver**: Acts as HTTP proxy/load balancer with dynamic routing capabilities  
+- **Smart Mode Switching**: Automatically switches between modes based on replica count
+- **Dual Mode Operation**:
+      - **Proxy Mode (Replicas = 0):** Intercepts/queues and buffers traffic until pods are brought online.
+      - **Serve Mode (Replicas > 0):** Bypasses proxy for direct routing, maximizing throughput and minimizing latency.
 - **Prometheus Integration**: Built-in metrics collection and query-based scaling triggers
 
-### KEDA Architecture
+### KEDA HTTP Add-on Architecture
 
-KEDA provides event-driven autoscaling through external scalers:
+KEDA HTTP Add-on provides event-driven autoscaling through a proxy-based system:
 
 - **KEDA Operator**: Manages ScaledObject CRDs and HPA integration
-- **KEDA HTTP Add-on**: Separate component for HTTP-based scaling
-- **External Scaler Pattern**: Delegates scaling decisions to external metrics
+- **HTTP Add-on Operator**: Manages HTTPScaledObject CRDs and configures interceptors
+- **HTTP Interceptor**: Always-on proxy that handles all HTTP traffic and maintains request queues
+- **External Scaler**: Communicates queue metrics to KEDA using external-push scaler pattern
 - **HPA Integration**: Leverages Kubernetes HPA for actual scaling operations
 
 ## Scaling Mechanisms
 
 | Feature | KubeElasti | KEDA HTTP Add-on |
 |---------|------------|------------------|
-| **Scaling Trigger** | Prometheus queries with custom metrics | HTTP request queue depth |
-| **Scale-to-Zero** | Native support with proxy mode | Supported via interceptor |
-| **Scale-from-Zero** | Automatic via resolver proxy | Requires HTTP interceptor |
-| **Scaling Algorithm** | Custom controller with configurable thresholds | HPA-based with external metrics |
-| **Cold Start Handling** | Intelligent proxy buffering | Request queuing in interceptor |
-| **Scaling Speed** | Configurable intervals (default: 30s) | HPA-controlled (default: 15s) |
+| **Scaling Trigger** | Prometheus queries with custom metrics | HTTP request queue depth (pending requests) |
+| **Scale-to-Zero** | Native support with proxy mode activation | Supported via interceptor queue management |
+| **Scale-from-Zero** | Automatic via resolver proxy with request queueing | Request queuing in always-on interceptor |
+| **Scaling Algorithm** | Custom controller with configurable thresholds and cooldown periods | HPA-based with external-push metrics from interceptor |
+| **Cold Start Handling** | Intelligent proxy buffering during scale-up | Request queuing with configurable pending request thresholds |
+| **Scaling Speed** | Configurable polling intervals (default: 30s) | HPA-controlled (default: 15s) with scaledownPeriod configuration |
 
-## Traffic Management
+## Traffic Management Patterns
 
 ### KubeElasti Traffic Flow
 
 ```
-Client Request → Resolver (Proxy/Serve Mode) → Target Service
-                     ↓
-              Prometheus Metrics → Controller → Scaling Decision
+[In Proxy]
+Client Request → Resolver → Target Service
+↓
+Prometheus Metrics → Controller → Scaling Decision → Mode Switch
+
+[In Serve]
+Client Request → Target Service
+↓
+Prometheus Metrics → Controller → Scaling Decision → Mode Switch
 ```
 
-**Proxy Mode**: Resolver acts as reverse proxy, buffers requests during scaling
-**Serve Mode**: Direct routing to target service for optimal performance
+**Proxy Mode (Replicas = 0)**: Resolver acts as reverse proxy, queues requests during scaling
+**Serve Mode (Replicas > 0)**: Direct routing to target service, resolver out of critical path
 
 ### KEDA HTTP Add-on Traffic Flow
 
 ```
-Client Request → HTTP Interceptor → Target Service
-                     ↓
-              Queue Metrics → KEDA Operator → HPA → Scaling Decision
+Client Request → HTTP Interceptor (Always-On) → Target Service
+↓
+Queue Metrics → External Scaler → KEDA Operator → HPA → Scaling Decision
 ```
 
-**Always-On Proxy**: HTTP interceptor remains in request path
-**Queue-Based**: Scaling decisions based on request queue depth
-
-## Resource Requirements
-
-### KubeElasti
-
-```yaml
-# Controller Resource Usage
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
-
-# Resolver Resource Usage
-resources:
-  requests:
-    cpu: 50m
-    memory: 64Mi
-  limits:
-    cpu: 200m
-    memory: 256Mi
-```
-
-### KEDA HTTP Add-on
-
-```yaml
-# KEDA Operator Resource Usage
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 1000m
-    memory: 1000Mi
-
-# HTTP Interceptor Resource Usage
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 1000m
-    memory: 1000Mi
-```
+**Always-On Proxy**: HTTP interceptor remains in request path regardless of scaling state
+**Queue-Based Metrics**: Scaling decisions based on in-flight request count and pending queue depth
 
 ## Configuration Complexity
 
@@ -130,7 +89,11 @@ apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
   name: example-service
+  namespace: default
 spec:
+  service: example-service
+  minTargetReplicas: 1
+  cooldownPeriod: 300
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -139,42 +102,32 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus:9090
-        query: 'rate(http_requests_total[1m])'
+        query: 'sum(rate(http_requests_total[1m])) or vector(0)'
         threshold: '0.1'
-  minReplicas: 0
-  maxReplicas: 10
 ```
 
 ### KEDA HTTP Add-on Configuration
 
 ```yaml
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
-metadata:
-  name: example-scaledobject
-spec:
-  scaleTargetRef:
-    name: target-deployment
-  minReplicaCount: 0
-  maxReplicaCount: 10
-  triggers:
-  - type: external
-    metadata:
-      scalerAddress: keda-http-add-on-external-scaler:9090
-      host: example.com
-      targetPendingRequests: '10'
----
 apiVersion: http.keda.sh/v1alpha1
 kind: HTTPScaledObject
 metadata:
   name: example-http-scaledobject
 spec:
-  host: example.com
-  targetPendingRequests: 10
+  hosts:
+    - example.com
   scaleTargetRef:
     deployment: target-deployment
     service: target-service
     port: 8080
+  replicas:
+    min: 0
+    max: 10
+  scaledownPeriod: 300
+  targetPendingRequests: 100
+---
+# Note: ScaledObject is automatically created by the HTTPScaledObject operator
+# with external-push trigger configuration
 ```
 
 ## Performance Characteristics
@@ -183,98 +136,83 @@ spec:
 
 | Scenario | KubeElasti | KEDA HTTP Add-on |
 |----------|------------|------------------|
-| **Serve Mode** | ~1ms overhead | ~2-5ms overhead |
-| **Proxy Mode** | ~5-10ms overhead | ~2-5ms overhead |
-| **Cold Start** | 200-500ms (with buffering) | 300-800ms (queue processing) |
-| **Scaling Decision** | 30s default interval | 15s HPA interval |
+| **Serve Mode (Active)** | 0ms overhead | ~2-5ms overhead |
+| **Cold Start** | 200-800ms (with request buffering) | 300-1000ms (queue processing) |
+| **Scaling Decision Latency** | 30s default polling interval | 15s HPA polling + scaler evaluation |
 
 ### Throughput Characteristics
 
-- **KubeElasti**: Higher throughput in serve mode due to direct routing
-- **KEDA**: Consistent throughput with always-on proxy pattern
-
-## Monitoring and Observability
-
-### KubeElasti Metrics
-
-```prometheus
-# Built-in Prometheus metrics
-elasti_service_mode{service="example", mode="proxy|serve"}
-elasti_service_replicas{service="example"}
-elasti_service_requests_total{service="example"}
-elasti_service_scaling_duration_seconds{service="example"}
-```
-
-### KEDA Metrics
-
-```prometheus
-# KEDA operator metrics
-keda_scaler_active{scaler="external-scaler"}
-keda_scaled_object_paused{scaledObject="example"}
-keda_scaler_metrics_value{scaler="external-scaler"}
-
-# HTTP Add-on metrics
-keda_http_requests_pending{host="example.com"}
-keda_http_requests_total{host="example.com"}
-```
+- **KubeElasti**: Higher throughput in serve mode due to direct routing bypass
+- **KEDA HTTP Add-on**: Consistent throughput with always-on proxy, but potential bottleneck under high load
 
 ## Operational Considerations
 
 ### KubeElasti
 
 **Advantages**:
-- Intelligent mode switching reduces proxy overhead
-- Built-in Prometheus integration
-- Simpler architecture with fewer components
-- Custom scaling algorithms beyond HTTP metrics
+- Intelligent mode switching reduces proxy overhead during normal operations
+- Built-in Prometheus integration with flexible query-based triggers
+- Simpler architecture with fewer moving components
+- Custom scaling algorithms beyond HTTP metrics support
+- Lower resource footprint when scaled up (serve mode)
 
 **Limitations**:
-- Requires Prometheus for advanced scaling
-- Custom CRD learning curve
-- Less mature ecosystem
+- Requires Prometheus for advanced scaling capabilities
+- Newer project with smaller ecosystem and community
+- Limited scaler types compared to KEDA
+- Less enterprise adoption and support
 
 ### KEDA HTTP Add-on
 
 **Advantages**:
-- Mature ecosystem with extensive scaler support
-- Standard HPA integration
-- Active community and enterprise support
-- Multiple trigger types beyond HTTP
+- Mature ecosystem with extensive scaler support (70+ built-in scalers)
+- Standard HPA integration with Kubernetes-native patterns
+- Active community and enterprise support options
+- Multiple trigger types beyond HTTP (databases, queues, etc.)
+- Proven production deployments at scale
 
 **Limitations**:
-- Always-on proxy overhead
-- More complex multi-component architecture
+- Always-on proxy overhead even when not scaling
+- More complex multi-component architecture (operator + interceptor + scaler)
+- Beta stage with potential production limitations
 - Limited customization of scaling algorithms
-- Additional resource overhead
+
+## Technical Trade-offs Summary
+
+| Consideration | KubeElasti | KEDA HTTP Add-on |
+|---------------|------------|------------------|
+| **Architectural Complexity** | Lower | Higher |
+| **Performance (Scaled Up)** | Better (serve mode) | Good (consistent proxy) |
+| **Performance (Scale-from-zero)** | Good (proxy mode) | Good (always-on queue) |  
+| **Ecosystem Maturity** | Developing | Mature |
+| **Operational Overhead** | Lower | Higher |
+| **Flexibility** | High (custom triggers) | Very High (70+ scalers) |
+| **Resource Efficiency** | Higher (mode switching) | Lower (always-on proxy) |
+
 
 ## Use Case Recommendations
 
 ### Choose KubeElasti When
 
-- Performance optimization is critical (serve mode benefits)
-- Custom scaling logic based on business metrics
-- Prometheus-centric monitoring stack
-- Simplified operational model preferred
+- **Performance optimization is critical** (serve mode benefits significant)
+- **Custom scaling logic required** based on business metrics beyond HTTP queues
+- **Prometheus-centric monitoring stack** already in place
+- **Simplified operational model preferred** with fewer components
+- **Direct routing benefits** outweigh always-on proxy patterns
+- **Resource efficiency** during scaled-up state is important
 
-### Choose KEDA When
+### Choose KEDA HTTP Add-on When
 
-- Multi-trigger scaling requirements (HTTP + queue + database)
-- Enterprise support and ecosystem maturity needed
-- Standard HPA integration preferred
-- Existing KEDA infrastructure in place
+- **Multi-trigger scaling requirements** (HTTP + queue + database triggers)
+- **Enterprise support and ecosystem maturity** needed
+- **Standard HPA integration** and Kubernetes-native patterns preferred
+- **Existing KEDA infrastructure** already deployed
+- **Beta limitations acceptable** for your use case
+- **Consistent proxy behavior** preferred over mode switching
 
-## Migration Considerations
 
-### From KEDA to KubeElasti
+## Conclusion
 
-1. Replace ScaledObject with ElastiService CRD
-2. Convert HTTP interceptor configuration to resolver settings
-3. Migrate external scaler metrics to Prometheus queries
-4. Update monitoring dashboards for new metrics
+Both KubeElasti and KEDA HTTP Add-on solve the scale-to-zero challenge for HTTP workloads but with fundamentally different architectural approaches. KubeElasti's dual-mode architecture offers performance benefits when scaled up. KEDA HTTP Add-on provides proven patterns with extensive ecosystem support but maintains always-on proxy overhead.
 
-### From KubeElasti to KEDA
-
-1. Deploy KEDA operator and HTTP Add-on
-2. Create HTTPScaledObject and ScaledObject resources
-3. Configure HTTP interceptor routing
-4. Migrate Prometheus-based triggers to external scaler pattern
+The choice between them should be based on your specific requirements for performance, operational complexity, ecosystem maturity, and long-term architectural goals.
