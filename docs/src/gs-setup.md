@@ -1,3 +1,21 @@
+---
+title: "KubeElasti Setup Guide - Install Kubernetes Serverless Operator"
+description: "Complete installation guide for KubeElasti. Learn how to set up the Kubernetes serverless operator with Helm, configure prerequisites, and start scaling to zero."
+keywords:
+  - KubeElasti installation
+  - Kubernetes serverless setup
+  - Helm installation guide
+  - Kubernetes operator setup
+  - scale to zero configuration
+  - serverless Kubernetes
+tags:
+  - setup
+  - installation
+  - getting-started
+  - helm
+  - kubernetes
+---
+
 # Setup
 
 Get started by following below steps:

@@ -1,3 +1,21 @@
+---
+title: "KubeElasti Introduction - Kubernetes Scale-to-Zero Solution"
+description: "Learn how KubeElasti provides scale-to-zero functionality for Kubernetes. Understand proxy mode, traffic queueing, and automatic scaling from 0 to 1 replicas."
+keywords:
+  - KubeElasti introduction
+  - Kubernetes scale to zero
+  - serverless Kubernetes
+  - traffic queueing
+  - proxy mode
+  - automatic scaling
+  - resource optimization
+tags:
+  - introduction
+  - concepts
+  - getting-started
+  - scale-to-zero
+---
+
 # Introduction
 
 KubeElasti (Sometimes referred to as just "Elasti") is a Kubernetes-native solution that offers scale-to-zero functionality when there is no traffic and automatically scales **up from 0** when traffic arrives. Most Kubernetes autoscaling solutions like HPA or Keda can scale from 1 to n replicas based on cpu utilization or memory usage. However, these solutions do not offer a way to scale to 0 when there is no traffic. KubeElasti solves this problem by dynamically managing service replicas based on real-time traffic conditions. It only handles scaling the application down to 0 replicas and scaling it back up to 1 replica when traffic is detected again. The scaling after 1 replica is handled by the autoscaler like HPA or Keda.
