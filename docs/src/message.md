@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Message Flow - Internal Communication Patterns"
+description: "Understand internal message flow and communication patterns in KubeElasti. Learn about component interactions and data flow."
+keywords:
+  - KubeElasti message flow
+  - internal communication
+  - component interaction
+  - data flow patterns
+  - system architecture
+  - message patterns
+---
+
 ```
 graph TB
   %% ───────────────────────────

@@ -1,5 +1,13 @@
 ---
-title: Scalers
+title: "KubeElasti Scalers - HPA and KEDA Integration"
+description: "Learn how KubeElasti works with HPA and KEDA for Kubernetes auto-scaling. Configure horizontal pod autoscaling with scale-to-zero functionality."
+keywords:
+  - KubeElasti scalers
+  - HPA integration
+  - KEDA integration
+  - Kubernetes auto-scaling
+  - horizontal pod autoscaler
+  - scale to zero HPA
 ---
 
 

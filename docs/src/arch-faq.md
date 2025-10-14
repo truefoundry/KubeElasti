@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Architecture FAQ - Design Decisions and Technical Questions"
+description: "Common questions about KubeElasti's architecture decisions, component separation, and design choices for Kubernetes serverless scaling."
+keywords:
+  - KubeElasti FAQ
+  - architecture questions
+  - design decisions
+  - resolver operator separation
+  - Kubernetes architecture
+  - technical FAQ
+---
+
 # Architecture FAQ
 
 This FAQ addresses common questions about KubeElasti's architecture decisions and design choices.

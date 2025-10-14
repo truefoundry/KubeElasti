@@ -1,6 +1,18 @@
+---
+title: "Configure ElastiService - KubeElasti Custom Resource Setup"
+description: "Learn how to configure ElastiService CRD for KubeElasti. Complete guide to setting up scale-to-zero with triggers, scalers, and resources configuration."
+keywords:
+  - ElastiService configuration
+  - KubeElasti CRD setup
+  - Kubernetes custom resource
+  - scale to zero configuration
+  - ElastiService yaml
+  - KubeElasti triggers
+---
+
 # Configure ElastiService
 
-To enable scale to 0 on any deployment, we will need to create an ElastiService custom resource for that deployment. 
+To enable scale to 0 on any supported resource, we will need to create an ElastiService custom resource for that resource. 
 
 An ElastiService custom resource has the following structure:
 
@@ -17,7 +29,7 @@ spec:
   scaleTargetRef:
     apiVersion: <apiVersion> # (5)
     kind: <kind> # (6)
-    name: <deployment-or-rollout-name> # (7)
+    name: <deployment-or-rollout-or-statefulset-name> # (7)
   triggers:
   - type: <trigger-type> # (8)
     metadata:
@@ -34,9 +46,9 @@ spec:
 2. Replace it with the namespace of the service.
 3. Replace it with the min replicas to bring up when first request arrives. Minimum: 1
 4. Replace it with the cooldown period to wait after scaling up before considering scale down. Default: 900 seconds (15 minutes) | Maximum: 604800 seconds (7 days) | Minimum: 1 second (1 second)
-5. ApiVersion should be `apps/v1` if you are using deployments or `argoproj.io/v1alpha1` in case you are using argo-rollouts. 
-6. Kind should be either `Deployment` or `Rollout` (in case you are using Argo Rollouts).
-7. Name should exactly match the name of the deployment or rollout.
+5. ApiVersion should be `apps/v1` if you are using `Deployment` or `StatefulSet` or `argoproj.io/v1alpha1` in case you are using argo-rollouts. 
+6. Kind should be either `Deployment` or `Rollout`(in case you are using Argo Rollouts) or `StatefulSet` 
+7. Name should exactly match the name of the deployment or rollout or statefulset.
 8. Replace it with the trigger type. Currently, KubeElasti supports only one trigger type - `prometheus`. 
 9. Replace it with the trigger query. In this case, it is the number of requests per second.
 10. Replace it with the trigger server address. In this case, it is the address of the prometheus server.
@@ -52,9 +64,9 @@ The key fields to be specified in the spec are:
 - `<min-target-replicas>`: Min replicas to bring up when first request arrives.
     - Minimum: 1
 - `<scaleTargetRef>`: Reference to the scale target similar to the one used in HorizontalPodAutoscaler.
-- `<kind>`: Replace by `rollouts` or `deployments`
+- `<kind>`: Replace by `Rollout` or `Deployment` or `StatefulSet`
 - `<apiVersion>`: Replace with `argoproj.io/v1alpha1` or `apps/v1`
-- `<deployment-or-rollout-name>`: Replace with name of the rollout or the deployment for the service. This will be scaled up to min-target-replicas when first request comes
+- `<deployment-or-rollout-or-statefulset-name>`: Replace with name of the rollout or the deployment or statefulset for the service. This will be scaled up to min-target-replicas when first request comes
 - `cooldownPeriod`: Minimum time (in seconds) to wait after scaling up before considering scale down. 
     - Default: 900 seconds (15 minutes)
     - Maximum: 604800 seconds (7 days)
@@ -74,8 +86,8 @@ The section below explains how the different configuration options are used in K
 
 This is defined using the `scaleTargetRef` field in the spec. 
 
-- `scaleTargetRef.kind`: should be either be  `deployments` or `rollouts` (in case you are using Argo Rollouts). 
-- `scaleTargetRef.apiVersion` will be `apps/v1` if you are using deployments or `argoproj.io/v1alpha1` in case you are using argo-rollouts. 
+- `scaleTargetRef.kind`: should be either be  `Deployment` or `Rollout` or `StatefulSet` (in case you are using Argo Rollouts). 
+- `scaleTargetRef.apiVersion` should be `apps/v1` if you are using `Deployment` or `StatefulSet` or `argoproj.io/v1alpha1` in case you are using argo-rollouts.  
 - `scaleTargetRef.name` should exactly match the name of the deployment or rollout. 
 
 <br>

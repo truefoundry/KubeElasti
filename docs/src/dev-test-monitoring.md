@@ -1,4 +1,16 @@
 
+---
+title: "KubeElasti Test Monitoring - Prometheus and Grafana Setup"
+description: "Set up monitoring for KubeElasti testing with Prometheus and Grafana. Monitor test environments and validate scaling behavior."
+keywords:
+  - KubeElasti test monitoring
+  - Prometheus testing setup
+  - Grafana test dashboard
+  - test environment monitoring
+  - Kubernetes test monitoring
+  - monitoring setup
+---
+
 # Test Monitoring
 
 ```bash

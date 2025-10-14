@@ -8,7 +8,8 @@ extra_css:
   - stylesheets/extra.css
 extra_files:
   - docs/CNAME
-
+  - docs/robots.txt
+  - docs/ads.txt
 
 # Repository
 repo_name: truefoundry/KubeElasti
@@ -108,7 +109,6 @@ plugins:
       separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - blog
   - meta
-  - tags
   - minify:
       minify_html: true
       minify_js: true
@@ -128,7 +128,7 @@ extra:
       link: https://x.com/truefoundry
   analytics:
     provider: google
-    property_id: G-XXXXXXXXXX
+    property_id: G-LQ0TP60DHT
   structured_data:
     organization:
       "@context": "https://schema.org"
@@ -138,7 +138,6 @@ extra:
       logo: "https://kubeelasti.dev/images/logo/logo_white_full.png"
       sameAs:
         - "https://github.com/truefoundry"
-        - "https://x.com/truefoundry"
         - "https://discord.gg/qFyN73htgE"
     software:
       "@context": "https://schema.org"
@@ -167,7 +166,7 @@ extra:
       "@type": "WebSite"
       name: "KubeElasti Documentation"
       url: "https://kubeelasti.dev"
-      description: "Official documentation for KubeElasti - Serverless for Kubernetes"
+      description: "Official documentation for KubeElasti - Kubernetes operator for serverless auto-scaling"
       publisher:
         "@type": "Organization"
         name: "TrueFoundry"
@@ -236,7 +235,10 @@ nav:
       - E2E Testing: src/dev-test-e2e.md
       - Test Monitoring: src/dev-test-monitoring.md
       - Contributors: src/dev-contributors.md
-  - Comparisons: src/comparisons.md
+  - Comparisons: 
+      - Overview: src/comp-main.md
+      - KEDA vs KubeElasti: src/comp-keda-vs-kubeelasti.md
+      - KubeElasti vs Knative: src/comp-knative-vs-kubeelasti.md
   - Adopters: src/adopters.md
   - Blog: 
       - Blog: blog/index.md

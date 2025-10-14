@@ -1,3 +1,15 @@
+---
+title: "KubeElasti vs Knative vs OpenFaaS - Kubernetes Serverless Comparison"
+description: "Compare KubeElasti with Knative, OpenFaaS, and KEDA HTTP Add-on. Feature comparison table for Kubernetes serverless and scale-to-zero solutions."
+keywords:
+  - KubeElasti vs Knative
+  - Kubernetes serverless comparison
+  - OpenFaaS vs KubeElasti
+  - KEDA HTTP comparison
+  - scale to zero comparison
+  - serverless solutions comparison
+---
+
 # Comparisons with Other Solutions
 
 This document compares KubeElasti with other popular serverless and scale-to-zero solutions in the Kubernetes ecosystem.
@@ -21,7 +33,7 @@ Knative is a comprehensive platform for deploying and managing serverless worklo
 
 ### Key Differences
 - **Complexity**: Knative is a full-featured platform that requires significant setup and maintenance. KubeElasti is focused solely on scale-to-zero functionality and can be added to existing services with minimal configuration.
-- **Integration**: Knative requires services to be deployed as Knative services. KubeElasti works with existing Kubernetes deployments and Argo Rollouts without modification.
+- **Integration**: Knative requires services to be deployed as Knative services. KubeElasti works with existing Kubernetes resources without modification.
 - **Learning Curve**: Knative has a steeper learning curve due to its many concepts and components. KubeElasti follows familiar Kubernetes patterns with simple CRD-based configuration.
 
 ## **OpenFaaS**

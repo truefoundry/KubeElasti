@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Architecture - Kubernetes Serverless Operator Design"
+description: "Understand KubeElasti's architecture with controller, resolver, and proxy components. Learn how the Kubernetes operator manages scale-to-zero functionality."
+keywords:
+  - KubeElasti architecture
+  - Kubernetes operator design
+  - serverless architecture
+  - controller resolver proxy
+  - Kubernetes components
+  - scale to zero design
+---
+
 # KubeElasti Architecture
 
 <!-- ![Unified Architecture of KubeElasti](../../images/hld.png) -->

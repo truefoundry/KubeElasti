@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Playground - Local Testing Environment"
+description: "Set up a local Kubernetes playground for testing KubeElasti. Learn how to use Kind, Minikube, or Docker Desktop for local development and testing."
+keywords:
+  - KubeElasti playground
+  - local Kubernetes testing
+  - Kind cluster setup
+  - Minikube development
+  - Docker Desktop Kubernetes
+  - local testing environment
+---
+
 # Playground
 
 This guide will help you set up a local Kubernetes cluster to test the elasti operator and resolver. Follow these steps from the project home directory.

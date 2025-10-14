@@ -51,7 +51,7 @@ KubeElasti uses a proxy mechanism that queues and holds requests for scaled-down
 
 - **Seamless Integration:** KubeElasti integrates effortlessly with your existing Kubernetes setup - whether you are using HPA or Keda. It takes just a few steps to enable scale to zero for any service.
 
-- **Deployment and Argo Rollouts Support:** KubeElasti supports two scale target references: Deployment and Argo Rollouts, making it versatile for various deployment scenarios.
+- **Deployment, StatefulSet, Argo Rollouts Support:** KubeElasti supports three scale target references: Deployment, StatefulSet and Argo Rollouts, making it versatile for various deployment scenarios.
 
 - **Prometheus Metrics Export:** KubeElasti exports Prometheus metrics for easy out-of-the-box monitoring. You can also import a pre-built dashboard into Grafana for comprehensive visualization.
 

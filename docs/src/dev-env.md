@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Development Environment Setup"
+description: "Set up your development environment for KubeElasti. Complete guide for Go, Docker, Kubernetes tools, and local development setup."
+keywords:
+  - KubeElasti development
+  - Go development setup
+  - Kubernetes development
+  - Docker development
+  - local development environment
+  - contributing to KubeElasti
+---
+
 # Dev Environment
 
 Setting up your development environment for KubeElasti involves preparing your local setup for building, testing, and contributing to the project. Follow these steps to get started:

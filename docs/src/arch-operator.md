@@ -1,4 +1,16 @@
 
+---
+title: "KubeElasti Operator Architecture - Controller and CRD Design"
+description: "Deep dive into KubeElasti operator architecture. Learn about ElastiService CRD, controller patterns, and Kubernetes operator implementation."
+keywords:
+  - KubeElasti operator
+  - Kubernetes controller
+  - ElastiService CRD
+  - operator architecture
+  - controller pattern
+  - Kubernetes operator design
+---
+
 # Operator Architecture
 
 ``` mermaid

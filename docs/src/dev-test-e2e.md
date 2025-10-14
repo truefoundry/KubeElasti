@@ -1,4 +1,16 @@
 
+---
+title: "KubeElasti E2E Testing - KUTTL Framework Testing"
+description: "Run end-to-end tests for KubeElasti using KUTTL framework. Complete guide for testing KubeElasti in real Kubernetes environments."
+keywords:
+  - KubeElasti E2E testing
+  - KUTTL testing framework
+  - Kubernetes end-to-end tests
+  - integration testing
+  - KubeElasti testing
+  - automated testing
+---
+
 # End-to-End Testing
 
 Use the KUTTL framework to execute KubeElasti end-to-end tests in a real Kubernetes environment:
