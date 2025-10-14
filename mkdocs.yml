@@ -233,8 +233,8 @@ nav:
       - Contributors: src/dev-contributors.md
   - Comparisons: 
       - Overview: src/comp-main.md
-      - KEDA vs KubeElasti: src/comp-keda-vs-kubeelasti.md
-      - KubeElasti vs Knative: src/comp-knative-vs-kubeelasti.md
+      - KubeElasti vs KEDA: src/comp-kubeelasti-vs-keda.md
+      - KubeElasti vs Knative: src/comp-kubeelasti-vs-knative.md
   - Adopters: src/adopters.md
   - Blog: 
       - Blog: blog/index.md

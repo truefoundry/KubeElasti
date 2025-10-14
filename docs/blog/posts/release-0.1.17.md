@@ -5,7 +5,7 @@ title: Release 0.1.17
 description: Release 0.1.17 of KubeElasti is now available. This release includes a number of new features and improvements.
 keywords: 
     - KubeElasti Release 0.1.17
-    - scale-to-zero
+    - Release
     - cost optimization
     - kubernetes scaling
 author: 
@@ -17,6 +17,7 @@ slug: release-0.1.17
 
 **KubeElasti v0.1.17** is out, and we are excited! This release brings significant improvements to KubeElasti, and marks a major milestone in making KubeElasti more versatile and production-ready for diverse workloads.
 
+<!-- more -->
 
 ## **Major New Feature: StatefulSet Support**
 
