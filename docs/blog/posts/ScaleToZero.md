@@ -117,7 +117,7 @@ With KubeElasti, you can implement it **without changing your service code**, **
 
 Want to give it a spin? Start here:
 
-* 🧪 Quickstart: [Get Started Guide](/src/gs-setup/)
+* 🧪 Quickstart: [Get Started Guide](../../src/gs-setup.md)
 * 🧩 Source Code: [KubeElasti on GitHub](https://github.com/truefoundry/KubeElasti)
 
 

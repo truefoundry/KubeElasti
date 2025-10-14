@@ -149,7 +149,7 @@ This will deploy a httpbin service in the `target` namespace.
 
 ## 8. Create ElastiService Resource
 
-Using the [ElastiService Definition](/src/gs-configure-elastiservice/), create a manifest file for your service and apply it. For demo, we use the below manifest.
+Using the [ElastiService Definition](./gs-configure-elastiservice.md), create a manifest file for your service and apply it. For demo, we use the below manifest.
 
 ```bash
 kubectl -n target apply -f ./playground/config/demo-deployment-elastiService.yaml
