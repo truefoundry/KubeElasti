@@ -3,7 +3,16 @@ date: 2025-08-02
 pin: true
 title: What is Scale-to-Zero?
 description: Learn how to implement true scale-to-zero for HTTP services in Kubernetes, avoid cold-start failures, and discover how KubeElasti achieves this better than Knative, KEDA, or OpenFaaS.
-keywords: Kubernetes, scale-to-zero, autoscaling, KEDA, Knative, KubeElasti, serverless, cost optimization, kubernetes scaling
+keywords: 
+  - Kubernetes
+  - scale-to-zero
+  - autoscaling
+  - KEDA
+  - Knative
+  - KubeElasti
+  - serverless
+  - cost optimization
+  - kubernetes scaling
 author: 
     - Raman Tehlan
 slug: scale-to-zero
@@ -17,7 +26,7 @@ In today's blog, we dive into the concept of **Scale-to-Zero**, why it matters, 
 
 # What is Scale-to-Zero?
 
-**Scale-to-Zero** refers to the ability to automatically scale down a pods to zero replicas — effectively **turning off** the service — when it's idle, and scaling it back up when traffic resumes.
+**Scale-to-Zero** refers to the ability to automatically scale down pod to zero replicas — effectively **turning off** the service — when it's idle, and scaling it back up when traffic resumes.
 
 This is ideal for:
 
@@ -25,8 +34,6 @@ This is ideal for:
 - Spiky workloads
 - Scheduled batch jobs
 - Cost-sensitive services (e.g., licensed software, GPU workloads)
-
-
 
 ## Why Use Scale-to-Zero?
 

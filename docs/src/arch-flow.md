@@ -1,4 +1,3 @@
-
 ---
 title: "KubeElasti Flow Description - Scale-to-Zero Traffic Management"
 description: "Learn how KubeElasti manages traffic flow during scale-to-zero operations. Understand proxy mode, serve mode, and traffic queueing mechanisms."
@@ -61,7 +60,7 @@ graph LR
 
 ## **2. Scale Down to 0:** when there are no requests
 
-If the query from prometheus returns a value less than the threshold, KubeElasti will scale down the service to 0. Before it scales to 0, it redirects all requests to the KubeElasti resolver, then sets the pods replicas to 0. It also pauses KEDA (if in use) to prevent it from scaling the service up, because KEDA is configured with `minReplicas: 1`.
+If the query from prometheus returns a value less than the threshold, KubeElasti will scale down the service to 0. Before it scales to 0, it redirects all requests to the KubeElasti resolver, then sets the pod replicas to 0. It also pauses KEDA (if in use) to prevent it from scaling the service up, because KEDA is configured with `minReplicas: 1`.
 
 
 ``` mermaid

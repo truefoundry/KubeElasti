@@ -54,7 +54,7 @@ KEDA HTTP Add-on provides event-driven autoscaling through a proxy-based system:
 
 ### KubeElasti Traffic Flow
 
-```
+```text
 [In Proxy]
 Client Request → Resolver → Target Service
 ↓
@@ -71,7 +71,7 @@ Prometheus Metrics → Controller → Scaling Decision → Mode Switch
 
 ### KEDA HTTP Add-on Traffic Flow
 
-```
+```text
 Client Request → HTTP Interceptor (Always-On) → Target Service
 ↓
 Queue Metrics → External Scaler → KEDA Operator → HPA → Scaling Decision

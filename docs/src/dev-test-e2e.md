@@ -1,4 +1,3 @@
-
 ---
 title: "KubeElasti E2E Testing - KUTTL Framework Testing"
 description: "Run end-to-end tests for KubeElasti using KUTTL framework. Complete guide for testing KubeElasti in real Kubernetes environments."

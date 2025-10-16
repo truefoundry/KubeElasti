@@ -56,7 +56,7 @@ Knative is a full-stack serverless platform for Kubernetes, designed for advance
 | **Scale-from-Zero**    | Requests queued in proxy, released when ready        | Activator proxies/queues requests to ready revision          |
 | **Scaling Algorithm**  | Custom controller with thresholds/cooldown control   | Advanced (precision tuning on concurrency, QPS, latency)     |
 | **Cold Start Handling**| Request buffering; near-zero traffic loss            | Activator buffers requests; latency based on pod readiness   |
-| **Scaling Speed**      | Configurable polling intervals, default 30s[3][1]  | Configurable; typically 2s-60s depending on traffic profile  |
+| **Scaling Speed**      | Configurable polling intervals, default 30s  | Configurable; typically 2s-60s depending on traffic profile  |
 
 ***
 
@@ -64,7 +64,7 @@ Knative is a full-stack serverless platform for Kubernetes, designed for advance
 
 ### KubeElasti Traffic Flow
 
-```
+```text
 [Proxy Mode (Replicas=0)]
 Client Request → Resolver (queues)
 ↓
@@ -83,7 +83,7 @@ Prometheus Metrics → Controller → Scale Decision
 
 ### Knative Traffic Flow
 
-```
+```text
 Client Request → Ingress → Activator (if scaled to zero; buffers!)
 ↓
 Autoscaler evaluates → Revision scaled up → Queue Proxy → Target Container

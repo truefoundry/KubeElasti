@@ -10,8 +10,6 @@ Allow: /
 Disallow: /.git/
 Disallow: /node_modules/
 Disallow: /.github/
-Disallow: /images/
-Disallow: /assets/
 
 # Sitemap location
 Sitemap: https://kubeelasti.dev/sitemap.xml

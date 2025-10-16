@@ -88,7 +88,7 @@ This is defined using the `scaleTargetRef` field in the spec.
 
 - `scaleTargetRef.kind`: should be either be  `Deployment` or `Rollout` or `StatefulSet` (in case you are using Argo Rollouts). 
 - `scaleTargetRef.apiVersion` should be `apps/v1` if you are using `Deployment` or `StatefulSet` or `argoproj.io/v1alpha1` in case you are using argo-rollouts.  
-- `scaleTargetRef.name` should exactly match the name of the deployment or rollout. 
+- `scaleTargetRef.name`: name of deployment/rollout/statefulset.
 
 <br>
 
@@ -99,7 +99,7 @@ The `metadata` section holds trigger-specific data:
 
 - **query** - the Prometheus query to evaluate  
 - **serverAddress** - address of the Prometheus server  
-- **threshold** - numeric threshold that triggers scale-down  
+- **threshold** - numeric threshold that triggers scale-down    
 
 For example, you can query the number of requests per second and set the threshold to `0`.  
 KubeElasti polls this metric every 30 seconds, and if the **value** is below the threshold it scales the service to 0.
