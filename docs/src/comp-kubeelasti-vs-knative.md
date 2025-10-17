@@ -33,7 +33,7 @@ KubeElasti is designed as a non-invasive add-on that enhances existing Kubernete
 
 ```text
 ┌─────────────────────────────────────────┐
-│   Your Existing Kubernetes Resources   │
+│   Your Existing Kubernetes Resources    │
 │  • Deployment (unchanged)               │
 │  • Service (unchanged)                  │
 │  • Ingress (unchanged)                  │
@@ -151,7 +151,7 @@ spec:
 
 ***
 
-## Traffic Management & Performance
+## Traffic Management 
 
 ### KubeElasti Traffic Flow
 
@@ -177,12 +177,6 @@ Client → Networking Layer (Kourier/Istio) →
 - **Queue-Proxy sidecar always present (adds ~2-5ms latency)**
 - **Activator in path for cold starts**
 - **Requires Knative-specific networking**
-
-| Scenario | KubeElasti | Knative |
-|----------|------------|----------|
-| **Active Service (Warm)** | 0ms overhead (direct) | ~2-5ms overhead (Queue-Proxy sidecar) |
-| **Cold Start** | 200-800ms (proxy buffering) | 300-1000ms (Activator buffering) |
-| **Throughput (Active)** | Maximum (no proxy) | Excellent (minor sidecar overhead) |
 
 ***
 
