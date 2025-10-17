@@ -11,6 +11,8 @@ keywords:
 - event-driven autoscaling
 ---
 
+
+
 # KubeElasti vs KEDA HTTP Add-on
 
 This document provides a comprehensive technical comparison between KubeElasti and KEDA HTTP Add-on, specifically focusing on HTTP-based scaling scenarios with scale-to-zero capabilities.
@@ -48,7 +50,7 @@ KEDA HTTP Add-on provides event-driven autoscaling through a proxy-based system:
 | **Scale-from-Zero** | Automatic via resolver proxy with request queueing | Request queuing in always-on interceptor |
 | **Scaling Algorithm** | Custom controller with configurable thresholds and cooldown periods | HPA-based with external-push metrics from interceptor |
 | **Cold Start Handling** | Intelligent proxy buffering during scale-up | Request queuing with configurable pending request thresholds |
-| **Scaling Speed** | Configurable polling intervals (default: 30s) | HPA-controlled (default: 15s) with scaledownPeriod configuration |
+| **Scaling Speed** | Immediate (proxy mode) or Configurable polling intervals (default: 30s) | HPA-controlled (default: 15s) with scaledownPeriod configuration |
 
 ## Traffic Management Patterns
 
@@ -132,16 +134,6 @@ spec:
 
 ## Performance Characteristics
 
-### Latency Impact
-
-| Scenario | KubeElasti | KEDA HTTP Add-on |
-|----------|------------|------------------|
-| **Serve Mode (Active)** | 0ms overhead | ~2-5ms overhead |
-| **Cold Start** | 200-800ms (with request buffering) | 300-1000ms (queue processing) |
-| **Scaling Decision Latency** | 30s default polling interval | 15s HPA polling + scaler evaluation |
-
-### Throughput Characteristics
-
 - **KubeElasti**: Higher throughput in serve mode due to direct routing bypass
 - **KEDA HTTP Add-on**: Consistent throughput with always-on proxy, but potential bottleneck under high load
 
@@ -153,23 +145,20 @@ spec:
 - Intelligent mode switching reduces proxy overhead during normal operations
 - Built-in Prometheus integration with flexible query-based triggers
 - Simpler architecture with fewer moving components
-- Custom scaling algorithms beyond HTTP metrics support
 - Lower resource footprint when scaled up (serve mode)
 
 **Limitations**:
 - Requires Prometheus for advanced scaling capabilities
 - Newer project with smaller ecosystem and community
 - Limited scaler types compared to KEDA
-- Less enterprise adoption and support
+- Less enterprise adoption
 
 ### KEDA HTTP Add-on
 
 **Advantages**:
 - Mature ecosystem with extensive scaler support (70+ built-in scalers)
 - Standard HPA integration with Kubernetes-native patterns
-- Active community and enterprise support options
 - Multiple trigger types beyond HTTP (databases, queues, etc.)
-- Proven production deployments at scale
 
 **Limitations**:
 - Always-on proxy overhead even when not scaling
@@ -182,20 +171,19 @@ spec:
 | Consideration | KubeElasti | KEDA HTTP Add-on |
 |---------------|------------|------------------|
 | **Architectural Complexity** | Lower | Higher |
-| **Performance (Scaled Up)** | Better (serve mode) | Good (consistent proxy) |
-| **Performance (Scale-from-zero)** | Good (proxy mode) | Good (always-on queue) |  
-| **Ecosystem Maturity** | Developing | Mature |
+| **Performance (Scaled Up)** | Better (no proxy) | Good (always-on proxy) |
+| **Performance (Scale-from-zero)** | Good (queued requests) | Good (queued requests) |  
+| **Ecosystem Maturity** | Beta | Beta |
 | **Operational Overhead** | Lower | Higher |
 | **Flexibility** | High (custom triggers) | Very High (70+ scalers) |
-| **Resource Efficiency** | Higher (mode switching) | Lower (always-on proxy) |
+| **Resource Efficiency** | Higher (proxy switching) | Lower (always-on proxy) |
 
 
 ## Use Case Recommendations
 
 ### Choose KubeElasti When
 
-- **Performance optimization is critical** (serve mode benefits significant)
-- **Custom scaling logic required** based on business metrics beyond HTTP queues
+- **Performance optimization is critical** (serve mode benefits are significant)
 - **Prometheus-centric monitoring stack** already in place
 - **Simplified operational model preferred** with fewer components
 - **Direct routing benefits** outweigh always-on proxy patterns
@@ -205,7 +193,6 @@ spec:
 
 - **Multi-trigger scaling requirements** (HTTP + queue + database triggers)
 - **Enterprise support and ecosystem maturity** needed
-- **Standard HPA integration** and Kubernetes-native patterns preferred
 - **Existing KEDA infrastructure** already deployed
 - **Beta limitations acceptable** for your use case
 - **Consistent proxy behavior** preferred over mode switching
