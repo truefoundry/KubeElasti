@@ -1,4 +1,17 @@
 ---
+title: "KubeElasti - Serverless for Kubernetes | Auto Scale-to-Zero"
+description: "KubeElasti automatically scales your Kubernetes services to zero when idle and scales up when traffic arrives. Save costs without losing traffic, no code changes required."
+keywords: 
+  - Kubernetes serverless
+  - scale to zero
+  - Kubernetes auto-scaling
+  - cost optimization
+  - serverless computing
+  - Kubernetes operator
+  - container orchestration
+  - cloud native
+  - DevOps automation
+  - resource optimization
 hide:
   - navigation
   - toc

@@ -17,3 +17,4 @@ db-go-service
 .qodo
 .codeql-db
 *.sarif
+venv

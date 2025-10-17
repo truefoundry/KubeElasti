@@ -1,15 +1,22 @@
 ---
 date: 2025-08-02
 pin: true
-title: Scale-to-Zero in Kubernetes - Save Costs Without Losing Traffic
+title: What is Scale-to-Zero?
 description: Learn how to implement true scale-to-zero for HTTP services in Kubernetes, avoid cold-start failures, and discover how KubeElasti achieves this better than Knative, KEDA, or OpenFaaS.
-keywords: Kubernetes, scale-to-zero, autoscaling, KEDA, Knative, KubeElasti, serverless, cost optimization, kubernetes scaling
+keywords: 
+  - Kubernetes
+  - scale-to-zero
+  - autoscaling
+  - KEDA
+  - Knative
+  - KubeElasti
+  - serverless
+  - cost optimization
+  - kubernetes scaling
 author: 
     - Raman Tehlan
 slug: scale-to-zero
 ---
-
-# Scale-to-Zero in Kubernetes: Save Costs Without Losing Traffic
 
 If you've ever deployed HTTP services on Kubernetes, you've probably dealt with **idle pods** that burn resources during off-hours or inactivity. 
 
@@ -17,10 +24,9 @@ In today's blog, we dive into the concept of **Scale-to-Zero**, why it matters, 
 
 <!-- more -->
 
+# What is Scale-to-Zero?
 
-## What is Scale-to-Zero?
-
-**Scale-to-Zero** refers to the ability to automatically scale down a deployment to zero replicas — effectively **turning off** the service — when it's idle, and scaling it back up when traffic resumes.
+**Scale-to-Zero** refers to the ability to automatically scale down pod to zero replicas — effectively **turning off** the service — when it's idle, and scaling it back up when traffic resumes.
 
 This is ideal for:
 
@@ -28,8 +34,6 @@ This is ideal for:
 - Spiky workloads
 - Scheduled batch jobs
 - Cost-sensitive services (e.g., licensed software, GPU workloads)
-
-
 
 ## Why Use Scale-to-Zero?
 
@@ -50,13 +54,11 @@ sequenceDiagram
     participant User
     participant Proxy
     participant Operator
-    participant Deployment
     participant Pod
 
     User->>Proxy: HTTP Request
     Proxy-->>Operator: Pod is down, trigger scale-up
-    Operator->>Deployment: Scale replicas = 1
-    Deployment->>Pod: Start new pod
+    Operator->>Pod: Scale replicas = 1
     Proxy-->>Pod: Forward request after pod is ready
 ```
 
@@ -83,8 +85,7 @@ sequenceDiagram
 flowchart TB
   User[User] -->|HTTP Request| ElastiProxy
   ElastiProxy -->|Pod Not Found| KubeElastiOperator
-  KubeElastiOperator -->|Scale Up| Deployment
-  Deployment --> Pod
+  KubeElastiOperator -->|Scale Up| Pod
   ElastiProxy -->|Forward| Pod
 ```
 
@@ -110,7 +111,7 @@ Like any focused tool, KubeElasti makes some trade-offs:
 
 * ✅ HTTP-only support (for now) — gRPC/TCP support is in roadmap.
 * ✅ Only Prometheus metrics are supported for traffic detection.
-* ✅ Works with **Deployments & Argo Rollouts** — more types to come.
+* ✅ Works with **Deployments, StatefulSets & Argo Rollouts** — To request support for other resources, please open an [issue on GitHub](https://github.com/truefoundry/KubeElasti/issues).
 
 That said, it gives you **production-ready scale-to-zero** in under 5 minutes, with real observability and battle-tested scaling behavior.
 
@@ -123,7 +124,7 @@ With KubeElasti, you can implement it **without changing your service code**, **
 
 Want to give it a spin? Start here:
 
-* 🧪 Quickstart: [Get Started Guide](/src/gs-setup/)
+* 🧪 Quickstart: [Get Started Guide](../../src/gs-setup.md)
 * 🧩 Source Code: [KubeElasti on GitHub](https://github.com/truefoundry/KubeElasti)
 
 

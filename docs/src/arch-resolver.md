@@ -1,3 +1,14 @@
+---
+title: "KubeElasti Resolver Architecture - Proxy and Traffic Management"
+description: "Understand KubeElasti resolver architecture for traffic proxying, request queueing, and service discovery in Kubernetes serverless environments."
+keywords:
+  - KubeElasti resolver
+  - traffic proxy
+  - request queueing
+  - service discovery
+  - proxy architecture
+  - Kubernetes proxy
+---
 
 # Resolver Architecture
 

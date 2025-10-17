@@ -30,7 +30,7 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      - run: pip install mkdocs-material
+      - run: pip install -r docs-requirements.txt
       - name: Fetch contributors
         run: |
           python docs/scripts/fetch_contributors.py

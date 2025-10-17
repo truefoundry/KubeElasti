@@ -1,0 +1,16 @@
+# Host directive (preferred domain)
+Host: kubeelasti.dev
+
+# Allow all web crawlers to access the site
+User-agent: *
+Allow: /
+
+
+# Block access to admin and private areas (if any exist in the future)
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /.github/
+
+# Sitemap location
+Sitemap: https://kubeelasti.dev/sitemap.xml
+

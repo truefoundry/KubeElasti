@@ -1,3 +1,16 @@
+---
+title: "KubeElasti Introduction - Kubernetes Scale-to-Zero Solution"
+description: "Learn how KubeElasti provides scale-to-zero functionality for Kubernetes. Understand proxy mode, traffic queueing, and automatic scaling from 0 to 1 replicas."
+keywords:
+  - KubeElasti introduction
+  - Kubernetes scale to zero
+  - serverless Kubernetes
+  - traffic queueing
+  - proxy mode
+  - automatic scaling
+  - resource optimization
+---
+
 # Introduction
 
 KubeElasti (Sometimes referred to as just "Elasti") is a Kubernetes-native solution that offers scale-to-zero functionality when there is no traffic and automatically scales **up from 0** when traffic arrives. Most Kubernetes autoscaling solutions like HPA or Keda can scale from 1 to n replicas based on cpu utilization or memory usage. However, these solutions do not offer a way to scale to 0 when there is no traffic. KubeElasti solves this problem by dynamically managing service replicas based on real-time traffic conditions. It only handles scaling the application down to 0 replicas and scaling it back up to 1 replica when traffic is detected again. The scaling after 1 replica is handled by the autoscaler like HPA or Keda.
@@ -67,16 +80,19 @@ flowchart TB
 
 - **Seamless Integration:** KubeElasti integrates effortlessly with your existing Kubernetes setup-whether you are using HPA or Keda. It takes just a few steps to enable scale to zero for any service.
 
-- **Deployment and Argo Rollouts Support:** KubeElasti supports two scale target references: Deployment and Argo Rollouts, making it versatile for various deployment scenarios.
+- **Deployment, StatefulSet, Argo Rollouts Support:** KubeElasti supports three scale target references: Deployment, StatefulSet and Argo Rollouts, making it versatile for various deployment scenarios.
 
 - **Prometheus Metrics Export:** KubeElasti exports Prometheus metrics for easy out-of-the-box monitoring. You can also import a pre-built dashboard into Grafana for comprehensive visualization.
 
 - **Generic Service Support:** KubeElasti works at the kubernetes service level. It also supports East-West traffic using cluster-local service DNS, ensuring robust and flexible traffic management across your services. So any ingress or service mesh solution can be used with KubeElasti.
 
+!!! tip "Request support for Scale-To-Zero on more resources"
+
+    KubeElasti uses the `/scale` subresource. Which means we can support scale-to-zero on any resource that supports the `/scale` subresource. If you want to request support, please open an issue [here](https://github.com/truefoundry/elasti/issues/new/choose).
+
 ## Limitations
 
 - **Only HTTP is supported:** KubeElasti currently supports requests that are routed to the service via HTTP. In the future we will support more protocols like TCP, UDP etc.
-- **Only Deployment and Argo Rollouts are supported:** KubeElasti supports two scale target references: Deployment and Argo Rollouts. In the future this will be made generic to support all target references that support the `/scale` subresource.
 - **Prometheus Trigger:** The only trigger currently supported is Prometheus
 
-Please checkout the comparison [here](comparisons.md) to see how KubeElasti compares to other Kubernetes autoscaling solutions.
+Please checkout the comparison [here](comp-main.md) to see how KubeElasti compares to other Kubernetes autoscaling solutions.

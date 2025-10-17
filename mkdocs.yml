@@ -1,14 +1,11 @@
 # Site
-site_name: KubeElasti
+site_name: KubeElasti - Serverless for Kubernetes
 site_url: https://kubeelasti.dev/
 site_author: TrueFoundry
 site_description: >-
   KubeElasti is a Kubernetes operator that automatically scales-to-zero your services when they are idle and scales them back up when they receive traffic.
 extra_css:
   - stylesheets/extra.css
-extra_files:
-  - docs/CNAME
-
 
 # Repository
 repo_name: truefoundry/KubeElasti
@@ -107,6 +104,15 @@ plugins:
   - search:
       separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - blog
+  - meta
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+        remove_empty_space: true
+      cache_safe: true
 
 extra:
   social:
@@ -116,6 +122,91 @@ extra:
       link: https://github.com/truefoundry
     - icon: fontawesome/brands/x-twitter
       link: https://x.com/truefoundry
+  analytics:
+    provider: google
+    property_id: G-LQ0TP60DHT
+  structured_data:
+    organization:
+      "@context": "https://schema.org"
+      "@type": "Organization"
+      name: "TrueFoundry"
+      url: "https://truefoundry.com"
+      logo: "https://kubeelasti.dev/images/logo/logo_white_full.png"
+      sameAs:
+        - "https://github.com/truefoundry"
+        - "https://discord.gg/qFyN73htgE"
+    software:
+      "@context": "https://schema.org"
+      "@type": "SoftwareApplication"
+      name: "KubeElasti"
+      applicationCategory: "DeveloperApplication"
+      operatingSystem: "Kubernetes"
+      description: "KubeElasti is a Kubernetes operator that automatically scales-to-zero your services when they are idle and scales them back up when they receive traffic."
+      url: "https://kubeelasti.dev"
+      downloadUrl: "https://github.com/truefoundry/KubeElasti"
+      author:
+        "@type": "Organization"
+        name: "TrueFoundry"
+        url: "https://truefoundry.com"
+      license: "https://github.com/truefoundry/KubeElasti/blob/main/LICENSE"
+      programmingLanguage: "Go"
+      keywords: 
+        - "Kubernetes"
+        - "Serverless"
+        - "Auto-scaling"
+        - "Scale-to-zero"
+        - "Operator"
+        - "Cloud Native"
+    website:
+      "@context": "https://schema.org"
+      "@type": "WebSite"
+      name: "KubeElasti Documentation"
+      url: "https://kubeelasti.dev"
+      description: "Official documentation for KubeElasti - Kubernetes operator for serverless auto-scaling"
+      publisher:
+        "@type": "Organization"
+        name: "TrueFoundry"
+        url: "https://truefoundry.com"
+      potentialAction:
+        "@type": "SearchAction"
+        target: "https://kubeelasti.dev/search/?q={search_term_string}"
+        "query-input": "required name=search_term_string"
+    breadcrumb:
+      "@context": "https://schema.org"
+      "@type": "BreadcrumbList"
+      itemListElement:
+        - "@type": "ListItem"
+          position: 1
+          name: "Home"
+          item: "https://kubeelasti.dev"
+    documentation:
+      "@context": "https://schema.org"
+      "@type": "TechArticle"
+      headline: "KubeElasti Documentation"
+      description: "Comprehensive documentation for KubeElasti - Kubernetes operator for serverless auto-scaling"
+      author:
+        "@type": "Organization"
+        name: "TrueFoundry"
+        url: "https://truefoundry.com"
+      publisher:
+        "@type": "Organization"
+        name: "TrueFoundry"
+        url: "https://truefoundry.com"
+        logo:
+          "@type": "ImageObject"
+          url: "https://kubeelasti.dev/images/logo/logo_white_full.png"
+      mainEntityOfPage:
+        "@type": "WebPage"
+        "@id": "https://kubeelasti.dev"
+      datePublished: "2024-01-01"
+      dateModified: "2025-01-01"
+      articleSection: "Documentation"
+      keywords:
+        - "Kubernetes documentation"
+        - "Serverless computing"
+        - "Container orchestration"
+        - "Auto-scaling"
+        - "DevOps tools"
 
 # Page tree
 nav:
@@ -140,7 +231,10 @@ nav:
       - E2E Testing: src/dev-test-e2e.md
       - Test Monitoring: src/dev-test-monitoring.md
       - Contributors: src/dev-contributors.md
-  - Comparisons: src/comparisons.md
+  - Comparisons: 
+      - Overview: src/comp-main.md
+      - KubeElasti vs KEDA: src/comp-kubeelasti-vs-keda.md
+      - KubeElasti vs Knative: src/comp-kubeelasti-vs-knative.md
   - Adopters: src/adopters.md
   - Blog: 
       - Blog: blog/index.md

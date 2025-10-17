@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Setup Guide - Install Kubernetes Serverless Operator"
+description: "Complete installation guide for KubeElasti. Learn how to set up the Kubernetes serverless operator with Helm, configure prerequisites, and start scaling to zero."
+keywords:
+  - KubeElasti installation
+  - Kubernetes serverless setup
+  - Helm installation guide
+  - Kubernetes operator setup
+  - scale to zero configuration
+  - serverless Kubernetes
+---
+
 # Setup
 
 Get started by following below steps:
@@ -114,14 +126,14 @@ spec:
   scaleTargetRef:
     apiVersion: <apiVersion> # (5)
     kind: <kind> # (6)
-    name: <deployment-or-rollout-name> # (7)
+    name: <deployment-or-rollout-or-statefulset-name> # (7)
   triggers:
   - type: <trigger-type> # (8)
     metadata:
       query: <query> # (9)
       serverAddress: <server-address> # (10)
       threshold: <threshold> # (11)
-      uptimeFilter: <uptime-filter> # (12)
+      uptimeFilter: <uptime-filter> #(12)
   autoscaler:
     name: <autoscaler-object-name> # (13)
     type: <autoscaler-type> # (14)
@@ -131,9 +143,9 @@ spec:
 2. Replace it with the namespace of the service.
 3. Replace it with the min replicas to bring up when first request arrives. Minimum: 1
 4. Replace it with the cooldown period to wait after scaling up before considering scale down. Default: 900 seconds (15 minutes) | Maximum: 604800 seconds (7 days) | Minimum: 1 second (1 second)
-5. ApiVersion should be `apps/v1` if you are using deployments or `argoproj.io/v1alpha1` in case you are using argo-rollouts. 
-6. Kind should be either `Deployment` or `Rollout` (in case you are using Argo Rollouts).
-7. Name should exactly match the name of the deployment or rollout.
+5. ApiVersion should be `apps/v1` if you are using `Deployment` or `StatefulSet` or `argoproj.io/v1alpha1` in case you are using argo-rollouts. 
+6. Kind should be either `Deployment` or `Rollout`(in case you are using Argo Rollouts) or `StatefulSet` 
+7. Name should exactly match the name of the deployment or rollout or statefulset.
 8. Replace it with the trigger type. Currently, KubeElasti supports only one trigger type - `prometheus`. 
 9. Replace it with the trigger query. In this case, it is the number of requests per second.
 10. Replace it with the trigger server address. In this case, it is the address of the prometheus server.

@@ -1,3 +1,15 @@
+---
+title: "KubeElasti Triggers - Prometheus Queries for Scale-to-Zero"
+description: "Configure KubeElasti triggers with Prometheus queries. Learn how to set up effective metrics-based triggers for automatic scale-to-zero functionality."
+keywords:
+  - KubeElasti triggers
+  - Prometheus queries
+  - scale to zero triggers
+  - metrics-based scaling
+  - ElastiService triggers
+  - Kubernetes metrics
+---
+
 # Triggers
 
 ## Trigger with Prometheus

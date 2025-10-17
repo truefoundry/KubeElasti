@@ -1,6 +1,13 @@
 ---
-title: Contributors
-description: Contributors to the KubeElasti project
+title: "KubeElasti Contributors - Open Source Community"
+description: "Meet the contributors to KubeElasti project. Recognize the developers, testers, and community members who make Kubernetes serverless scaling possible."
+keywords:
+  - KubeElasti contributors
+  - open source contributors
+  - Kubernetes community
+  - project contributors
+  - development team
+  - community support
 ---
 
 This page recognizes all the dedicated and incredible people who have contributed to the KubeElasti project. We appreciate all contributions, from code to documentation, testing, and community support.
