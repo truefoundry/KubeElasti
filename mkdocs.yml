@@ -124,7 +124,7 @@ extra:
       link: https://x.com/truefoundry
   analytics:
     provider: google
-    property_id: G-LQ0TP60DHT
+    property: G-LQ0TP60DHT
   structured_data:
     organization:
       "@context": "https://schema.org"
