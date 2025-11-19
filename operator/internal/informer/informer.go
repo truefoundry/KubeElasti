@@ -157,14 +157,14 @@ func (m *Manager) StopForCRD(crdName string) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			// Check if key starts with the crdName
-			if key.(string)[:len(crdName)] == crdName {
+			keyStr := key.(string)
+			if strings.HasPrefix(keyStr, crdName) {
 				info, ok := value.(info)
 				if ok {
 					if err := m.StopInformer(m.getKeyFromRequestWatch(info.Req)); err != nil {
 						m.logger.Error("Failed to stop informer", zap.Error(err))
 					}
-					m.logger.Info("Stopped informer", zap.String("key", key.(string)))
+					m.logger.Info("Stopped informer", zap.String("key", keyStr))
 				}
 			}
 		}()
