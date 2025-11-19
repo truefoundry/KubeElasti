@@ -80,7 +80,7 @@ func (r *ElastiServiceReconciler) finalizeCRD(ctx context.Context, es *v1alpha1.
 	// Stop all active informers related to this CRD in background
 	go func() {
 		defer wg.Done()
-		r.InformerManager.StopForCRD(req.Name)
+		r.InformerManager.StopForCRD(req.Name, req.Namespace)
 		r.Logger.Info("[Done] Informer stopped for CRD", zap.String("es", req.String()))
 		// Reset the informer start mutex, so if the ElastiService is recreated, we will need to reset the informer
 		r.resetMutexForInformer(r.getMutexKeyForTargetRef(req))
