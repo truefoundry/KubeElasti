@@ -150,7 +150,7 @@ func (m *Manager) Stop() {
 }
 
 // StopForCRD is to close all the active informers for a perticular CRD
-func (m *Manager) StopForCRD(crdName string) {
+func (m *Manager) StopForCRD(crdName string, namespace string) {
 	// Loop through all the informers and stop them
 	var wg sync.WaitGroup
 	m.informers.Range(func(key, value interface{}) bool {
@@ -158,7 +158,7 @@ func (m *Manager) StopForCRD(crdName string) {
 		go func() {
 			defer wg.Done()
 			keyStr := key.(string)
-			if strings.HasPrefix(keyStr, crdName) {
+			if strings.HasPrefix(keyStr, fmt.Sprintf("%s/%s", crdName, namespace)) {
 				info, ok := value.(info)
 				if ok {
 					if err := m.StopInformer(m.getKeyFromRequestWatch(info.Req)); err != nil {
