@@ -158,7 +158,7 @@ func (m *Manager) StopForCRD(crdName string, namespace string) {
 		go func() {
 			defer wg.Done()
 			keyStr := key.(string)
-			if strings.HasPrefix(keyStr, fmt.Sprintf("%s/%s/", crdName, namespace)) {
+			if strings.HasPrefix(keyStr, fmt.Sprintf("%s/%s/", strings.ToLower(crdName), strings.ToLower(namespace))) {
 				info, ok := value.(info)
 				if ok {
 					if err := m.StopInformer(m.getKeyFromRequestWatch(info.Req)); err != nil {
