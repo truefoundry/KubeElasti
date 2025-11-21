@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block extrahead %}
+  {{ super() }}
+  
+  <!-- Additional SEO Meta Tags -->
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="TrueFoundry">
+  
+  <!-- Dynamic Keywords from Page Meta -->
+  {% if page and page.meta and page.meta.keywords %}
+    <meta name="keywords" content="{% for keyword in page.meta.keywords %}{{ keyword }}{% if not loop.last %}, {% endif %}{% endfor %}">
+  {% else %}
+    <meta name="keywords" content="Kubernetes, Serverless, Auto-scaling, Scale-to-zero, Operator, Cloud Native, KubeElasti">
+  {% endif %}
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:type" content="{% if page and page.meta and page.meta.og_type %}{{ page.meta.og_type }}{% else %}website{% endif %}">
+  <meta property="og:site_name" content="KubeElasti Documentation">
+  <meta property="og:locale" content="en_US">
+  {% if page and page.canonical_url %}
+  <meta property="og:url" content="{{ page.canonical_url }}">
+  {% endif %}
+  <meta property="og:title" content="{% if page and page.meta and page.meta.title %}{{ page.meta.title }}{% elif page and page.title %}{{ page.title }} - KubeElasti{% else %}KubeElasti - Serverless for Kubernetes{% endif %}">
+  <meta property="og:description" content="{% if page and page.meta and page.meta.description %}{{ page.meta.description }}{% else %}{{ config.site_description }}{% endif %}">
+  <meta property="og:image" content="{% if page and page.meta and page.meta.image %}{{ page.meta.image }}{% else %}{{ config.site_url }}images/logo/logo_white_full.png{% endif %}">
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@truefoundry">
+  <meta name="twitter:creator" content="@truefoundry">
+  <meta name="twitter:title" content="{% if page and page.meta and page.meta.title %}{{ page.meta.title }}{% elif page and page.title %}{{ page.title }} - KubeElasti{% else %}KubeElasti - Serverless for Kubernetes{% endif %}">
+  <meta name="twitter:description" content="{% if page and page.meta and page.meta.description %}{{ page.meta.description }}{% else %}{{ config.site_description }}{% endif %}">
+  <meta name="twitter:image" content="{% if page and page.meta and page.meta.image %}{{ page.meta.image }}{% else %}{{ config.site_url }}images/logo/logo_white_full.png{% endif %}">
+  
+  <!-- Canonical URL -->
+  {% if page and page.canonical_url %}
+  <link rel="canonical" href="{{ page.canonical_url }}">
+  {% endif %}
+  
+  <!-- Additional Meta Tags -->
+  <meta name="theme-color" content="#1e293b">
+  <meta name="msapplication-TileColor" content="#1e293b">
+  <meta name="application-name" content="KubeElasti">
+  <meta name="apple-mobile-web-app-title" content="KubeElasti">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  {% if config.extra.structured_data %}
+    <!-- Organization Schema -->
+    {% if config.extra.structured_data.organization %}
+    <script type="application/ld+json">
+      {{ config.extra.structured_data.organization | tojson }}
+    </script>
+    {% endif %}
+    
+    <!-- Software Application Schema -->
+    {% if config.extra.structured_data.software %}
+    <script type="application/ld+json">
+      {{ config.extra.structured_data.software | tojson }}
+    </script>
+    {% endif %}
+    
+    <!-- Website Schema -->
+    {% if config.extra.structured_data.website %}
+    <script type="application/ld+json">
+      {{ config.extra.structured_data.website | tojson }}
+    </script>
+    {% endif %}
+    
+    <!-- Breadcrumb Schema -->
+    {% if config.extra.structured_data.breadcrumb %}
+    <script type="application/ld+json">
+      {{ config.extra.structured_data.breadcrumb | tojson }}
+    </script>
+    {% endif %}
+    
+    <!-- Documentation Schema -->
+    {% if config.extra.structured_data.documentation %}
+    <script type="application/ld+json">
+      {{ config.extra.structured_data.documentation | tojson }}
+    </script>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block announce %}
+    <div style="text-align: center;"> 
+    Monthly Community Sync 
+    <span style="margin-left: 5px; margin-right: 5px; font-weight: bold;"> - </span>
+    <b>Every 4th @ 3:00 PM UTC</b>
+    <span style="margin-left: 20px; margin-right: 20px; font-weight: bold;"> - </span>
+    <a href="https://calendar.google.com/calendar/u/0?cid=Y18xNDMzZTE2ZjZkMzM4ZWRhZGViOGNhYjAxNGE1M2IxZmQ2MzZiMjdkOWJlMWNlOTc4Mjk4ODBjMmE5YjEyZDkxQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20" style="color: #ffeb3b; text-decoration: none; font-weight: bold;" target="_blank" rel="noopener noreferrer">📅 Add to Calendar</a>
+    <span style="margin-left: 20px; margin-right: 20px; font-weight: bold;"> - </span>
+    <a href="https://discord.gg/qFyN73htgE" style="color: #ffeb3b; text-decoration: none; font-weight: bold;" target="_blank" rel="noopener noreferrer">💬 Join Discord</a>
+    <span style="margin-left: 20px; margin-right: 20px; font-weight: bold;"> - </span>
+    <a href="https://github.com/truefoundry/kubeelasti" style="color: #ffeb3b; text-decoration: none; font-weight: bold;" target="_blank" rel="noopener noreferrer">⭐ Star on GitHub</a>
+    
+    </div>
+{% endblock %}
