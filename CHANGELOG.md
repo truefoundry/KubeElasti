@@ -7,15 +7,18 @@
 ## 0.1.18
 
 ### Improvements
+
 * SEO optimizations & docs update by @ramantehlan in [#200](https://github.com/truefoundry/KubeElasti/pull/200)
 * Add adopters message on top by @ramantehlan in [#202](https://github.com/truefoundry/KubeElasti/pull/202)
 
 ### Fixes
+
 * Update docs by @ramantehlan in [#201](https://github.com/truefoundry/KubeElasti/pull/201)
 * Docs fix by @ramantehlan in [#203](https://github.com/truefoundry/KubeElasti/pull/203)
 * Safely check for prefix in CRD name instead of looking at slice length by @shubhamrai1993 in [#204](https://github.com/truefoundry/KubeElasti/pull/204)
 
 ### Other
+
 * Release 0.1.18-rc.1 by @shubhamrai1993 in [#205](https://github.com/truefoundry/KubeElasti/pull/205)
 
 ## 0.1.17
