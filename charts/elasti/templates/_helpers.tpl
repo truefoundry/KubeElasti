@@ -51,6 +51,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Image pull secrets
+*/}}
+{{- define "elasti.imagePullSecrets" -}}
+{{- toYaml .Values.global.imagePullSecrets }}
+{{- end }}
+
+{{/*
 Common env values
 */}}
 {{- define "elasti.commonEnvValues" -}}
