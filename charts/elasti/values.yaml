@@ -6,8 +6,7 @@ global:
   secretName: elasti-secret
   image:
     registry: "tfy.jfrog.io"
-  imagePullSecrets:
-    - name: jfrog-creds
+  imagePullSecrets: []
 elastiController:
   manager:
     args:
