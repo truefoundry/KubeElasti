@@ -30,12 +30,8 @@ jobs:
           # Adding || true to avoid "Process exited with code 1" errors
           charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep '^charts/' | awk -F/ 'NF >= 2 {print $1"/"$2}'| sort -u | uniq || true)"
           for chart in ${charts_dirs_changed}; do
-            if [ "${chart}" != "charts/tfy-grafana" ]; then
-              echo "Updating README.md for ${chart}"
-              readme-generator --values "${chart}/values.yaml" --readme "${chart}/README.md" --schema "/tmp/schema.json"
-            else
-              echo "Skipping README.md update for ${chart}"
-            fi
+            echo "Updating README.md for ${chart}"
+            readme-generator --values "${chart}/values.yaml" --readme "${chart}/README.md" --schema "/tmp/schema.json"
           done
       - name: Configure Git and push changes
         run: |
