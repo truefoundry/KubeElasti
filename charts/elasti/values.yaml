@@ -65,7 +65,7 @@ elastiResolver:
       reqTimeout: "600"
       trafficReEnableDuration: "5"
     image:
-      registry: "test.jfrog.io"
+      registry: ""
       repository: tfy-images/elasti-resolver
       tag: 0.1.18
     imagePullPolicy: IfNotPresent
