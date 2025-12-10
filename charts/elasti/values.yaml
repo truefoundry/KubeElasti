@@ -1,36 +1,67 @@
+## @section Global parameters for elasti helm chart
 global:
+  ## @param global.kubernetesClusterDomain domain of the Kubernetes cluster
+  ##
   kubernetesClusterDomain: cluster.local
+  ## @param global.nameOverride name of the deployment
+  ##
   nameOverride: ""
+  ## @param global.fullnameOverride full name of the deployment
+  ##
   fullnameOverride: ""
+  ## @param global.enableMonitoring whether to enable monitoring
+  ##
   enableMonitoring: false
+  ## @param global.secretName name of the secret to use for the deployment
+  ##
   secretName: elasti-secret
+  ## @param global.image.registry registry to use for the deployment
+  ##
   image:
     registry: "tfy.jfrog.io"
-  imagePullSecrets:
-    - name: jfrog-creds
+  ## @param global.imagePullSecrets [array] image pull secrets to use for the deployment
+  ##
+  imagePullSecrets: []
+## @section Elasti controller parameters
 elastiController:
   manager:
+    ## @param elastiController.manager.args [array] arguments to pass to the manager
+    ##
     args:
       - --leader-elect
       - --health-probe-bind-address=:8081
       - --metrics-bind-address=0
+    ## @param elastiController.manager.containerSecurityContext [object] container security context
+    ##
     containerSecurityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
       capabilities:
         drop:
           - ALL
+    ## @param elastiController.manager.podSecurityContext [object] pod security context
+    ##
     podSecurityContext:
       runAsNonRoot: true
       runAsUser: 65532
       runAsGroup: 65532
       seccompProfile:
         type: RuntimeDefault
+    ## @param elastiController.manager.image.registry registry to use for the deployment
+    ##
     image:
       registry: ""
+      ## @param elastiController.manager.image.repository repository to use for the deployment
+      ##
       repository: tfy-images/elasti-operator
+      ## @param elastiController.manager.image.tag tag to use for the deployment
+      ##
       tag: 0.1.18
+    ## @param elastiController.manager.imagePullPolicy image pull policy
+    ##
     imagePullPolicy: IfNotPresent
+    ## @param elastiController.manager.resources [object] resources to use for the deployment
+    ##
     resources:
       limits:
         cpu: 200m
@@ -38,22 +69,42 @@ elastiController:
       requests:
         cpu: 100m
         memory: 40Mi
+
     sentry:
+      ## @param elastiController.manager.sentry.enabled whether to enable sentry
+      ##
       enabled: false
+      ## @param elastiController.manager.sentry.environment environment to use for the deployment
+      ##
       environment: ""
+    ## @param elastiController.manager.env [object] environment to use for the deployment
+    ##
     env:
       pollingInterval: 30
+  ## @param elastiController.replicas number of replicas to use for the deployment
+  ##
   replicas: 1
   serviceAccount:
+    ## @param elastiController.serviceAccount.annotations [object] annotations to use for the deployment
+    ##
     annotations: {}
+  ## @param elastiController.metricsService [object] metrics service to use for the deployment
+  ##
   metricsService:
     port: 8080
     type: ClusterIP
+
+  ## @param elastiController.service [object] service to use for the deployment
+  ##
   service:
     port: 8013
     type: ClusterIP
+
+## @section Elasti resolver parameters
 elastiResolver:
   proxy:
+    ## @param elastiResolver.proxy.env [object] environment to use for the deployment
+    ##
     env:
       headerForHost: X-Envoy-Decorator-Operation
       initialCapacity: "500"
@@ -66,10 +117,20 @@ elastiResolver:
       reqTimeout: "600"
       trafficReEnableDuration: "5"
     image:
+      ## @param elastiResolver.proxy.image.registry registry to use for the deployment
+      ##
       registry: "test.jfrog.io"
+      ## @param elastiResolver.proxy.image.repository repository to use for the deployment
+      ##
       repository: tfy-images/elasti-resolver
+      ## @param elastiResolver.proxy.image.tag tag to use for the deployment
+      ##
       tag: 0.1.18
+    ## @param elastiResolver.proxy.imagePullPolicy image pull policy
+    ##
     imagePullPolicy: IfNotPresent
+    ## @param elastiResolver.proxy.resources [object] resources to use for the deployment
+    ##
     resources:
       limits:
         cpu: 200m
@@ -77,34 +138,61 @@ elastiResolver:
       requests:
         cpu: 100m
         memory: 40Mi
+
+    ## @param elastiResolver.proxy.containerSecurityContext [object] container security context
+    ##
     containerSecurityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
       capabilities:
         drop:
           - ALL
+
+    ## @param elastiResolver.proxy.podSecurityContext [object] pod security context
+    ##
     podSecurityContext:
       runAsNonRoot: true
       runAsUser: 65532
       runAsGroup: 65532
       seccompProfile:
         type: RuntimeDefault
+
     sentry:
+      ## @param elastiResolver.proxy.sentry.enabled whether to enable sentry
+      ##
       enabled: false
+      ## @param elastiResolver.proxy.sentry.environment environment to use for the deployment
+      ##
       environment: ""
+  ## @param elastiResolver.replicas number of replicas to use for the deployment
+  ##
   replicas: 1
   serviceAccount:
+    ## @param elastiResolver.serviceAccount.annotations [object] annotations to use for the deployment
+    ##
     annotations: {}
+
   autoscaling:
+    ## @param elastiResolver.autoscaling.enabled whether to enable autoscaling
+    ##
     enabled: false
+    ## @param elastiResolver.autoscaling.minReplicas minimum number of replicas to use for the deployment
+    ##
     minReplicas: 1
+    ## @param elastiResolver.autoscaling.maxReplicas maximum number of replicas to use for the deployment
+    ##
     maxReplicas: 4
+    ## @param elastiResolver.autoscaling.targetCPUUtilizationPercentage target CPU utilization percentage to use for the deployment
+    ##
     targetCPUUtilizationPercentage: 70
   # Port for hitting the reverse proxy server
+  ## @param elastiResolver.reverseProxyService [object] reverse proxy service to use for the deployment
   reverseProxyService:
     port: 8012
     type: ClusterIP
   # Port for hitting the internal server used for everything except reverse proxy
+  ## @param elastiResolver.service [object] service to use for the deployment
+  ##
   service:
     port: 8013
     type: ClusterIP
