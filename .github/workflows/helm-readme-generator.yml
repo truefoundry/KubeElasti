@@ -1,0 +1,42 @@
+name: '[CI/CD] Update README metadata'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'charts/**'
+jobs:
+  update-readme-metadata:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Install readme-generator-for-helm
+        run: npm install -g @bitnami/readme-generator-for-helm
+      - name: Checkout charts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+      - name: Execute readme-generator-for-helm
+        env:
+          DIFF_URL: '${{github.event.pull_request.diff_url}}'
+          TEMP_FILE: '${{runner.temp}}/pr-${{github.event.number}}.diff'
+        run: |
+          # This request doesn't consume API calls.
+          curl -Lkso $TEMP_FILE $DIFF_URL
+          files_changed="$(sed -nr 's/[\-\+]{3} [ab]\/(.*)/\1/p' $TEMP_FILE | sort | uniq)"
+          # Adding || true to avoid "Process exited with code 1" errors
+          charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep '^charts/' | awk -F/ 'NF >= 2 {print $1"/"$2}'| sort -u | uniq || true)"
+          for chart in ${charts_dirs_changed}; do
+            echo "Updating README.md for ${chart}"
+            readme-generator --values "${chart}/values.yaml" --readme "${chart}/README.md" --schema "/tmp/schema.json"
+          done
+      - name: Configure Git and push changes
+        run: |
+          if git status -s | grep charts; then
+              git config user.name "$GITHUB_ACTOR"
+              git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+              git add . && git commit -am "Update README.md with readme-generator-for-helm" --signoff && git push
+          fi
