@@ -4,6 +4,9 @@ global:
   fullnameOverride: ""
   enableMonitoring: false
   secretName: elasti-secret
+  image:
+    registry: "tfy.jfrog.io"
+  imagePullSecrets: []
 elastiController:
   manager:
     args:
@@ -23,8 +26,9 @@ elastiController:
       seccompProfile:
         type: RuntimeDefault
     image:
-      repository: tfy.jfrog.io/tfy-images/elasti-operator
-      tag: 0ef64b28427ca5e0b8ab2551f2f33a405d442c2f
+      registry: ""
+      repository: tfy-images/elasti-operator
+      tag: 672055dd46a6494b2ed0c6eff27dff3b5eaad633
     imagePullPolicy: IfNotPresent
     resources:
       limits:
@@ -61,8 +65,9 @@ elastiResolver:
       reqTimeout: "600"
       trafficReEnableDuration: "5"
     image:
-      repository: tfy.jfrog.io/tfy-images/elasti-resolver
-      tag: 0ef64b28427ca5e0b8ab2551f2f33a405d442c2f
+      registry: ""
+      repository: tfy-images/elasti-resolver
+      tag: 672055dd46a6494b2ed0c6eff27dff3b5eaad633
     imagePullPolicy: IfNotPresent
     resources:
       limits:
