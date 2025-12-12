@@ -3,6 +3,7 @@ enableMonitoring: true
 elastiController:
   manager:
     image:
+      registry: local
       repository: elasti-operator
       tag: v1alpha1
     imagePullPolicy: IfNotPresent
@@ -16,6 +17,7 @@ elastiController:
 elastiResolver:
   proxy:
     image:
+      registry: local
       repository: elasti-resolver
       tag: v1alpha1
     imagePullPolicy: IfNotPresent
