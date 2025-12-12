@@ -41,7 +41,7 @@ spec:
           value: {{ .Values.elastiController.manager.sentry.environment }}
         {{- end }}
         {{ include "elasti.commonEnvValues" . | nindent 8 }}
-        image: {{ .Values.elastiController.manager.image.repository }}:{{ .Values.elastiController.manager.image.tag | default .Chart.AppVersion }}
+        image: {{ .Values.elastiController.manager.image.registry | default .Values.global.image.registry | trimSuffix "/" }}/{{ .Values.elastiController.manager.image.repository }}:{{ .Values.elastiController.manager.image.tag | default .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.elastiController.manager.imagePullPolicy }}
         livenessProbe:
           httpGet:
@@ -68,6 +68,8 @@ spec:
         {{- toYaml .Values.elastiController.manager.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "elasti.fullname" . }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
+      imagePullSecrets:
+        {{- include "elasti.imagePullSecrets" . | nindent 8 }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -126,7 +128,7 @@ spec:
           value: {{ .Values.elastiResolver.proxy.sentry.environment }}
         {{- end }}
         {{ include "elasti.commonEnvValues" . | nindent 8 }}
-        image: {{ .Values.elastiResolver.proxy.image.repository }}:{{ .Values.elastiResolver.proxy.image.tag | default .Chart.AppVersion }}
+        image: {{ .Values.elastiResolver.proxy.image.registry | default .Values.global.image.registry | trimSuffix "/" }}/{{ .Values.elastiResolver.proxy.image.repository }}:{{ .Values.elastiResolver.proxy.image.tag | default .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.elastiResolver.proxy.imagePullPolicy }}
         name: proxy
         ports:
@@ -138,4 +140,6 @@ spec:
           {{- toYaml .Values.elastiResolver.proxy.containerSecurityContext | nindent 10 }}
       securityContext:
         {{- toYaml .Values.elastiResolver.proxy.podSecurityContext | nindent 8 }}
+      imagePullSecrets:
+        {{- include "elasti.imagePullSecrets" . | nindent 8 }}
       serviceAccountName: {{ include "elasti.fullname" . }}-resolver

@@ -30,14 +30,14 @@ chmod-scripts:
 
 .PHONY: build-images
 build-images: ## Build and push images
-	$(MAKE) -C ../../operator docker-build IMG=elasti-operator:v1alpha1
-	$(MAKE) -C ../../resolver docker-build IMG=elasti-resolver:v1alpha1
+	$(MAKE) -C ../../operator docker-build IMG=local/elasti-operator:v1alpha1
+	$(MAKE) -C ../../resolver docker-build IMG=local/elasti-resolver:v1alpha1
 
 .PHONY: reload-images
 reload-images: ## Reload images into kind and restart deployments
 	@echo "Loading images into kind cluster..."
-	@kind load docker-image elasti-operator:v1alpha1 --name $(CLUSTER_NAME)
-	@kind load docker-image elasti-resolver:v1alpha1 --name $(CLUSTER_NAME)
+	@kind load docker-image local/elasti-operator:v1alpha1 --name $(CLUSTER_NAME)
+	@kind load docker-image local/elasti-resolver:v1alpha1 --name $(CLUSTER_NAME)
 	@echo "Restarting elasti operator deployment..."
 	@kubectl rollout restart deployment elasti-operator-controller-manager -n $(ELASTI_NAMESPACE)
 	@echo "Images reloaded and deployment restarted."
@@ -53,8 +53,8 @@ kind-up: ## Create Kind cluster
 		echo "Kind cluster '$(CLUSTER_NAME)' already exists."; \
 		kubectl config use-context kind-$(CLUSTER_NAME); \
 	fi
-	kind load docker-image elasti-operator:v1alpha1 --name elasti-e2e
-	kind load docker-image elasti-resolver:v1alpha1 --name elasti-e2e
+	kind load docker-image local/elasti-operator:v1alpha1 --name elasti-e2e
+	kind load docker-image local/elasti-resolver:v1alpha1 --name elasti-e2e
 	kubectl scale --replicas=1 deployment/coredns -n kube-system
 
 .PHONY: kind-down
