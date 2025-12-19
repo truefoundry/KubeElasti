@@ -31,6 +31,14 @@ spec:
         env:
         - name: POLLING_INTERVAL
           value: {{ .Values.elastiController.manager.env.pollingInterval | quote }}
+        {{- with .Values.elastiController.manager.env.prometheusTriggerServerAddress }}
+        - name: PROMETHEUS_TRIGGER_SERVER_ADDRESS
+          value: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.elastiController.manager.env.prometheusTriggerAuthorizationHeader }}
+        - name: PROMETHEUS_TRIGGER_AUTHORIZATION_HEADER
+          value: {{ . | quote }}
+        {{- end }}
         {{- if .Values.elastiController.manager.sentry.enabled }}
         - name: SENTRY_DSN
           valueFrom:
