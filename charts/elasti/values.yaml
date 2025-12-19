@@ -119,7 +119,7 @@ elastiResolver:
     image:
       ## @param elastiResolver.proxy.image.registry registry to use for the deployment
       ##
-      registry: "test.jfrog.io"
+      registry: ""
       ## @param elastiResolver.proxy.image.repository repository to use for the deployment
       ##
       repository: tfy-images/elasti-resolver
