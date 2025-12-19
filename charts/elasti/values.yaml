@@ -81,6 +81,13 @@ elastiController:
     ##
     env:
       pollingInterval: 30
+      ## @param elastiController.manager.env.prometheusTriggerServerAddress: default prometheus server address to avoid setting in each ElastiService
+      ##
+      # prometheusTriggerServerAddress: http://prometheus-operated.monitoring.svc.cluster.local:9090
+      ## @param elastiController.manager.env.prometheusTriggerAuthorizationHeader: authorization header to set in prometheus requests. Useful when prometheus is protected by an authentication mechanism
+      ##
+      # prometheusTriggerAuthorizationHeader: Basic xxx
+
   ## @param elastiController.replicas number of replicas to use for the deployment
   ##
   replicas: 1
