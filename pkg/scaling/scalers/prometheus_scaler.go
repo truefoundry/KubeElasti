@@ -110,7 +110,7 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 		return -1, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	// set headers
+	// Apply default headers, then per-trigger metadata headers (which can override defaults)
 	for key, value := range s.defaultHeaders {
 		req.Header.Set(key, value)
 	}
