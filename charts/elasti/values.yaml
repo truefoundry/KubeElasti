@@ -56,7 +56,7 @@ elastiController:
       repository: tfy-images/elasti-operator
       ## @param elastiController.manager.image.tag tag to use for the deployment
       ##
-      tag: 27f5696e015e87a5223ddd9279f2475180e0f2a4
+      tag: 42de4f197e19d88cd027ceaf36c5ff20fda2932c
     ## @param elastiController.manager.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
@@ -116,13 +116,13 @@ elastiResolver:
     image:
       ## @param elastiResolver.proxy.image.registry registry to use for the deployment
       ##
-      registry: "test.jfrog.io"
+      registry: ""
       ## @param elastiResolver.proxy.image.repository repository to use for the deployment
       ##
       repository: tfy-images/elasti-resolver
       ## @param elastiResolver.proxy.image.tag tag to use for the deployment
       ##
-      tag: 27f5696e015e87a5223ddd9279f2475180e0f2a4
+      tag: 42de4f197e19d88cd027ceaf36c5ff20fda2932c
     ## @param elastiResolver.proxy.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
