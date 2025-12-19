@@ -100,6 +100,9 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 	if s.metadata.ServerAddress != "" {
 		serverAddress = s.metadata.ServerAddress
 	}
+	if serverAddress == "" {
+		return -1, fmt.Errorf("prometheus serverAddress not configured")
+	}
 	queryURL := fmt.Sprintf("%s/api/v1/query?query=%s&time=%s", serverAddress, queryEscaped, t)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", queryURL, nil)
