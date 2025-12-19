@@ -40,7 +40,7 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 | Name                                                        | Description                                                 | Value                        |
 | ----------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------- |
 | `elastiResolver.proxy.env`                                  | environment to use for the deployment                       | `{}`                         |
-| `elastiResolver.proxy.image.registry`                       | registry to use for the deployment                          | `test.jfrog.io`              |
+| `elastiResolver.proxy.image.registry`                       | registry to use for the deployment                          | `""`                         |
 | `elastiResolver.proxy.image.repository`                     | repository to use for the deployment                        | `tfy-images/elasti-resolver` |
 | `elastiResolver.proxy.image.tag`                            | tag to use for the deployment                               | `0.1.19`                     |
 | `elastiResolver.proxy.imagePullPolicy`                      | image pull policy                                           | `IfNotPresent`               |
