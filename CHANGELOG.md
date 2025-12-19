@@ -4,6 +4,17 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
+## 0.1.19
+
+### Improvements
+
+* Adding support for passing custom registry and imagePullSecrets by @dunefro in [#210](https://github.com/truefoundry/KubeElasti/pull/210)
+* Adding readme generator by @dunefro in [#211](https://github.com/truefoundry/KubeElasti/pull/211)
+
+### Fixes
+
+* fix incorrect error return case in unhealthy scaler check by @maanas-23 in [#209](https://github.com/truefoundry/KubeElasti/pull/209)
+
 ## 0.1.18
 
 ### Improvements
