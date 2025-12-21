@@ -63,11 +63,11 @@ KubeElasti uses a proxy mechanism that queues and holds requests for scaled-down
 
 # Getting Started
 
-Details on how to install and configure KubeElasti can be found in the [Getting Started](./docs/src/getting-started.md) guide.
+Details on how to install and configure KubeElasti can be found in the [Getting Started](./docs/src/gs-setup.md) guide.
 
 # Configure KubeElasti
 
-Check out the different ways to configure KubeElasti in the [Configuration](./docs/src/configure-elastiservice.md) guide.
+Check out the different ways to configure KubeElasti in the [Configuration](./docs/src/gs-configure-elastiservice.md) guide.
 
 # Monitoring
 
