@@ -59,7 +59,7 @@ KubeElasti uses a proxy mechanism that queues and holds requests for scaled-down
 
 - **Generic Service Support:** KubeElasti works at the kubernetes service level. It also supports East-West traffic using cluster-local service DNS, ensuring robust and flexible traffic management across your services. So any ingress or service mesh solution can be used with KubeElasti.
 
-- **Autoscaler Integration:** KubeElasti can work seamlessly with [HPA](./docs/src/integration-hpa.md) and [Keda](./docs/src/integration-keda.md).
+- **Autoscaler Integration:** KubeElasti can work seamlessly with [HPA](./docs/src/gs-scalers.md#scaling-with-hpa) and [Keda](./docs/src/gs-scalers.md#scaling-with-keda).
 
 # Getting Started
 
