@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
 	"github.com/getsentry/sentry-go"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -48,6 +51,8 @@ type config struct {
 	// Sentry config
 	SentryDsn string `split_words:"true" default:""`
 	SentryEnv string `envconfig:"SENTRY_ENVIRONMENT" default:""`
+	// H2C
+	EnableH2C bool `envconfig:"ENABLE_H2C" default:"false"`
 }
 
 func main() {
@@ -114,11 +119,18 @@ func main() {
 	reverseProxyPort := fmt.Sprintf(":%d", elasti_config.GetResolverConfig().ReverseProxyPort)
 	reverseProxyServerMux := http.NewServeMux()
 	reverseProxyServerMux.Handle("/", sentryHandler.HandleFunc(requestHandler.ServeHTTP))
+
 	reverseProxyServer := &http.Server{
 		Addr:              reverseProxyPort,
 		Handler:           reverseProxyServerMux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
+
+	if env.EnableH2C {
+		h2s := &http2.Server{}
+		reverseProxyServer.Handler = h2c.NewHandler(reverseProxyServerMux, h2s)
+	}
+
 	logger.Info("Reverse Proxy Server starting at ", zap.String("port", reverseProxyPort))
 	go func() {
 		if err := reverseProxyServer.ListenAndServe(); err != nil {
