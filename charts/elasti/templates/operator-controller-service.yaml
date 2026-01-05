@@ -4,13 +4,15 @@ metadata:
   name: {{ include "elasti.fullname" . }}-operator-controller-service
   namespace: '{{ .Release.Namespace }}'
   labels:
-    control-plane: controller-manager
-    {{- include "elasti.labels" . | nindent 4 }}
+    {{- include "elasti-operator.controlPlaneLabels" . | nindent 4 }}
+    {{- include "elasti-operator.serviceLabels" . | nindent 4 }}
+  annotations:
+    {{- include "elasti-operator.serviceAnnotations" . | nindent 4 }}
 spec:
   type: {{ .Values.elastiController.service.type }}
   selector:
-    control-plane: controller-manager
-    {{- include "elasti.selectorLabels" . | nindent 4 }}
+    {{- include "elasti-operator.controlPlaneLabels" . | nindent 4 }}
+    {{- include "elasti.selectorLabels" (dict "context" . "name" "elasti") | nindent 4 }}
   ports:
   - port: {{ .Values.elastiController.service.port }}
     targetPort: {{ .Values.elastiController.service.port }}

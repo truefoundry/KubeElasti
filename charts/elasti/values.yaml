@@ -22,6 +22,37 @@ global:
   ## @param global.imagePullSecrets [array] image pull secrets to use for the deployment
   ##
   imagePullSecrets: []
+  ## @param global.labels [object] labels to apply to all resources
+  ##
+  labels: {}
+  ## @param global.annotations [object] annotations to apply to all resources
+  ##
+  annotations: {}
+  ## @param global.podLabels [object] labels to apply to all pods
+  ##
+  podLabels: {}
+  ## @param global.podAnnotations [object] annotations to apply to all pods
+  ##
+  podAnnotations: {}
+  ## @param global.serviceLabels [object] labels to apply to all services
+  ##
+  serviceLabels: {}
+  ## @param global.serviceAnnotations [object] annotations to apply to all services
+  ##
+  serviceAnnotations: {}
+  ## @param global.deploymentLabels [object] labels to apply to all deployments
+  ##
+  deploymentLabels: {}
+  ## @param global.deploymentAnnotations [object] annotations to apply to all deployments
+  ##
+  deploymentAnnotations: {}
+  ## @param global.serviceAccount [object] service account configuration
+  ##
+  serviceAccount:
+    ## @param global.serviceAccount.annotations [object] annotations to apply to all service accounts
+    annotations: {}
+    ## @param global.serviceAccount.labels [object] labels to apply to all service accounts
+    labels: {}
 ## @section Elasti controller parameters
 elastiController:
   manager:
@@ -84,21 +115,57 @@ elastiController:
   ## @param elastiController.replicas number of replicas to use for the deployment
   ##
   replicas: 1
+  ## @param elastiController.commonLabels [object] labels to apply to all elastiController resources
+  ##
+  commonLabels: {}
+  ## @param elastiController.commonAnnotations [object] annotations to apply to all elastiController resources
+  ##
+  commonAnnotations: {}
+  ## @param elastiController.podLabels [object] labels to apply to elastiController pods
+  ##
+  podLabels: {}
+  ## @param elastiController.podAnnotations [object] annotations to apply to elastiController pods
+  ##
+  podAnnotations: {}
+  ## @param elastiController.deploymentLabels [object] labels to apply to elastiController deployment
+  ##
+  deploymentLabels: {}
+  ## @param elastiController.deploymentAnnotations [object] annotations to apply to elastiController deployment
+  ##
+  deploymentAnnotations: {}
   serviceAccount:
     ## @param elastiController.serviceAccount.annotations [object] annotations to use for the deployment
     ##
     annotations: {}
+    ## @param elastiController.serviceAccount.labels [object] labels to use for the service account
+    ##
+    labels: {}
   ## @param elastiController.metricsService [object] metrics service to use for the deployment
   ##
   metricsService:
     port: 8080
     type: ClusterIP
+    ## @param elastiController.metricsService.labels [object] labels to apply to metricsService
+    labels: {}
+    ## @param elastiController.metricsService.annotations [object] annotations to apply to metricsService
+    annotations: {}
 
   ## @param elastiController.service [object] service to use for the deployment
   ##
   service:
     port: 8013
     type: ClusterIP
+    ## @param elastiController.service.labels [object] labels to apply to service
+    labels: {}
+    ## @param elastiController.service.annotations [object] annotations to apply to service
+    annotations: {}
+  ## @param elastiController.serviceMonitor [object] serviceMonitor configuration
+  ##
+  serviceMonitor:
+    ## @param elastiController.serviceMonitor.labels [object] labels to apply to serviceMonitor
+    labels: {}
+    ## @param elastiController.serviceMonitor.annotations [object] annotations to apply to serviceMonitor
+    annotations: {}
 
 ## @section Elasti resolver parameters
 elastiResolver:
@@ -167,10 +234,31 @@ elastiResolver:
   ## @param elastiResolver.replicas number of replicas to use for the deployment
   ##
   replicas: 1
+  ## @param elastiResolver.commonLabels [object] labels to apply to all elastiResolver resources
+  ##
+  commonLabels: {}
+  ## @param elastiResolver.commonAnnotations [object] annotations to apply to all elastiResolver resources
+  ##
+  commonAnnotations: {}
+  ## @param elastiResolver.podLabels [object] labels to apply to elastiResolver pods
+  ##
+  podLabels: {}
+  ## @param elastiResolver.podAnnotations [object] annotations to apply to elastiResolver pods
+  ##
+  podAnnotations: {}
+  ## @param elastiResolver.deploymentLabels [object] labels to apply to elastiResolver deployment
+  ##
+  deploymentLabels: {}
+  ## @param elastiResolver.deploymentAnnotations [object] annotations to apply to elastiResolver deployment
+  ##
+  deploymentAnnotations: {}
   serviceAccount:
     ## @param elastiResolver.serviceAccount.annotations [object] annotations to use for the deployment
     ##
     annotations: {}
+    ## @param elastiResolver.serviceAccount.labels [object] labels to use for the service account
+    ##
+    labels: {}
 
   autoscaling:
     ## @param elastiResolver.autoscaling.enabled whether to enable autoscaling
@@ -196,3 +284,14 @@ elastiResolver:
   service:
     port: 8013
     type: ClusterIP
+    ## @param elastiResolver.service.labels [object] labels to apply to service
+    labels: {}
+    ## @param elastiResolver.service.annotations [object] annotations to apply to service
+    annotations: {}
+  ## @param elastiResolver.serviceMonitor [object] serviceMonitor configuration
+  ##
+  serviceMonitor:
+    ## @param elastiResolver.serviceMonitor.labels [object] labels to apply to serviceMonitor
+    labels: {}
+    ## @param elastiResolver.serviceMonitor.annotations [object] annotations to apply to serviceMonitor
+    annotations: {}
