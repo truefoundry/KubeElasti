@@ -5,7 +5,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.19.0
   labels:
-    {{- include "elasti.crdLabels" . | nindent 4 }}
+    {{- include "elasti.labels" . | nindent 4 }}
 spec:
   group: elasti.truefoundry.com
   names:
@@ -80,7 +80,6 @@ spec:
                     enum:
                     - deployments
                     - rollouts
-                    - statefulsets
                     - Deployment
                     - StatefulSet
                     - Rollout
