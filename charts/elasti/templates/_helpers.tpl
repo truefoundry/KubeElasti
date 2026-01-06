@@ -90,18 +90,6 @@ app.kubernetes.io/version: {{ include "elasti.versionLabelValue" .context }}
 {{- end }}
 
 {{/*
-CRD labels - excludes global.labels to avoid instance-specific labels on cluster-scoped resources
-*/}}
-{{- define "elasti.crdLabels" -}}
-helm.sh/chart: {{ include "elasti.chart" . }}
-app.kubernetes.io/name: {{ include "elasti.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/part-of: elasti
-app.kubernetes.io/version: {{ include "elasti.versionLabelValue" . }}
-{{- end }}
-
-{{/*
 Selector labels - accepts dict with "context" and "name" parameters
 Usage: include "elasti.selectorLabels" (dict "context" . "name" "elasti-operator")
 */}}
