@@ -181,12 +181,13 @@ control-plane: controller-manager
 {{- end }}
 
 {{/*
-Pod Labels - merges global and component labels, includes selector labels
+Pod Labels - merges control plane labels, global and component labels, includes selector labels
 Note: Using "elasti" for selector to maintain backward compatibility
 */}}
 {{- define "elasti-operator.podLabels" -}}
+{{- $controlPlaneLabels := include "elasti-operator.controlPlaneLabels" . | fromYaml }}
 {{- $selectorLabels := include "elasti.selectorLabels" (dict "context" . "name" "elasti") | fromYaml }}
-{{- $podLabels := mergeOverwrite (deepCopy .Values.global.podLabels) .Values.elastiController.podLabels $selectorLabels }}
+{{- $podLabels := mergeOverwrite (deepCopy .Values.global.podLabels) $controlPlaneLabels .Values.elastiController.podLabels $selectorLabels }}
 {{- toYaml $podLabels }}
 {{- end }}
 
@@ -203,11 +204,12 @@ Returns just the map (for merging with hardcoded pod annotations)
 {{- end }}
 
 {{/*
-Service Labels - merges commonLabels with service-specific labels
+Service Labels - merges control plane labels, commonLabels with service-specific labels
 */}}
 {{- define "elasti-operator.serviceLabels" -}}
+{{- $controlPlaneLabels := include "elasti-operator.controlPlaneLabels" . | fromYaml }}
 {{- $commonLabels := include "elasti-operator.commonLabels" . | fromYaml }}
-{{- $serviceLabels := mergeOverwrite (deepCopy .Values.global.serviceLabels) $commonLabels .Values.elastiController.service.labels }}
+{{- $serviceLabels := mergeOverwrite (deepCopy .Values.global.serviceLabels) $controlPlaneLabels $commonLabels .Values.elastiController.service.labels }}
 {{- toYaml $serviceLabels }}
 {{- end }}
 
@@ -221,11 +223,12 @@ Service Annotations - merges commonAnnotations with service-specific annotations
 {{- end }}
 
 {{/*
-Metrics Service Labels - merges commonLabels with metrics service-specific labels
+Metrics Service Labels - merges control plane labels, commonLabels with metrics service-specific labels
 */}}
 {{- define "elasti-operator.metricsServiceLabels" -}}
+{{- $controlPlaneLabels := include "elasti-operator.controlPlaneLabels" . | fromYaml }}
 {{- $commonLabels := include "elasti-operator.commonLabels" . | fromYaml }}
-{{- $metricsServiceLabels := mergeOverwrite (deepCopy .Values.global.serviceLabels) $commonLabels .Values.elastiController.metricsService.labels }}
+{{- $metricsServiceLabels := mergeOverwrite (deepCopy .Values.global.serviceLabels) $controlPlaneLabels $commonLabels .Values.elastiController.metricsService.labels }}
 {{- toYaml $metricsServiceLabels }}
 {{- end }}
 
@@ -257,11 +260,12 @@ Service Account Annotations - merges commonAnnotations with service-account spec
 {{- end }}
 
 {{/*
-Deployment Labels - merges commonLabels with deployment-specific labels
+Deployment Labels - merges control plane labels, commonLabels with deployment-specific labels
 */}}
 {{- define "elasti-operator.deploymentLabels" -}}
+{{- $controlPlaneLabels := include "elasti-operator.controlPlaneLabels" . | fromYaml }}
 {{- $commonLabels := include "elasti-operator.commonLabels" . | fromYaml }}
-{{- $mergedLabels := mergeOverwrite (deepCopy .Values.global.deploymentLabels) $commonLabels .Values.elastiController.deploymentLabels }}
+{{- $mergedLabels := mergeOverwrite (deepCopy .Values.global.deploymentLabels) $controlPlaneLabels $commonLabels .Values.elastiController.deploymentLabels }}
 {{- toYaml $mergedLabels }}
 {{- end }}
 
@@ -275,11 +279,12 @@ Deployment annotations
 {{- end }}
 
 {{/*
-ServiceMonitor Labels - merges commonLabels with servicemonitor specific labels
+ServiceMonitor Labels - merges control plane labels, commonLabels with servicemonitor specific labels
 */}}
 {{- define "elasti-operator.serviceMonitorLabels" -}}
+{{- $controlPlaneLabels := include "elasti-operator.controlPlaneLabels" . | fromYaml }}
 {{- $commonLabels := include "elasti-operator.commonLabels" . | fromYaml }}
-{{- $serviceMonitorLabels := mergeOverwrite (deepCopy $commonLabels) .Values.elastiController.serviceMonitor.labels }}
+{{- $serviceMonitorLabels := mergeOverwrite (deepCopy $controlPlaneLabels) $commonLabels .Values.elastiController.serviceMonitor.labels }}
 {{- toYaml $serviceMonitorLabels }}
 {{- end }}
 
@@ -290,6 +295,16 @@ ServiceMonitor Annotations - merges commonAnnotations with servicemonitor specif
 {{- $commonAnnotations := include "elasti-operator.commonAnnotations" . | fromYaml }}
 {{- $serviceMonitorAnnotations := mergeOverwrite (deepCopy $commonAnnotations) .Values.elastiController.serviceMonitor.annotations }}
 {{- toYaml $serviceMonitorAnnotations }}
+{{- end }}
+
+{{/*
+Selector Labels - merges control plane labels with base selector labels
+*/}}
+{{- define "elasti-operator.selectorLabels" -}}
+{{- $controlPlaneLabels := include "elasti-operator.controlPlaneLabels" . | fromYaml }}
+{{- $selectorLabels := include "elasti.selectorLabels" (dict "context" . "name" "elasti") | fromYaml }}
+{{- $mergedLabels := mergeOverwrite $controlPlaneLabels $selectorLabels }}
+{{- toYaml $mergedLabels }}
 {{- end }}
 
 {{/*
@@ -354,12 +369,13 @@ app: elasti-resolver
 {{- end }}
 
 {{/*
-Pod Labels - merges global and component labels, includes selector labels
+Pod Labels - merges app labels, global and component labels, includes selector labels
 Note: Using "elasti" for selector to maintain backward compatibility
 */}}
 {{- define "elasti-resolver.podLabels" -}}
+{{- $appLabels := include "elasti-resolver.appLabels" . | fromYaml }}
 {{- $selectorLabels := include "elasti.selectorLabels" (dict "context" . "name" "elasti") | fromYaml }}
-{{- $podLabels := mergeOverwrite (deepCopy .Values.global.podLabels) .Values.elastiResolver.podLabels $selectorLabels }}
+{{- $podLabels := mergeOverwrite (deepCopy .Values.global.podLabels) $appLabels .Values.elastiResolver.podLabels $selectorLabels }}
 {{- toYaml $podLabels }}
 {{- end }}
 
@@ -376,11 +392,12 @@ Returns just the map (for merging with hardcoded pod annotations)
 {{- end }}
 
 {{/*
-Service Labels - merges commonLabels with service-specific labels
+Service Labels - merges app labels, commonLabels with service-specific labels
 */}}
 {{- define "elasti-resolver.serviceLabels" -}}
+{{- $appLabels := include "elasti-resolver.appLabels" . | fromYaml }}
 {{- $commonLabels := include "elasti-resolver.commonLabels" . | fromYaml }}
-{{- $serviceLabels := mergeOverwrite (deepCopy .Values.global.serviceLabels) $commonLabels .Values.elastiResolver.service.labels }}
+{{- $serviceLabels := mergeOverwrite (deepCopy .Values.global.serviceLabels) $appLabels $commonLabels .Values.elastiResolver.service.labels }}
 {{- toYaml $serviceLabels }}
 {{- end }}
 
@@ -412,11 +429,12 @@ Service Account Annotations - merges commonAnnotations with service account-spec
 {{- end }}
 
 {{/*
-Deployment Labels - merges commonLabels with deployment-specific labels
+Deployment Labels - merges app labels, commonLabels with deployment-specific labels
 */}}
 {{- define "elasti-resolver.deploymentLabels" -}}
+{{- $appLabels := include "elasti-resolver.appLabels" . | fromYaml }}
 {{- $commonLabels := include "elasti-resolver.commonLabels" . | fromYaml }}
-{{- $deploymentLabels := mergeOverwrite (deepCopy .Values.global.deploymentLabels) $commonLabels .Values.elastiResolver.deploymentLabels }}
+{{- $deploymentLabels := mergeOverwrite (deepCopy .Values.global.deploymentLabels) $appLabels $commonLabels .Values.elastiResolver.deploymentLabels }}
 {{- toYaml $deploymentLabels }}
 {{- end }}
 
@@ -445,6 +463,16 @@ ServiceMonitor Annotations - merges commonAnnotations with servicemonitor specif
 {{- $commonAnnotations := include "elasti-resolver.commonAnnotations" . | fromYaml }}
 {{- $serviceMonitorAnnotations := mergeOverwrite (deepCopy $commonAnnotations) .Values.elastiResolver.serviceMonitor.annotations }}
 {{- toYaml $serviceMonitorAnnotations }}
+{{- end }}
+
+{{/*
+Selector Labels - merges app labels with base selector labels
+*/}}
+{{- define "elasti-resolver.selectorLabels" -}}
+{{- $appLabels := include "elasti-resolver.appLabels" . | fromYaml }}
+{{- $selectorLabels := include "elasti.selectorLabels" (dict "context" . "name" "elasti") | fromYaml }}
+{{- $mergedLabels := mergeOverwrite $appLabels $selectorLabels }}
+{{- toYaml $mergedLabels }}
 {{- end }}
 
 {{/*

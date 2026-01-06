@@ -5,7 +5,6 @@ metadata:
   name: {{ include "elasti.fullname" . }}-operator-controller-manager-metrics-monitor
   namespace: '{{ .Release.Namespace }}'
   labels:
-    {{- include "elasti-operator.controlPlaneLabels" . | nindent 4 }}
     {{- include "elasti-operator.serviceMonitorLabels" . | nindent 4 }}
   annotations:
     {{- include "elasti-operator.serviceMonitorAnnotations" . | nindent 4 }}

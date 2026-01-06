@@ -11,8 +11,7 @@ metadata:
 spec:
   type: {{ .Values.elastiResolver.service.type }}
   selector:
-    {{- include "elasti-resolver.appLabels" . | nindent 4 }}
-    {{- include "elasti.selectorLabels" (dict "context" . "name" "elasti") | nindent 4 }}
+    {{- include "elasti-resolver.selectorLabels" . | nindent 4 }}
   ports:
   - port: {{ .Values.elastiResolver.service.port }}
     targetPort: {{ .Values.elastiResolver.service.port }}
