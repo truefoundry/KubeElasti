@@ -4,6 +4,12 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
+## Unreleased
+
+### Fixes
+
+* fix: health check for scaler ([#221](https://github.com/truefoundry/KubeElasti/pull/221))
+
 ## 0.1.19
 
 ### Improvements
