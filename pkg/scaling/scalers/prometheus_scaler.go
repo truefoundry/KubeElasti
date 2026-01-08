@@ -18,20 +18,26 @@ const (
 	defaultUptimeFilter = "container=\"prometheus\""
 )
 
+type ErrorCode string
+type ExecutionError struct {
+	error error
+	code  ErrorCode
+}
+
 var (
-	ErrCreatePrometheusScaler = fmt.Errorf("error creating prometheus scaler")
-	ErrParseMetadata          = fmt.Errorf("failed to parse metadata")
-	ErrCreateHTTPRequest      = fmt.Errorf("failed to create HTTP request")
-	ErrExecuteHTTPRequest     = fmt.Errorf("failed to execute HTTP request")
-	ErrUnexpectedHTTPStatus   = fmt.Errorf("unexpected HTTP status")
-	ErrDecodePrometheusResp   = fmt.Errorf("failed to decode Prometheus response")
-	ErrEmptyQueryResult       = fmt.Errorf("prometheus query result is empty, prometheus metrics 'prometheus' target may be lost")
-	ErrMultipleQueryResults   = fmt.Errorf("prometheus query returned multiple elements")
-	ErrEmptyValueList         = fmt.Errorf("prometheus query value list in result is empty, prometheus metrics 'prometheus' target may be lost")
-	ErrInsufficientValues     = fmt.Errorf("prometheus query didn't return enough values")
-	ErrParseMetricValue       = fmt.Errorf("failed to parse metric value")
-	ErrInfiniteValue          = fmt.Errorf("prometheus query returns infinite value")
-	ErrExecutePrometheusQuery = fmt.Errorf("failed to execute prometheus query")
+	ErrCreatePrometheusScaler ErrorCode = "error creating prometheus scaler"
+	ErrParseMetadata          ErrorCode = "failed to parse metadata"
+	ErrCreateHTTPRequest      ErrorCode = "failed to create HTTP request"
+	ErrExecuteHTTPRequest     ErrorCode = "failed to execute HTTP request"
+	ErrUnexpectedHTTPStatus   ErrorCode = "unexpected HTTP status"
+	ErrDecodePrometheusResp   ErrorCode = "failed to decode Prometheus response"
+	ErrEmptyQueryResult       ErrorCode = "prometheus query result is empty, prometheus metrics 'prometheus' target may be lost"
+	ErrMultipleQueryResults   ErrorCode = "prometheus query returned multiple elements"
+	ErrEmptyValueList         ErrorCode = "prometheus query value list in result is empty, prometheus metrics 'prometheus' target may be lost"
+	ErrInsufficientValues     ErrorCode = "prometheus query didn't return enough values"
+	ErrParseMetricValue       ErrorCode = "failed to parse metric value"
+	ErrInfiniteValue          ErrorCode = "prometheus query returns infinite value"
+	ErrExecutePrometheusQuery ErrorCode = "failed to execute prometheus query"
 )
 
 type prometheusScaler struct {
@@ -92,43 +98,64 @@ func queryEscape(query string) string {
 	return plusEscaped
 }
 
-func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (float64, error) {
+func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (float64, ExecutionError) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	queryEscaped := queryEscape(query)
 	queryURL := fmt.Sprintf("%s/api/v1/query?query=%s&time=%s", s.metadata.ServerAddress, queryEscaped, t)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", queryURL, nil)
 	if err != nil {
-		return -1, fmt.Errorf("%w: %w", ErrCreateHTTPRequest, err)
+		return -1, ExecutionError{fmt.Errorf("%w: %w", ErrCreateHTTPRequest, err), ErrCreateHTTPRequest}
 	}
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		return -1, fmt.Errorf("%w: %w", ErrExecuteHTTPRequest, err)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %w", ErrExecuteHTTPRequest, err),
+			code:  ErrExecuteHTTPRequest,
+		}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return -1, fmt.Errorf("%w: %s", ErrUnexpectedHTTPStatus, resp.Status)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %s", ErrUnexpectedHTTPStatus, resp.Status),
+			code:  ErrUnexpectedHTTPStatus,
+		}
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&promQueryResponse); err != nil {
-		return -1, fmt.Errorf("%w: %w", ErrDecodePrometheusResp, err)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %w", ErrDecodePrometheusResp, err),
+			code:  ErrDecodePrometheusResp,
+		}
 	}
 
 	var v float64 = -1
 
 	if len(promQueryResponse.Data.Result) == 0 {
-		return -1, fmt.Errorf("%w: %s", ErrEmptyQueryResult, query)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %s", ErrEmptyQueryResult, query),
+			code:  ErrEmptyQueryResult,
+		}
 	} else if len(promQueryResponse.Data.Result) > 1 {
-		return -1, fmt.Errorf("%w: %s", ErrMultipleQueryResults, query)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %s", ErrMultipleQueryResults, query),
+			code:  ErrMultipleQueryResults,
+		}
 	}
 
 	valueLen := len(promQueryResponse.Data.Result[0].Value)
 	if valueLen == 0 {
-		return -1, fmt.Errorf("%w: %s", ErrEmptyValueList, s.metadata.Query)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %s", ErrEmptyValueList, s.metadata.Query),
+			code:  ErrEmptyValueList,
+		}
 	} else if valueLen < 2 {
-		return -1, fmt.Errorf("%w: %s", ErrInsufficientValues, s.metadata.Query)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %s", ErrInsufficientValues, s.metadata.Query),
+			code:  ErrInsufficientValues,
+		}
 	}
 
 	val := promQueryResponse.Data.Result[0].Value[1]
@@ -136,21 +163,27 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 		str := val.(string)
 		v, err = strconv.ParseFloat(str, 64)
 		if err != nil {
-			return -1, fmt.Errorf("%w: %w", ErrParseMetricValue, err)
+			return -1, ExecutionError{
+				error: fmt.Errorf("%s: %w", ErrParseMetricValue, err),
+				code:  ErrParseMetricValue,
+			}
 		}
 	}
 
 	if math.IsInf(v, 0) {
-		return -1, fmt.Errorf("%w: %f", ErrInfiniteValue, v)
+		return -1, ExecutionError{
+			error: fmt.Errorf("%s: %f", ErrInfiniteValue, v),
+			code:  ErrInfiniteValue,
+		}
 	}
 
-	return v, nil
+	return v, ExecutionError{}
 }
 
 func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) {
 	metricValue, err := s.executePromQuery(ctx, s.metadata.Query)
-	if err != nil {
-		return false, fmt.Errorf("%w %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err)
+	if err.error != nil {
+		return false, fmt.Errorf("%s %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err.error)
 	}
 
 	if metricValue == -1 {
@@ -164,8 +197,8 @@ func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) 
 
 func (s *prometheusScaler) ShouldScaleFromZero(ctx context.Context) (bool, error) {
 	metricValue, err := s.executePromQuery(ctx, s.metadata.Query)
-	if err != nil {
-		return true, fmt.Errorf("%w %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err)
+	if err.error != nil {
+		return true, fmt.Errorf("%s %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err.error)
 	}
 	if metricValue == -1 {
 		return true, nil
@@ -197,13 +230,13 @@ func (s *prometheusScaler) IsHealthy(ctx context.Context) (bool, error) {
 		ctx,
 		finalUptimeQuery,
 	)
-	if err != nil {
+	if err.error != nil {
 		// Only return HTTP request and status errors, ignore all other errors
-		errStr := err.Error()
-		if strings.Contains(errStr, ErrCreateHTTPRequest.Error()) ||
-			strings.Contains(errStr, ErrExecuteHTTPRequest.Error()) ||
-			strings.Contains(errStr, ErrUnexpectedHTTPStatus.Error()) {
-			return false, fmt.Errorf("%w %s: %w", ErrExecutePrometheusQuery, finalUptimeQuery, err)
+		errCode := err.code
+		if errCode == ErrCreateHTTPRequest ||
+			errCode == ErrExecuteHTTPRequest ||
+			errCode == ErrUnexpectedHTTPStatus {
+			return false, fmt.Errorf("%s %s: %w", errCode, finalUptimeQuery, err.error)
 		}
 		// Ignore all other errors and return healthy
 		return true, nil
