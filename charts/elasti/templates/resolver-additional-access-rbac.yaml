@@ -3,7 +3,9 @@ kind: ClusterRole
 metadata:
   name: {{ include "elasti.fullname" . }}-resolver-additional-access
   labels:
-    {{- include "elasti.labels" . | nindent 4 }}
+    {{- include "elasti-resolver.commonLabels" . | nindent 4 }}
+  annotations:
+    {{- include "elasti-resolver.commonAnnotations" . | nindent 4 }}
 rules:
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]

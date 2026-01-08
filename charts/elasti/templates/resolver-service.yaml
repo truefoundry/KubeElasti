@@ -5,12 +5,13 @@ metadata:
   namespace: '{{ .Release.Namespace }}'
   labels:
     app.kubernetes.io/prometheus: elasti-resolver # used serviceMonitor to define the jobLabel
-    {{- include "elasti.labels" . | nindent 4 }}
+    {{- include "elasti-resolver.serviceLabels" . | nindent 4 }}
+  annotations:
+    {{- include "elasti-resolver.serviceAnnotations" . | nindent 4 }}
 spec:
   type: {{ .Values.elastiResolver.service.type }}
   selector:
-    app: elasti-resolver
-    {{- include "elasti.selectorLabels" . | nindent 4 }}
+    {{- include "elasti-resolver.selectorLabels" . | nindent 4 }}
   ports:
   - port: {{ .Values.elastiResolver.service.port }}
     targetPort: {{ .Values.elastiResolver.service.port }}

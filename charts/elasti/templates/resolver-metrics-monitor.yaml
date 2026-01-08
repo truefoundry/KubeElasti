@@ -6,7 +6,9 @@ metadata:
   namespace: '{{ .Release.Namespace }}'
   labels:
     group: elasti
-    {{- include "elasti.labels" . | nindent 4 }}
+    {{- include "elasti-resolver.serviceMonitorLabels" . | nindent 4 }}
+  annotations:
+    {{- include "elasti-resolver.serviceMonitorAnnotations" . | nindent 4 }}
 spec:
   endpoints:
   - path: /metrics
