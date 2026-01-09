@@ -64,6 +64,6 @@ jobs:
           yq -i '.elastiResolver.proxy.image.tag="${{ github.sha }}"' values.yaml
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add values.yaml
+          git add -A
           git commit -m "Update Helm values.yaml on helm-main branch with sha: ${{ github.sha }}" --signoff
           git push --force origin helm-main
