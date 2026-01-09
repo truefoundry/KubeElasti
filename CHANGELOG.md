@@ -8,7 +8,7 @@
 
 ### Fixes
 
-* fix: health check for scaler ([#221](https://github.com/truefoundry/KubeElasti/pull/221))
+* fix: health check for scaler ([#222](https://github.com/truefoundry/KubeElasti/pull/222))
 
 ## 0.1.19
 
