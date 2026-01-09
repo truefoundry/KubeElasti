@@ -152,7 +152,7 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) {
 	metricValue, err := s.executePromQuery(ctx, s.metadata.Query)
 	if err != nil {
-		return false, fmt.Errorf("%s %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err)
+		return false, fmt.Errorf("%w %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err)
 	}
 
 	if metricValue == -1 {
@@ -167,7 +167,7 @@ func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) 
 func (s *prometheusScaler) ShouldScaleFromZero(ctx context.Context) (bool, error) {
 	metricValue, err := s.executePromQuery(ctx, s.metadata.Query)
 	if err != nil {
-		return true, fmt.Errorf("%s %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err)
+		return true, fmt.Errorf("%w %s: %w", ErrExecutePrometheusQuery, s.metadata.Query, err)
 	}
 	if metricValue == -1 {
 		return true, nil
