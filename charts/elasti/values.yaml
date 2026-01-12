@@ -87,7 +87,7 @@ elastiController:
       repository: tfy-images/elasti-operator
       ## @param elastiController.manager.image.tag tag to use for the deployment
       ##
-      tag: cb34b73f8c77fe94cb3a24cef3bcfa5447ee480d
+      tag: 7db3f17ffa6d15b8a79a7366367900e48eab5628
     ## @param elastiController.manager.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
@@ -180,6 +180,7 @@ elastiResolver:
       queueSize: "50000"
       reqTimeout: "600"
       trafficReEnableDuration: "5"
+      enableH2C: false
     image:
       ## @param elastiResolver.proxy.image.registry registry to use for the deployment
       ##
@@ -189,7 +190,7 @@ elastiResolver:
       repository: tfy-images/elasti-resolver
       ## @param elastiResolver.proxy.image.tag tag to use for the deployment
       ##
-      tag: cb34b73f8c77fe94cb3a24cef3bcfa5447ee480d
+      tag: 7db3f17ffa6d15b8a79a7366367900e48eab5628
     ## @param elastiResolver.proxy.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
