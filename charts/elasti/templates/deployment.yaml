@@ -119,6 +119,8 @@ spec:
           value: {{ quote .Values.elastiResolver.proxy.env.maxQueueConcurrency }}
         - name: INITIAL_CAPACITY
           value: {{ quote .Values.elastiResolver.proxy.env.initialCapacity }}
+        - name: ENABLE_H2C
+          value: {{ quote .Values.elastiResolver.proxy.env.enableH2C }}
         {{- if .Values.elastiResolver.proxy.sentry.enabled }}
         - name: SENTRY_DSN
           valueFrom:

@@ -183,6 +183,7 @@ elastiResolver:
       queueSize: "50000"
       reqTimeout: "600"
       trafficReEnableDuration: "5"
+      enableH2C: false
     image:
       ## @param elastiResolver.proxy.image.registry registry to use for the deployment
       ##
