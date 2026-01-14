@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,16 +20,19 @@ const (
 )
 
 type prometheusScaler struct {
-	httpClient     *http.Client
-	metadata       *prometheusMetadata
-	cooldownPeriod time.Duration
+	httpClient           *http.Client
+	metadata             *prometheusMetadata
+	cooldownPeriod       time.Duration
+	defaultServerAddress string
+	defaultHeaders       map[string]string
 }
 
 type prometheusMetadata struct {
-	ServerAddress string  `json:"serverAddress"`
-	Query         string  `json:"query"`
-	Threshold     float64 `json:"threshold,string"`
-	UptimeFilter  string  `json:"uptimeFilter"`
+	ServerAddress string            `json:"serverAddress"`
+	Query         string            `json:"query"`
+	Threshold     float64           `json:"threshold,string"`
+	UptimeFilter  string            `json:"uptimeFilter"`
+	Headers       map[string]string `json:"headers"`
 }
 
 var promQueryResponse struct {
@@ -53,10 +57,23 @@ func NewPrometheusScaler(metadata json.RawMessage, cooldownPeriod time.Duration)
 	}
 
 	return &prometheusScaler{
-		metadata:       parsedMetadata,
-		httpClient:     client,
-		cooldownPeriod: cooldownPeriod,
+		metadata:             parsedMetadata,
+		httpClient:           client,
+		cooldownPeriod:       cooldownPeriod,
+		defaultServerAddress: os.Getenv("PROMETHEUS_TRIGGER_SERVER_ADDRESS"),
+		defaultHeaders:       fetchDefaultHeaders(),
 	}, nil
+}
+
+func fetchDefaultHeaders() map[string]string {
+	headers := make(map[string]string)
+
+	authorizationHeader := os.Getenv("PROMETHEUS_TRIGGER_AUTHORIZATION_HEADER")
+	if authorizationHeader != "" {
+		headers["Authorization"] = authorizationHeader
+	}
+
+	return headers
 }
 
 func parsePrometheusMetadata(jsonMetadata json.RawMessage) (*prometheusMetadata, error) {
@@ -79,11 +96,26 @@ func queryEscape(query string) string {
 func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (float64, error) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	queryEscaped := queryEscape(query)
-	queryURL := fmt.Sprintf("%s/api/v1/query?query=%s&time=%s", s.metadata.ServerAddress, queryEscaped, t)
+	serverAddress := s.defaultServerAddress
+	if s.metadata.ServerAddress != "" {
+		serverAddress = s.metadata.ServerAddress
+	}
+	if serverAddress == "" {
+		return -1, fmt.Errorf("prometheus serverAddress not configured")
+	}
+	queryURL := fmt.Sprintf("%s/api/v1/query?query=%s&time=%s", serverAddress, queryEscaped, t)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", queryURL, nil)
 	if err != nil {
 		return -1, fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+
+	// Apply default headers, then per-trigger metadata headers (which can override defaults)
+	for key, value := range s.defaultHeaders {
+		req.Header.Set(key, value)
+	}
+	for key, value := range s.metadata.Headers {
+		req.Header.Set(key, value)
 	}
 
 	resp, err := s.httpClient.Do(req)
