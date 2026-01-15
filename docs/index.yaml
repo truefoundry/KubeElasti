@@ -19,6 +19,6 @@ entries:
     name: elasti
     type: application
     urls:
-    - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.20/kubeelasti-0.1.20.tgz
+    - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.20/elasti-0.1.20.tgz
     version: 0.1.20
 generated: "2026-01-16T05:11:00.886543+05:30"
