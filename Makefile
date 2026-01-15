@@ -62,3 +62,8 @@ build-docs: ## Build docs
 fetch-contributors: ## Fetch contributors
 	python3 docs/scripts/fetch_contributors.py
 
+.PHONY: index-helm
+index-helm: ## Index helm chart
+	helm package charts/elasti -d docs/
+	helm repo index docs/ --url https://kubeelasti.dev --merge ./docs/index.yaml 
+	rm -rf docs/elasti-*.tgz

@@ -1,0 +1,5 @@
+owner: truefoundry
+git-repo: KubeElasti
+charts-repo-url: https://kubeelasti.dev
+pages-branch: main
+pages-index-path: docs/index.yaml
