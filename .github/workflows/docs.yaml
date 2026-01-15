@@ -40,5 +40,4 @@ jobs:
           python docs/scripts/fetch_contributors.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: mkdocs gh-deploy 
-
+      - run: mkdocs gh-deploy --force
