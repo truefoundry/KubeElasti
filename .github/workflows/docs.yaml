@@ -1,8 +1,12 @@
 name: deploy-docs
-"on":
+on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'docs-requirements.txt'
 
 # Concurrency protection to prevent multiple workflow runs from executing simultaneously
 concurrency:
@@ -36,5 +40,5 @@ jobs:
           python docs/scripts/fetch_contributors.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: mkdocs gh-deploy --force
+      - run: mkdocs gh-deploy 
 
