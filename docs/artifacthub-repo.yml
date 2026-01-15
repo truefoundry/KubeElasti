@@ -1,6 +1,6 @@
 # Artifact Hub repository metadata file
 #
-#Â Some settings like the verified publisher flag or the ignored packages won't
+# Some settings like the verified publisher flag or the ignored packages won't
 # be applied until the next time the repository is processed. Please keep in
 # mind that the repository won't be processed if it has not changed since the
 # last time it was processed. Depending on the repository kind, this is checked
