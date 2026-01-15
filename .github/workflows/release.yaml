@@ -118,8 +118,8 @@ jobs:
       - name: Upload Helm chart to release
         uses: softprops/action-gh-release@v2
         with:
-            files: "$CHART_NAME-$CHART_VERSION.tgz"
-            tag_name: "v$CHART_VERSION"
+            files: "${{ needs.read-chart-values.outputs.chart_name }}-${{ needs.read-chart-values.outputs.chart_version }}.tgz"
+            tag_name: "v${{ needs.read-chart-values.outputs.chart_version }}"
             fail_on_unmatched_files: true
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
