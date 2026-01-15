@@ -1,0 +1,31 @@
+name: test-helm-chart
+
+on:
+    pull_request:
+        branches:
+          - main
+
+
+jobs:
+  release-helm-chart:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: "0"
+    
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Run chart-releaser
+        uses: chart-releaser/action@v2
+        with:
+          charts_dir: charts
+          config: .github/cr-config.yaml
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

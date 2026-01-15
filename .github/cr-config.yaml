@@ -1,0 +1,6 @@
+# Chart Releaser config
+owner: truefoundry
+git-repo: KubeElasti
+charts_repo_url: https://kubeelasti.dev
+pages_branch: gh-pages
+pages_index_path: index.yaml
