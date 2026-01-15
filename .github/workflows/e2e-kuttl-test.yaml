@@ -14,10 +14,6 @@ on:
       - 'tests/e2e/**'
       - '*.go'
       - 'go.mod'
-      - 'go.sum'
-      - 'go.work'
-      - 'go.work.sum'
-      - 'kustomization.yaml'
       - 'charts/**'
 
 jobs:

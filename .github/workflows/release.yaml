@@ -119,7 +119,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
             files: "charts/${{ needs.read-chart-values.outputs.chart_name }}-${{ needs.read-chart-values.outputs.chart_version }}.tgz"
-            tag_name: "${{ github.event.release.tag_name }}"
+            tag_name: "${{ github.ref_name }}"
             fail_on_unmatched_files: true
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
