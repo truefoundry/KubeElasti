@@ -7,6 +7,14 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'operator/**'
+      - 'resolver/**'
+      - 'pkg/**'
+      - 'tests/e2e/**'
+      - '*.go'
+      - 'go.mod'
+      - 'charts/**'
 
 jobs:
   kuttl-tests:
