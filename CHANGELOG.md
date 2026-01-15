@@ -4,6 +4,22 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
+All the unreleased changes are listed under `Unreleased` section. Add your changes here, they will be moved to the next release. 
+
+## Unreleased
+
+## v0.1.21 (2026-01-16)
+
+### Improvements
+
+* fix: stage all changes including deletions in helm-main sync workflow by @sachincool in https://github.com/truefoundry/KubeElasti/pull/225
+* feat: support HTTP/2 cleartext (H2C) in resolver by @quentinplessis in https://github.com/truefoundry/KubeElasti/pull/219
+* feat: support passing headers in prometheus requests (Grafana Mimir Support) by @quentinplessis in https://github.com/truefoundry/KubeElasti/pull/214
+* Workflow Update: Add helm chart to release | Update action conditions.  by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/229
+
+## New Contributors
+* @quentinplessis made their first contribution in https://github.com/truefoundry/KubeElasti/pull/219
+
 ## v0.1.20 (2026-01-08)
 
 ### Improvements
@@ -117,12 +133,3 @@
 * fix: port 5000 is used by the systems, using it might be hurdle for u… by @ramantehlan in [#120](https://github.com/truefoundry/KubeElasti/pull/120)
 * dont scale down new service and handle missing prom data by @shubhamrai1993 in [#121](https://github.com/truefoundry/KubeElasti/pull/121)
 
-All the unreleased changes are listed under `Unreleased` section.
-
-## Unreleased
-
-<!--
-    Add new changes here and sort them alphabetically.
-Example -
-- **General**: Add support for statefulset as a scale target reference ([#10](https://github.com/truefoundry/elasti/pull/10))
--->

@@ -3,9 +3,9 @@ entries:
   elasti:
   - apiVersion: v2
     appVersion: 0.1.21
-    created: "2026-01-16T04:08:52.058055+05:30"
+    created: "2026-01-16T05:11:00.887806+05:30"
     description: Helm chart for Elasti application
-    digest: f1eb80164a405fb70093c81ae6acc4024e924c8c97fde8c3b4605d60f8d2dbda
+    digest: 19e128e00bdce73168ea5368b38c98c5d655d4f700ee6c4cbaf94266d0e01b09
     name: elasti
     type: application
     urls:
@@ -19,6 +19,6 @@ entries:
     name: elasti
     type: application
     urls:
-    - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.20/elasti-0.1.20.tgz
+    - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.20/kubeelasti-0.1.20.tgz
     version: 0.1.20
-generated: "2026-01-16T04:16:06.569723+05:30"
+generated: "2026-01-16T05:11:00.886543+05:30"

@@ -63,7 +63,11 @@ fetch-contributors: ## Fetch contributors
 	python3 docs/scripts/fetch_contributors.py
 
 .PHONY: index-helm
-index-helm: ## Index helm chart
+index-helm: ## Index helm chart (usage: make index-helm RELEASE-NAME=v1.0.0)
+	@if [ -z "$(RELEASE-NAME)" ]; then \
+		echo "Error: RELEASE_NAME is required. Usage: make index-helm RELEASE_NAME=v1.0.0"; \
+		exit 1; \
+	fi
 	helm package charts/elasti -d docs/
-	helm repo index docs/ --url https://kubeelasti.dev --merge ./docs/index.yaml 
+	helm repo index docs/ --url https://github.com/truefoundry/KubeElasti/releases/download/$(RELEASE-NAME)/ --merge ./docs/index.yaml 
 	rm -rf docs/elasti-*.tgz
