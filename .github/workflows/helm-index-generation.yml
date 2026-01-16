@@ -1,0 +1,48 @@
+name: '[CI/CD] Generate Helm Index'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'charts/elasti/Chart.yaml'
+jobs:
+  generate-helm-index:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+      
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v4.0.4'
+      
+      - name: Extract chart version
+        id: chart-version
+        run: |
+          VERSION=$(grep '^version:' charts/elasti/Chart.yaml | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+      
+      - name: Generate Helm index
+        run: |
+          make index-helm RELEASE-NAME=v${{ steps.chart-version.outputs.version }}
+      
+      - name: Configure Git and push changes
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if git diff --quiet docs/index.yaml; then
+            echo "No changes to index.yaml"
+          else
+            git config user.name "$GITHUB_ACTOR"
+            git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+            git add docs/index.yaml
+            git commit -m "chore: update helm index.yaml" --signoff
+            git push
+          fi

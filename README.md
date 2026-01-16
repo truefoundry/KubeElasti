@@ -7,6 +7,7 @@
 <div align="center">
 
 ![Lint and Test](https://github.com/truefoundry/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/kubeelasti)](https://artifacthub.io/packages/search?repo=kubeelasti)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![Docs](https://img.shields.io/badge/Docs-kubeelasti.dev-blue)](https://kubeelasti.dev)
 </div>

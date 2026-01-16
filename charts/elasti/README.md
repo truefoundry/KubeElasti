@@ -1,4 +1,5 @@
-# Kube elasti helm chart
+# KubeElasti helm chart
+
 KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionality when there is no traffic and automatic scale up to 1 when traffic arrives. Most Kubernetes autoscaling solutions like HPA or Keda can scale from 1 to n replicas based on cpu utilization or memory usage
 
 ## Parameters
@@ -35,7 +36,7 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 | `elastiController.manager.podSecurityContext`       | pod security context                                   | `{}`                         |
 | `elastiController.manager.image.registry`           | registry to use for the deployment                     | `""`                         |
 | `elastiController.manager.image.repository`         | repository to use for the deployment                   | `tfy-images/elasti-operator` |
-| `elastiController.manager.image.tag`                | tag to use for the deployment                          | `0.1.20`                     |
+| `elastiController.manager.image.tag`                | tag to use for the deployment                          | `0.1.21`                     |
 | `elastiController.manager.imagePullPolicy`          | image pull policy                                      | `IfNotPresent`               |
 | `elastiController.manager.resources`                | resources to use for the deployment                    | `{}`                         |
 | `elastiController.manager.sentry.enabled`           | whether to enable sentry                               | `false`                      |
@@ -67,7 +68,7 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 | `elastiResolver.proxy.env`                                  | environment to use for the deployment                       | `{}`                         |
 | `elastiResolver.proxy.image.registry`                       | registry to use for the deployment                          | `""`                         |
 | `elastiResolver.proxy.image.repository`                     | repository to use for the deployment                        | `tfy-images/elasti-resolver` |
-| `elastiResolver.proxy.image.tag`                            | tag to use for the deployment                               | `0.1.20`                     |
+| `elastiResolver.proxy.image.tag`                            | tag to use for the deployment                               | `0.1.21`                     |
 | `elastiResolver.proxy.imagePullPolicy`                      | image pull policy                                           | `IfNotPresent`               |
 | `elastiResolver.proxy.resources`                            | resources to use for the deployment                         | `{}`                         |
 | `elastiResolver.proxy.containerSecurityContext`             | container security context                                  | `{}`                         |

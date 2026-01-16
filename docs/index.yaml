@@ -1,12 +1,33 @@
 apiVersion: v1
 entries:
   elasti:
-  - apiVersion: v2
+  - annotations:
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |-
+        - name: Homepage
+          url: https://kubeelasti.dev
+        - name: Source
+          url: https://github.com/truefoundry/KubeElasti
+        - name: Discord
+          url: https://discord.gg/qFyN73htgE
+      artifacthub.io/operator: "true"
+    apiVersion: v2
     appVersion: 0.1.21
-    created: "2026-01-16T04:08:52.058055+05:30"
-    description: Helm chart for Elasti application
-    digest: f1eb80164a405fb70093c81ae6acc4024e924c8c97fde8c3b4605d60f8d2dbda
+    created: "2026-01-16T08:54:26.542915902Z"
+    description: KubeElasti is a Kubernetes-native solution that offers scale-to-zero
+      functionality when there is no traffic and automatic scale up to 1 when traffic
+      arrives.
+    digest: 5e47fe384dd57a1be544a605de69a5658827acf45603fc646d5d4ab732f84f88
+    home: https://kubeelasti.dev
+    icon: https://raw.githubusercontent.com/truefoundry/KubeElasti/refs/heads/main/docs/images/logo/logo_white_192x192.png
+    keywords:
+    - Scale-to-zero
+    - Operator
+    - Cloud Native
+    - Autoscaling
     name: elasti
+    sources:
+    - https://github.com/truefoundry/KubeElasti
     type: application
     urls:
     - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.21/elasti-0.1.21.tgz
@@ -21,4 +42,4 @@ entries:
     urls:
     - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.20/elasti-0.1.20.tgz
     version: 0.1.20
-generated: "2026-01-16T04:16:06.569723+05:30"
+generated: "2026-01-16T08:54:26.541881869Z"
