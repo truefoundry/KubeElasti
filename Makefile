@@ -65,7 +65,7 @@ fetch-contributors: ## Fetch contributors
 .PHONY: index-helm
 index-helm: ## Index helm chart (usage: make index-helm RELEASE-NAME=v1.0.0)
 	@if [ -z "$(RELEASE-NAME)" ]; then \
-		echo "Error: RELEASE_NAME is required. Usage: make index-helm RELEASE_NAME=v1.0.0"; \
+		echo "Error: RELEASE-NAME is required. Usage: make index-helm RELEASE-NAME=v1.0.0"; \
 		exit 1; \
 	fi
 	helm package charts/elasti -d docs/

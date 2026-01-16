@@ -4,7 +4,7 @@
     Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
-All the unreleased changes are listed under `Unreleased` section. Add your changes here, they will be moved to the next release. 
+All the unreleased changes are listed under `Unreleased` section. Add your changes here, they will be moved to the next release.
 
 ## Unreleased
 
@@ -12,13 +12,13 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ### Improvements
 
-* fix: stage all changes including deletions in helm-main sync workflow by @sachincool in https://github.com/truefoundry/KubeElasti/pull/225
-* feat: support HTTP/2 cleartext (H2C) in resolver by @quentinplessis in https://github.com/truefoundry/KubeElasti/pull/219
-* feat: support passing headers in prometheus requests (Grafana Mimir Support) by @quentinplessis in https://github.com/truefoundry/KubeElasti/pull/214
-* Workflow Update: Add helm chart to release | Update action conditions.  by @ramantehlan in https://github.com/truefoundry/KubeElasti/pull/229
+* fix: stage all changes including deletions in helm-main sync workflow by @sachincool in [#225](https://github.com/truefoundry/KubeElasti/pull/225)
+* feat: support HTTP/2 cleartext (H2C) in resolver by @quentinplessis in [#219](https://github.com/truefoundry/KubeElasti/pull/219)
+* feat: support passing headers in prometheus requests (Grafana Mimir Support) by @quentinplessis in [#214](https://github.com/truefoundry/KubeElasti/pull/214)
+* Workflow Update: Add helm chart to release | Update action conditions.  by @ramantehlan in [#229](https://github.com/truefoundry/KubeElasti/pull/229)
 
 ## New Contributors
-* @quentinplessis made their first contribution in https://github.com/truefoundry/KubeElasti/pull/219
+* @quentinplessis made their first contribution in [#219](https://github.com/truefoundry/KubeElasti/pull/219)
 
 ## v0.1.20 (2026-01-08)
 
