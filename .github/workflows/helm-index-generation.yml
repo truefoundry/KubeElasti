@@ -21,7 +21,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'latest'
+          version: 'v4.0.4'
       
       - name: Extract chart version
         id: chart-version
@@ -35,6 +35,7 @@ jobs:
           make index-helm RELEASE-NAME=v${{ steps.chart-version.outputs.version }}
       
       - name: Configure Git and push changes
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           if git diff --quiet docs/index.yaml; then
             echo "No changes to index.yaml"
