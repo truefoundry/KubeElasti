@@ -4,8 +4,6 @@ entries:
   - annotations:
       artifacthub.io/license: MIT
       artifacthub.io/links: |-
-        - name: Homepage
-          url: https://kubeelasti.dev
         - name: Source
           url: https://github.com/truefoundry/KubeElasti
         - name: Discord
@@ -13,13 +11,13 @@ entries:
       artifacthub.io/operator: "true"
     apiVersion: v2
     appVersion: 0.1.21
-    created: "2026-01-16T08:54:26.542915902Z"
+    created: "2026-01-16T11:47:03.904760588Z"
     description: KubeElasti is a Kubernetes-native solution that offers scale-to-zero
       functionality when there is no traffic and automatic scale up to 1 when traffic
       arrives.
-    digest: 5e47fe384dd57a1be544a605de69a5658827acf45603fc646d5d4ab732f84f88
+    digest: 46e6fbcb89907e8fe6647c59e22c7bb8ddbff6f84b4f71fcb2b28625a4955834
     home: https://kubeelasti.dev
-    icon: https://raw.githubusercontent.com/truefoundry/KubeElasti/refs/heads/main/docs/images/logo/logo_white_192x192.png
+    icon: https://raw.githubusercontent.com/truefoundry/KubeElasti/refs/heads/main/docs/images/logo/logo_theme_200x200.png
     keywords:
     - Scale-to-zero
     - Operator
@@ -42,4 +40,4 @@ entries:
     urls:
     - https://github.com/truefoundry/KubeElasti/releases/download/v0.1.20/elasti-0.1.20.tgz
     version: 0.1.20
-generated: "2026-01-16T08:54:26.541881869Z"
+generated: "2026-01-16T11:47:03.903683892Z"
