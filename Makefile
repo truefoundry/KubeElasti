@@ -69,5 +69,5 @@ index-helm: ## Index helm chart (usage: make index-helm RELEASE-NAME=v1.0.0)
 		exit 1; \
 	fi
 	helm package charts/elasti -d docs/
-	helm repo index docs/ --url https://github.com/truefoundry/KubeElasti/releases/download/$(RELEASE-NAME)/ --merge ./docs/index.yaml 
+	helm repo index docs/ --url https://github.com/truefoundry/KubeElasti/releases/download/$(RELEASE-NAME)/ --merge ./docs/index.yaml
 	rm -rf docs/elasti-*.tgz
