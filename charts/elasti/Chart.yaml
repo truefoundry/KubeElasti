@@ -1,7 +1,7 @@
 apiVersion: v2
 name: elasti
 description: KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionality when there is no traffic and automatic scale up to 1 when traffic arrives.
-icon: https://kubeelasti.dev/images/logo/logo_white_full.png
+icon: https://raw.githubusercontent.com/truefoundry/KubeElasti/refs/heads/main/docs/images/logo/logo_white_192x192.png 
 type: application
 version: 0.1.21
 appVersion: "0.1.21"
