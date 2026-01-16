@@ -35,8 +35,7 @@ Stable releases require manual preparation and are triggered by creating a GitHu
          image:
            tag: vX.Y.Z
      ```
-2. Update helm index. You need to run the following make command in the root. `make index-helm RELEASE-NAME=$RELEASE_NAME`, here **$RELEASE_NAME** will replaced by the github release name you plan to keep. For example, v0.1.21, then the command you need to run is `make index-helm RELEASE-NAME=v0.1.21`. This will update the `docs/index.yaml` with this release version.
-3. Update `CHANGELOG.md` with the new version number:
+2. Update `CHANGELOG.md` with the new version number:
    ```markdown
    ## vX.Y.Z (YYYY-MM-DD)
    ### New
@@ -64,8 +63,8 @@ Stable releases require manual preparation and are triggered by creating a GitHu
    etc...
    ```
 
-4. Create a pull request with these changes
-5. Review and merge the PR to `main`
+3. Create a pull request with these changes
+4. Review and merge the PR to `main`
 
 ### Release Steps
 
