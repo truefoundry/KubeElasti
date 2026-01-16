@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "elasti.name" -}}
-{{- default .Chart.Name .Values.global.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default "elasti" .Values.global.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
