@@ -35,6 +35,7 @@ Stable releases require manual preparation and are triggered by creating a GitHu
          image:
            tag: vX.Y.Z
      ```
+
 2. Update `CHANGELOG.md` with the new version number:
    ```markdown
    ## vX.Y.Z (YYYY-MM-DD)
