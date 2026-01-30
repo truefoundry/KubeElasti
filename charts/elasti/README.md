@@ -95,3 +95,11 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 | `elastiResolver.serviceMonitor`                             | serviceMonitor configuration                                | `{}`                         |
 | `elastiResolver.serviceMonitor.labels`                      | labels to apply to serviceMonitor                           | `{}`                         |
 | `elastiResolver.serviceMonitor.annotations`                 | annotations to apply to serviceMonitor                      | `{}`                         |
+
+### Telemetry parameters
+
+| Name                       | Description                | Value                                             |
+| -------------------------- | -------------------------- | ------------------------------------------------- |
+| `telemetry.enabled`        | Enable anonymous telemetry | `true`                                            |
+| `telemetry.posthog.apiKey` | PostHog API key            | `phc_hlVTQvSWqDUBwXrsph0v8xhfc5lsSK9lvejrlZ5AiOG` |
+| `telemetry.posthog.host`   | PostHog host               | `https://us.i.posthog.com`                        |
