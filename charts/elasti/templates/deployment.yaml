@@ -58,14 +58,10 @@ spec:
               name: elasti-telemetry
               key: install_id
               optional: true
-        {{- if .Values.telemetry.posthog.apiKey }}
         - name: POSTHOG_API_KEY
           value: {{ .Values.telemetry.posthog.apiKey | quote }}
-        {{- end }}
-        {{- if .Values.telemetry.posthog.host }}
         - name: POSTHOG_HOST
           value: {{ .Values.telemetry.posthog.host | quote }}
-        {{- end }}
         {{- end }}
         {{ include "elasti.commonEnvValues" . | nindent 8 }}
         image: {{ .Values.elastiController.manager.image.registry | default .Values.global.image.registry | trimSuffix "/" }}/{{ .Values.elastiController.manager.image.repository }}:{{ .Values.elastiController.manager.image.tag | default .Chart.AppVersion }}
