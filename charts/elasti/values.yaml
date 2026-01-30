@@ -305,3 +305,18 @@ elastiResolver:
     labels: {}
     ## @param elastiResolver.serviceMonitor.annotations [object] annotations to apply to serviceMonitor
     annotations: {}
+
+## @section Telemetry parameters
+telemetry:
+  ## @param telemetry.enabled Enable anonymous telemetry
+  ##
+  enabled: true
+  ## @param telemetry.posthog PostHog configuration for telemetry
+  ##
+  posthog:
+    ## @param telemetry.posthog.apiKey PostHog API key
+    ##
+    apiKey: ""
+    ## @param telemetry.posthog.host PostHog host
+    ##
+    host: ""

@@ -13,6 +13,7 @@ import (
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 
+	"github.com/truefoundry/elasti/pkg/telemetry"
 	"github.com/truefoundry/elasti/resolver/internal/handler"
 	"github.com/truefoundry/elasti/resolver/internal/hostmanager"
 	"github.com/truefoundry/elasti/resolver/internal/operator"
@@ -86,6 +87,8 @@ func main() {
 	if err != nil {
 		logger.Fatal("Error fetching cluster config", zap.Error(err))
 	}
+
+	telemetry.SendStartupBeacon("resolver", logger)
 
 	// Get components required for the handler
 	k8sUtil := k8shelper.NewOps(logger, config)

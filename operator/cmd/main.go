@@ -28,10 +28,10 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/scaling"
-
-	"truefoundry/elasti/operator/internal/elastiserver"
+	"github.com/truefoundry/elasti/pkg/telemetry"
 
 	"truefoundry/elasti/operator/internal/crddirectory"
+	"truefoundry/elasti/operator/internal/elastiserver"
 	"truefoundry/elasti/operator/internal/informer"
 
 	tfLogger "github.com/truefoundry/elasti/pkg/logger"
@@ -160,6 +160,8 @@ func mainWithError() error {
 		sentry.CaptureException(err)
 		return fmt.Errorf("main: %w", err)
 	}
+
+	telemetry.SendStartupBeacon("operator", zapLogger)
 
 	// Start the shared CRD Directory
 	crddirectory.InitDirectory(zapLogger)
