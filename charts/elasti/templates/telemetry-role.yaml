@@ -1,0 +1,18 @@
+{{- if .Values.telemetry.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "elasti.fullname" . }}-telemetry-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "elasti.labels" (dict "context" . "name" "telemetry-init") | nindent 4 }}
+    app.kubernetes.io/component: telemetry-init
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create"]
+{{- end }}
