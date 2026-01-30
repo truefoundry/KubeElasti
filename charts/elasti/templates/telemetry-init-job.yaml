@@ -1,0 +1,160 @@
+{{- if .Values.telemetry.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "elasti.fullname" . }}-telemetry-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "elasti.labels" (dict "context" . "name" "telemetry-init") | nindent 4 }}
+    app.kubernetes.io/component: telemetry-init
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "elasti.fullname" . }}-telemetry-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "elasti.labels" (dict "context" . "name" "telemetry-init") | nindent 4 }}
+    app.kubernetes.io/component: telemetry-init
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create"]
+    # We only need get and create, not update or delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "elasti.fullname" . }}-telemetry-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "elasti.labels" (dict "context" . "name" "telemetry-init") | nindent 4 }}
+    app.kubernetes.io/component: telemetry-init
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "elasti.fullname" . }}-telemetry-init
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "elasti.fullname" . }}-telemetry-init
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "elasti.fullname" . }}-telemetry-init-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "elasti.labels" (dict "context" . "name" "telemetry-init") | nindent 4 }}
+    app.kubernetes.io/component: telemetry-init
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: telemetry-init
+      labels:
+        {{- include "elasti.labels" (dict "context" . "name" "telemetry-init") | nindent 8 }}
+        app.kubernetes.io/component: telemetry-init
+    spec:
+      serviceAccountName: {{ include "elasti.fullname" . }}-telemetry-init
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: init
+        image: bitnami/kubectl:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          
+          echo "========================================"
+          echo "Elasti Telemetry ID Initialization"
+          echo "========================================"
+          echo ""
+          
+          NAMESPACE='{{ .Release.Namespace }}'
+          CONFIGMAP_NAME="elasti-telemetry"
+          
+          echo "Checking if ConfigMap '${CONFIGMAP_NAME}' exists in namespace '${NAMESPACE}'..."
+          
+          # Try to get the ConfigMap
+          if kubectl get configmap ${CONFIGMAP_NAME} -n ${NAMESPACE} >/dev/null 2>&1; then
+            echo "✓ ConfigMap '${CONFIGMAP_NAME}' already exists"
+            
+            # Get the existing install_id
+            EXISTING_ID=$(kubectl get configmap ${CONFIGMAP_NAME} -n ${NAMESPACE} -o jsonpath='{.data.install_id}' 2>/dev/null || echo "")
+            
+            if [ -n "$EXISTING_ID" ]; then
+              echo "✓ Using existing install_id: ${EXISTING_ID:0:8}...${EXISTING_ID: -8}"
+              echo ""
+              echo "No changes needed. ConfigMap will be preserved across upgrades."
+              exit 0
+            else
+              echo "⚠ ConfigMap exists but install_id is missing!"
+              echo "This should not happen. Please check the ConfigMap manually."
+              exit 1
+            fi
+          fi
+          
+          echo "ConfigMap not found. Creating new installation ID..."
+          echo ""
+          
+          # Generate new UUID
+          # /proc/sys/kernel/random/uuid provides a v4 UUID
+          UUID=$(cat /proc/sys/kernel/random/uuid | tr -d '-' | tr -d '\n')
+          
+          if [ -z "$UUID" ] || [ ${#UUID} -ne 32 ]; then
+            echo "✗ Failed to generate valid UUID"
+            exit 1
+          fi
+          
+          echo "→ Generated install_id: ${UUID:0:8}...${UUID: -8}"
+          echo ""
+          
+          # Create the ConfigMap
+          kubectl create configmap ${CONFIGMAP_NAME} \
+            --from-literal=install_id=${UUID} \
+            -n ${NAMESPACE}
+          
+          if [ $? -eq 0 ]; then
+            echo "✓ ConfigMap '${CONFIGMAP_NAME}' created successfully"
+            echo ""
+            echo "This install_id will be used for anonymous telemetry."
+            echo "It will remain the same across all future upgrades."
+            echo ""
+            echo "To disable telemetry, set: telemetry.enabled=false"
+          else
+            echo "✗ Failed to create ConfigMap"
+            exit 1
+          fi
+{{- end }}
