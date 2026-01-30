@@ -158,8 +158,8 @@ spec:
           value: {{ .Values.elastiResolver.proxy.sentry.environment }}
         {{- end }}
         {{- if not .Values.telemetry.enabled }}
-        - name: ELASTI_TELEMETRY_DISABLED
-          value: "true"
+        - name: ELASTI_TELEMETRY_ENABLED
+          value: "false"
         {{- else }}
         - name: ELASTI_INSTALL_ID
           valueFrom:

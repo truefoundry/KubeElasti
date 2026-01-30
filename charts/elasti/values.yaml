@@ -311,12 +311,10 @@ telemetry:
   ## @param telemetry.enabled Enable anonymous telemetry
   ##
   enabled: true
-  ## @param telemetry.posthog PostHog configuration for telemetry
-  ##
   posthog:
     ## @param telemetry.posthog.apiKey PostHog API key
     ##
-    apiKey: ""
+    apiKey: "phc_hlVTQvSWqDUBwXrsph0v8xhfc5lsSK9lvejrlZ5AiOG"
     ## @param telemetry.posthog.host PostHog host
     ##
-    host: ""
+    host: "https://us.i.posthog.com"
