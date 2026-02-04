@@ -8,6 +8,8 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ## Unreleased
 
+* fix: variable name correction for pollingInterval value by `@artazar` in [`#241`](https://github.com/truefoundry/KubeElasti/pull/241)
+
 ## v0.1.21 (2026-01-16)
 
 ### Improvements
