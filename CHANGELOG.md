@@ -8,6 +8,8 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ## Unreleased
 
+* feat: support scheduled activity for ElastiService objects by `@artazar` in [`#243`](https://github.com/truefoundry/KubeElasti/pull/243)
+
 ## v0.1.21 (2026-01-16)
 
 ### Improvements

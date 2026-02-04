@@ -26,6 +26,20 @@ const (
 	ElastiServiceFinalizer = "elasti.truefoundry.com/finalizer"
 )
 
+// EnabledPeriod defines when the scale-to-zero policy is active.
+// Outside of this period, services maintain minTargetReplicas and scale-down is prevented.
+type EnabledPeriod struct {
+	// Schedule is a 5-item cron expression (minute hour day month weekday).
+	// Uses UTC timezone. Example: "0 9 * * 1-5" for 9 AM Monday-Friday.
+	// +kubebuilder:default="0 0 * * *"
+	Schedule string `json:"schedule,omitempty"`
+
+	// Duration specifies how long the enabled period lasts from each scheduled trigger.
+	// Accepts formats like "1h", "30m", "8h", etc.
+	// +kubebuilder:default="24h"
+	Duration string `json:"duration,omitempty"`
+}
+
 // +kubebuilder:validation:Required={"scaleTargetRef","service"}
 type ElastiServiceSpec struct {
 	// ScaleTargetRef of the target resource to scale
@@ -45,6 +59,10 @@ type ElastiServiceSpec struct {
 	// +kubebuilder:validation:MinItems=1
 	Triggers   []ScaleTrigger  `json:"triggers,omitempty"`
 	Autoscaler *AutoscalerSpec `json:"autoscaler,omitempty"`
+	// EnabledPeriod defines when the scale-to-zero policy is active.
+	// When omitted, scale-to-zero is always enabled (default behavior).
+	// When specified, scale-down only occurs during the cron schedule window.
+	EnabledPeriod *EnabledPeriod `json:"enabledPeriod,omitempty"`
 }
 
 func (es *ElastiServiceSpec) GetScaleTargetRef() ScaleTargetRef {
