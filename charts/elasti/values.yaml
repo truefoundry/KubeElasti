@@ -111,7 +111,8 @@ elastiController:
     ## @param elastiController.manager.env [object] environment to use for the deployment
     ##
     env:
-      pollingInterval: 30
+      ## elastiController.manager.env.pollingInterval polling interval for checking triggers (e.g. "10s", "30s", "1m")
+      pollingInterval: "30s"
       ## elastiController.manager.env.prometheusTriggerServerAddress: default prometheus server address to avoid setting in each ElastiService
       # e.g. prometheusTriggerServerAddress: http://prometheus-operated.monitoring.svc.cluster.local:9090
       ##
