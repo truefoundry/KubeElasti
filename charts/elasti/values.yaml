@@ -87,7 +87,7 @@ elastiController:
       repository: tfy-images/elasti-operator
       ## @param elastiController.manager.image.tag tag to use for the deployment
       ##
-      tag: d0e09687aaf820db3698d8428f61b100c2d9f600
+      tag: d13ad6454b7152caf3c086251fe2aed02da67234
     ## @param elastiController.manager.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
@@ -110,7 +110,8 @@ elastiController:
     ## @param elastiController.manager.env [object] environment to use for the deployment
     ##
     env:
-      pollingInterval: 30
+      ## elastiController.manager.env.pollingInterval polling interval for checking triggers (e.g. "10s", "30s", "1m")
+      pollingInterval: "30s"
       ## elastiController.manager.env.prometheusTriggerServerAddress: default prometheus server address to avoid setting in each ElastiService
       # e.g. prometheusTriggerServerAddress: http://prometheus-operated.monitoring.svc.cluster.local:9090
       ##
@@ -198,7 +199,7 @@ elastiResolver:
       repository: tfy-images/elasti-resolver
       ## @param elastiResolver.proxy.image.tag tag to use for the deployment
       ##
-      tag: d0e09687aaf820db3698d8428f61b100c2d9f600
+      tag: d13ad6454b7152caf3c086251fe2aed02da67234
     ## @param elastiResolver.proxy.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
