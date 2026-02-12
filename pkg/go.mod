@@ -6,6 +6,7 @@ toolchain go1.24.6
 
 require (
 	github.com/getsentry/sentry-go v0.35.3
+	github.com/robfig/cron/v3 v3.0.1
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1

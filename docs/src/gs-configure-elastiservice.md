@@ -30,6 +30,9 @@ spec:
     apiVersion: <apiVersion> # (5)
     kind: <kind> # (6)
     name: <deployment-or-rollout-or-statefulset-name> # (7)
+  enabledPeriod: # (15) Optional
+    schedule: <cron-schedule> # (16)
+    duration: <duration> # (17)
   triggers:
   - type: <trigger-type> # (8)
     metadata:
@@ -56,6 +59,9 @@ spec:
 12. Replace it with the uptime filter of your TSDB instance. Default: `container="prometheus"`.
 13. Replace it with the autoscaler name. In this case, it is the name of the KEDA ScaledObject.
 14. Replace it with the autoscaler type. In this case, it is `keda`.
+15. **Optional**: Define when scale-to-zero is active. Omit this field for always-on behavior.
+16. Replace with a 5-item cron expression (minute hour day month weekday) in UTC.
+17. Replace with a duration string (e.g., "8h", "24h").
 
 The key fields to be specified in the spec are:
 
@@ -134,3 +140,50 @@ autoscaler:
 As soon as the service is scaled down to 0, KubeElasti **resolver** will start accepting requests for that service. On receiving the first request, it will scale up the service to `minTargetReplicas`. Once the pod is up, the new requests are handled by the service pods and do not pass through the elasti-resolver. The requests that came before the pod scaled up are held in memory of the elasti-resolver and are processed once the pod is up.
 
 We can configure the `cooldownPeriod` to specify the minimum time (in seconds) to wait after scaling up before considering scale down.
+
+<br>
+
+### **5. EnabledPeriod: Control when scale-to-zero is active (Optional)**
+
+The `enabledPeriod` field allows you to define specific time windows when the scale-to-zero policy should be active. Outside of these periods, KubeElasti will maintain the service at `minTargetReplicas` and prevent scale-down. This is useful for scenarios like:
+
+- Only allowing scale-to-zero during night hours
+- Preventing scale-down during business hours when you want services always ready
+- Scheduling scale-to-zero for the weekends
+
+**Configuration:**
+
+```yaml
+enabledPeriod:
+  schedule: "0 22 * * *"   # Cron expression (5 fields)
+  duration: "12h"          # How long the period lasts
+```
+
+**Fields:**
+
+- **schedule**: A 5-item cron expression defining when the enabled period starts
+  - Format: `minute hour day month weekday`
+  - Uses UTC timezone
+  - Examples:
+    - `"0 9 * * 1-5"` - 9 AM Monday through Friday
+    - `"0 0 * * *"` - Daily at midnight
+    - `"*/15 8-17 * * 1-5"` - Every 15 minutes, 8 AM to 5 PM, weekdays
+  - Default: `"0 0 * * *"` (daily at midnight)
+
+- **duration**: How long the enabled period lasts from each scheduled trigger
+  - Format: Go duration string (e.g., "1h", "30m", "8h", "24h")
+  - Default: `"24h"`
+
+**Behavior:**
+
+- When `enabledPeriod` is **omitted**: Scale-to-zero is always active (default behavior)
+- When `enabledPeriod` is **specified**:
+  - During the enabled window: Normal scale-to-zero behavior applies
+  - Outside the enabled window: Service maintains `minTargetReplicas`, scale-down is prevented
+
+**Important Notes:**
+
+- All times use **UTC timezone**
+- The cron expression uses 5 fields (not 6 - no seconds field)
+- Invalid cron expressions will log warnings and default to enabled (fail-open)
+- For durations longer than 24h with daily triggers, services may always be enabled

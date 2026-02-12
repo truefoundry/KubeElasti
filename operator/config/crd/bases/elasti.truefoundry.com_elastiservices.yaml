@@ -60,6 +60,25 @@ spec:
                 maximum: 604800
                 minimum: 0
                 type: integer
+              enabledPeriod:
+                description: |-
+                  EnabledPeriod defines when the scale-to-zero policy is active.
+                  When omitted, scale-to-zero is always enabled (default behavior).
+                  When specified, scale-down only occurs during the cron schedule window.
+                properties:
+                  duration:
+                    default: 24h
+                    description: |-
+                      Duration specifies how long the enabled period lasts from each scheduled trigger.
+                      Accepts formats like "1h", "30m", "8h", etc.
+                    type: string
+                  schedule:
+                    default: 0 0 * * *
+                    description: |-
+                      Schedule is a 5-item cron expression (minute hour day month weekday).
+                      Uses UTC timezone. Example: "0 9 * * 1-5" for 9 AM Monday-Friday.
+                    type: string
+                type: object
               minTargetReplicas:
                 description: Minimum number of replicas to scale to
                 format: int32

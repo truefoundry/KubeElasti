@@ -6,4 +6,36 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: elastiservice-sample
 spec:
-  # TODO(user): Add fields here
+  service: my-service
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-deployment
+  minTargetReplicas: 1
+  cooldownPeriod: 900
+  triggers:
+    - type: prometheus
+      metadata:
+        query: "rate(http_requests_total[5m])"
+        threshold: "0"
+---
+apiVersion: elasti.truefoundry.com/v1alpha1
+kind: ElastiService
+metadata:
+  name: elastiservice-with-schedule
+spec:
+  service: my-scheduled-service
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-scheduled-deployment
+  minTargetReplicas: 1
+  cooldownPeriod: 900
+  enabledPeriod:
+    schedule: "0 22 * * *"  # 10 PM Daily (UTC)
+    duration: "12h"         # Active for 12 hours
+  triggers:
+    - type: prometheus
+      metadata:
+        query: "rate(http_requests_total[5m])"
+        threshold: "0"

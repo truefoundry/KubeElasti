@@ -12,6 +12,7 @@ import (
 
 	"k8s.io/client-go/scale"
 
+	"github.com/truefoundry/elasti/pkg/cronutil"
 	"github.com/truefoundry/elasti/pkg/k8shelper"
 	"github.com/truefoundry/elasti/pkg/scaling/scalers"
 	"github.com/truefoundry/elasti/pkg/values"
@@ -181,6 +182,22 @@ func (h *ScaleHandler) calculateScaleDirection(ctx context.Context, cooldownPeri
 			zap.Duration("cooldown", cooldownPeriod),
 			zap.Time("creation timestamp", es.CreationTimestamp.Time))
 		return NoScale, nil
+	}
+
+	// Check if we're in the enabled period
+	if es.Spec.EnabledPeriod != nil {
+		enabled, err := h.isInEnabledPeriod(es.Spec.EnabledPeriod)
+		if err != nil {
+			h.logger.Warn("failed to check enabled period",
+				zap.String("service", es.Spec.Service),
+				zap.Error(err))
+			// On error, assume enabled to avoid disruption
+			return ScaleUp, nil
+		} else if !enabled {
+			h.logger.Debug("Outside enabled period, preventing scale-down",
+				zap.String("service", es.Spec.Service))
+			return ScaleUp, nil
+		}
 	}
 
 	for _, trigger := range es.Spec.Triggers {
@@ -442,4 +459,30 @@ func (h *ScaleHandler) createEvent(namespace, name, eventType, reason, message s
 		Namespace:  namespace,
 	}
 	h.EventRecorder.Event(ref, eventType, reason, message)
+}
+
+// isInEnabledPeriod checks if the current time is within the enabled period
+// defined by the EnabledPeriod configuration.
+func (h *ScaleHandler) isInEnabledPeriod(enabledPeriod *v1alpha1.EnabledPeriod) (bool, error) {
+	schedule := enabledPeriod.Schedule
+	if schedule == "" {
+		schedule = "0 0 * * *" // default: daily at midnight
+	}
+
+	durationStr := enabledPeriod.Duration
+	if durationStr == "" {
+		durationStr = "24h" // default: 24 hours
+	}
+
+	duration, err := cronutil.ValidateDuration(durationStr)
+	if err != nil {
+		return false, fmt.Errorf("invalid duration: %w", err)
+	}
+
+	enabled, err := cronutil.IsInEnabledPeriod(schedule, duration)
+	if err != nil {
+		return false, fmt.Errorf("failed to check enabled period: %w", err)
+	}
+
+	return enabled, nil
 }
