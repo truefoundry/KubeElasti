@@ -100,11 +100,14 @@ func NewScaleHandler(logger *zap.Logger, config *rest.Config, watchNamespace str
 
 func (h *ScaleHandler) StartScaleDownWatcher(ctx context.Context) {
 	pollingInterval := 30 * time.Second
-	if envInterval := os.Getenv("POLLING_VARIABLE"); envInterval != "" {
+	if envInterval := os.Getenv("POLLING_INTERVAL"); envInterval != "" {
 		duration, err := time.ParseDuration(envInterval)
-		if err != nil {
-			h.logger.Warn("Invalid POLLING_VARIABLE value, using default 30s", zap.Error(err))
-		} else {
+		switch {
+		case err != nil:
+			h.logger.Warn("Invalid POLLING_INTERVAL value, using default 30s", zap.Error(err))
+		case duration <= 0:
+			h.logger.Warn("POLLING_INTERVAL must be positive, using default 30s", zap.String("value", envInterval))
+		default:
 			pollingInterval = duration
 		}
 	}
