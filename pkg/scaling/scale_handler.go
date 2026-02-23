@@ -188,10 +188,9 @@ func (h *ScaleHandler) calculateScaleDirection(ctx context.Context, cooldownPeri
 	if es.Spec.EnabledPeriod != nil {
 		enabled, err := h.isInEnabledPeriod(es.Spec.EnabledPeriod)
 		if err != nil {
-			h.logger.Warn("failed to check enabled period",
+			h.logger.Warn("Failed to check enabled period, preventing scale-down",
 				zap.String("service", es.Spec.Service),
 				zap.Error(err))
-			// On error, assume enabled to avoid disruption
 			return ScaleUp, nil
 		} else if !enabled {
 			h.logger.Debug("Outside enabled period, preventing scale-down",
