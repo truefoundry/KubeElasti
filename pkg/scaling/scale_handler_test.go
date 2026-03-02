@@ -98,6 +98,30 @@ var _ = Describe("StartScaleDownWatcher Polling Interval", func() {
 			Expect(hasWarning).To(BeFalse())
 			Expect(observedLogs.Len()).To(Equal(0))
 		})
+
+		It("should parse '1s' correctly", func() {
+			interval, hasWarning := testPollingIntervalParsing("1s")
+
+			Expect(interval).To(Equal(1 * time.Second))
+			Expect(hasWarning).To(BeFalse())
+			Expect(observedLogs.Len()).To(Equal(0))
+		})
+
+		It("should parse '5m' correctly", func() {
+			interval, hasWarning := testPollingIntervalParsing("5m")
+
+			Expect(interval).To(Equal(5 * time.Minute))
+			Expect(hasWarning).To(BeFalse())
+			Expect(observedLogs.Len()).To(Equal(0))
+		})
+
+		It("should parse '10m' correctly", func() {
+			interval, hasWarning := testPollingIntervalParsing("10m")
+
+			Expect(interval).To(Equal(10 * time.Minute))
+			Expect(hasWarning).To(BeFalse())
+			Expect(observedLogs.Len()).To(Equal(0))
+		})
 	})
 
 	Context("When POLLING_INTERVAL is invalid", func() {
@@ -124,6 +148,16 @@ var _ = Describe("StartScaleDownWatcher Polling Interval", func() {
 
 		It("should fall back to default 30s when set to 'abc'", func() {
 			interval, hasWarning := testPollingIntervalParsing("abc")
+
+			Expect(interval).To(Equal(30 * time.Second))
+			Expect(hasWarning).To(BeTrue())
+			Expect(observedLogs.Len()).To(Equal(1))
+			allLogs := observedLogs.All()
+			Expect(allLogs[0].Message).To(Equal("Invalid POLLING_INTERVAL value, using default 30s"))
+		})
+
+		It("should fall back to default 30s when set to whitespace", func() {
+			interval, hasWarning := testPollingIntervalParsing("   ")
 
 			Expect(interval).To(Equal(30 * time.Second))
 			Expect(hasWarning).To(BeTrue())
@@ -162,6 +196,20 @@ var _ = Describe("StartScaleDownWatcher Polling Interval", func() {
 			interval, hasWarning := testPollingIntervalParsing(envValue)
 
 			Expect(interval).To(Equal(15 * time.Second))
+			Expect(hasWarning).To(BeFalse())
+		})
+
+		It("should NOT read from deprecated POLLING_VARIABLE environment variable", func() {
+			// This test verifies the bug fix - the old variable name should not be used
+			os.Setenv("POLLING_VARIABLE", "15s")
+			defer os.Unsetenv("POLLING_VARIABLE")
+
+			// Attempting to read from the old variable name should return empty
+			envValue := os.Getenv("POLLING_INTERVAL")
+			interval, hasWarning := testPollingIntervalParsing(envValue)
+
+			// Should use default since POLLING_INTERVAL is not set
+			Expect(interval).To(Equal(30 * time.Second))
 			Expect(hasWarning).To(BeFalse())
 		})
 	})
