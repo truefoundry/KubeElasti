@@ -85,7 +85,7 @@ Use Helm to install KubeElasti into your Kubernetes cluster.
 helm install elasti oci://tfy.jfrog.io/tfy-helm/elasti --namespace elasti --create-namespace
 ```
 
-Check out [values.yaml](https://github.com/truefoundry/KubeElasti/blob/main/charts/elasti/values.yaml) to see configuration options in the helm value file.
+Check out [values.yaml](https://github.com/KubeElasti/KubeElasti/blob/main/charts/elasti/values.yaml) to see configuration options in the helm value file.
 
 <br>
 

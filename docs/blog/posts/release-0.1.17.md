@@ -43,7 +43,7 @@ spec:
 
     We've fundamentally changed how KubeElasti handles scaling by switching to Kubernetes' standard `/scale` subresource. This means we can support scale-to-zero on any resource that supports the `/scale` subresource.
 
-    Want scale-to-zero support for other Kubernetes resources? Simply [open an issue on GitHub](https://github.com/truefoundry/KubeElasti/issues/new/choose) with your use case.
+    Want scale-to-zero support for other Kubernetes resources? Simply [open an issue on GitHub](https://github.com/KubeElasti/KubeElasti/issues/new/choose) with your use case.
 
 ## **Other Improvements**
 - **Environment variable forwarding**: Helm values can now be passed through environment variables for better configuration management.

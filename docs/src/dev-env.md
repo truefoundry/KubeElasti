@@ -32,7 +32,7 @@ Ensure you have the following tools installed:
 Clone the KubeElasti repository from GitHub to your local machine:
 
 ```bash
-git clone https://github.com/truefoundry/KubeElasti.git
+git clone https://github.com/KubeElasti/KubeElasti.git
 cd KubeElasti
 ```
 

@@ -8,8 +8,8 @@ extra_css:
   - stylesheets/extra.css
 
 # Repository
-repo_name: truefoundry/KubeElasti
-repo_url: https://github.com/truefoundry/KubeElasti
+repo_name: KubeElasti/KubeElasti
+repo_url: https://github.com/KubeElasti/KubeElasti
 
 # Copyright
 copyright: Copyright &copy; 2025 TrueFoundry
@@ -143,12 +143,12 @@ extra:
       operatingSystem: "Kubernetes"
       description: "KubeElasti is a Kubernetes operator that automatically scales-to-zero your services when they are idle and scales them back up when they receive traffic."
       url: "https://kubeelasti.dev"
-      downloadUrl: "https://github.com/truefoundry/KubeElasti"
+      downloadUrl: "https://github.com/KubeElasti/KubeElasti"
       author:
         "@type": "Organization"
         name: "TrueFoundry"
         url: "https://truefoundry.com"
-      license: "https://github.com/truefoundry/KubeElasti/blob/main/LICENSE"
+      license: "https://github.com/KubeElasti/KubeElasti/blob/main/LICENSE"
       programmingLanguage: "Go"
       keywords: 
         - "Kubernetes"

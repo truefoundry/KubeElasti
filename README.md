@@ -6,7 +6,7 @@
 
 <div align="center">
 
-![Lint and Test](https://github.com/truefoundry/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
+![Lint and Test](https://github.com/KubeElasti/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/kubeelasti)](https://artifacthub.io/packages/search?repo=kubeelasti)
 [![CNCF Landscape](https://img.shields.io/badge/CNCF%20Landscape-5699C6)](https://landscape.cncf.io/?item=serverless--framework--kubeelasti)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -90,12 +90,12 @@ See the list of organizations who are using KubeElasti in Production or in Stagi
 
 # Getting Help
 
-We have a dedicated [Discussions](https://github.com/truefoundry/KubeElasti/discussions) section for getting help and discussing ideas.
+We have a dedicated [Discussions](https://github.com/KubeElasti/KubeElasti/discussions) section for getting help and discussing ideas.
 
 # Roadmap
 
-We are maintaining the future roadmap using the [issues](https://github.com/truefoundry/KubeElasti/issues) and [milestones](https://github.com/truefoundry/KubeElasti/milestones). You can also suggest ideas and vote for them by adding a 👍 reaction to the issue.
+We are maintaining the future roadmap using the [issues](https://github.com/KubeElasti/KubeElasti/issues) and [milestones](https://github.com/KubeElasti/KubeElasti/milestones). You can also suggest ideas and vote for them by adding a 👍 reaction to the issue.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=truefoundry/KubeElasti&type=Date)](https://www.star-history.com/#truefoundry/KubeElasti&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=KubeElasti/KubeElasti&type=Date)](https://www.star-history.com/#KubeElasti/KubeElasti&Date)

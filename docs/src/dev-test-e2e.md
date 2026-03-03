@@ -20,7 +20,7 @@ make setup   # Sets up environment
 make test    # Runs tests
 ```
 
-For detailed information about the E2E test framework, see [tests/e2e/README.md](https://github.com/truefoundry/KubeElasti/blob/main/tests/e2e/README.md).
+For detailed information about the E2E test framework, see [tests/e2e/README.md](https://github.com/KubeElasti/KubeElasti/blob/main/tests/e2e/README.md).
 
 ## Testing Flow
 
