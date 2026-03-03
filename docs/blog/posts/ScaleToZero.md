@@ -20,7 +20,7 @@ slug: scale-to-zero
 
 If you've ever deployed HTTP services on Kubernetes, you've probably dealt with **idle pods** that burn resources during off-hours or inactivity. 
 
-In today's blog, we dive into the concept of **Scale-to-Zero**, why it matters, how existing tools implement it (and where they fall short), and how [**KubeElasti**](https://github.com/truefoundry/KubeElasti) solves this problem with **zero rewrites, zero request loss**, and **zero lingering proxies**.
+In today's blog, we dive into the concept of **Scale-to-Zero**, why it matters, how existing tools implement it (and where they fall short), and how [**KubeElasti**](https://github.com/KubeElasti/KubeElasti) solves this problem with **zero rewrites, zero request loss**, and **zero lingering proxies**.
 
 <!-- more -->
 
@@ -72,7 +72,7 @@ sequenceDiagram
 
 ## How KubeElasti Solves Scale-to-Zero
 
-[**KubeElasti**](https://github.com/truefoundry/KubeElasti) is a **Kubernetes-native controller + proxy** that adds scale-to-zero to **your existing HTTP services** — without any rewrites, packaging changes, or vendor lock-in.
+[**KubeElasti**](https://github.com/KubeElasti/KubeElasti) is a **Kubernetes-native controller + proxy** that adds scale-to-zero to **your existing HTTP services** — without any rewrites, packaging changes, or vendor lock-in.
 
 ### How it works:
 
@@ -111,7 +111,7 @@ Like any focused tool, KubeElasti makes some trade-offs:
 
 * ✅ HTTP-only support (for now) — gRPC/TCP support is in roadmap.
 * ✅ Only Prometheus metrics are supported for traffic detection.
-* ✅ Works with **Deployments, StatefulSets & Argo Rollouts** — To request support for other resources, please open an [issue on GitHub](https://github.com/truefoundry/KubeElasti/issues).
+* ✅ Works with **Deployments, StatefulSets & Argo Rollouts** — To request support for other resources, please open an [issue on GitHub](https://github.com/KubeElasti/KubeElasti/issues).
 
 That said, it gives you **production-ready scale-to-zero** in under 5 minutes, with real observability and battle-tested scaling behavior.
 
@@ -125,6 +125,6 @@ With KubeElasti, you can implement it **without changing your service code**, **
 Want to give it a spin? Start here:
 
 * 🧪 Quickstart: [Get Started Guide](../../src/gs-setup.md)
-* 🧩 Source Code: [KubeElasti on GitHub](https://github.com/truefoundry/KubeElasti)
+* 🧩 Source Code: [KubeElasti on GitHub](https://github.com/KubeElasti/KubeElasti)
 
 

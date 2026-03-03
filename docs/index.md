@@ -190,7 +190,7 @@ spec:
   <h2>Join Our Community</h2>
   <p>Get help, share your experience, and contribute to KubeElasti</p>
   <div class="community-links">
-    <a href="https://github.com/truefoundry/KubeElasti" class="community-link">
+    <a href="https://github.com/KubeElasti/KubeElasti" class="community-link">
       <span class="community-icon">🐱</span>
       <span class="community-text">GitHub</span>
     </a>
@@ -198,7 +198,7 @@ spec:
       <span class="community-icon">💬</span>
       <span class="community-text">Discord</span>
     </a>
-    <a href="https://github.com/truefoundry/KubeElasti/issues" class="community-link">
+    <a href="https://github.com/KubeElasti/KubeElasti/issues" class="community-link">
       <span class="community-icon">🆘</span>
       <span class="community-text">Report Issues</span>
     </a>

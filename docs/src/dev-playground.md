@@ -119,7 +119,7 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 
 ## 6. Deploy KubeElasti Locally
 
-We will be using [`playground/infra/elasti-demo-values.yaml`](https://github.com/truefoundry/KubeElasti/blob/main/playground/infra/elasti-demo-values.yaml) for the helm installation. Configure the image uri according to the requirement. Post that follow below steps from the project home directory:
+We will be using [`playground/infra/elasti-demo-values.yaml`](https://github.com/KubeElasti/KubeElasti/blob/main/playground/infra/elasti-demo-values.yaml) for the helm installation. Configure the image uri according to the requirement. Post that follow below steps from the project home directory:
 
 ```bash
 kubectl create namespace elasti

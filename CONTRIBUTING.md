@@ -24,7 +24,7 @@ If you've identified a bug or have an idea for an enhancement, please begin by c
 
 ## 💡 Ideas and Feedback
 
-We welcome all ideas and feedback. If you're not ready to open an Issue or if you're just looking for a place to discuss ideas, head over to our [GitHub Discussions](https://github.com/truefoundry/KubeElasti/discussions).
+We welcome all ideas and feedback. If you're not ready to open an Issue or if you're just looking for a place to discuss ideas, head over to our [GitHub Discussions](https://github.com/KubeElasti/KubeElasti/discussions).
 
 
 ## 📝 Pull Requests

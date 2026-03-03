@@ -1,7 +1,7 @@
 # Changelog
 
 <!--
-    Please refer to https://github.com/truefoundry/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
+    Please refer to https://github.com/KubeElasti/KubeElasti/blob/main/CONTRIBUTING.md#Changelog and follow the guidelines before adding a new entry.
 -->
 
 All the unreleased changes are listed under `Unreleased` section. Add your changes here, they will be moved to the next release.
