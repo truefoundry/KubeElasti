@@ -143,6 +143,14 @@ func main() {
 	internalServeMux := http.NewServeMux()
 	internalServeMux.Handle("/metrics", promhttp.Handler())
 	internalServeMux.Handle("/queue-status", sentryHandler.HandleFunc(requestHandler.GetQueueStatus))
+	internalServeMux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
+	internalServeMux.HandleFunc("/readyz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
 	internalServer := &http.Server{
 		Addr:              internalPort,
 		Handler:           internalServeMux,
