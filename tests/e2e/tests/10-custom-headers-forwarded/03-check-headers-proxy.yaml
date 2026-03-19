@@ -1,0 +1,8 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+# Target is at 0 replicas (proxy mode). The resolver holds this request while scaling
+# the deployment back up, then forwards it. The /headers endpoint echoes all received
+# headers as JSON — confirming the custom header survives the full proxy + scale-up path.
+commands:
+  - command: sh ../../manifest/check_headers.sh "http://target-deployment.$NAMESPACE.svc.cluster.local/headers" --namespace $NAMESPACE --target-resource deployments --target-name target-deployment
+    namespaced: true
