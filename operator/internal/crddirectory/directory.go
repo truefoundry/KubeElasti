@@ -56,3 +56,15 @@ func GetCRD(serviceName string) (*CRDDetails, bool) {
 	CRDDirectory.Logger.Info("Service found in directory", zap.String("service", serviceName))
 	return value.(*CRDDetails), true
 }
+
+func ListAllCRDs() map[string]*CRDDetails {
+	if CRDDirectory == nil {
+		return nil
+	}
+	result := make(map[string]*CRDDetails)
+	CRDDirectory.Services.Range(func(key, value interface{}) bool {
+		result[key.(string)] = value.(*CRDDetails)
+		return true
+	})
+	return result
+}

@@ -57,6 +57,7 @@ func (s *Server) Start(port string) error {
 	sentryHandler := sentryhttp.New(sentryhttp.Options{})
 	mux.Handle("/metrics", sentryHandler.Handle(promhttp.Handler()))
 	mux.Handle("/informer/incoming-request", sentryHandler.HandleFunc(s.resolverReqHandler))
+	mux.Handle("/crd-cache", sentryHandler.HandleFunc(s.crdCacheHandler))
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%s", strings.TrimPrefix(port, ":")),
@@ -144,6 +145,44 @@ func (s *Server) resolverReqHandler(w http.ResponseWriter, req *http.Request) {
 	s.logger.Info("Request fulfilled successfully",
 		zap.String("service", body.Svc),
 		zap.String("namespace", body.Namespace))
+}
+
+func (s *Server) crdCacheHandler(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	allCRDs := crddirectory.ListAllCRDs()
+	resp := messages.CRDCacheResponse{
+		CRDCache: make(map[string]messages.CRDCacheEntry),
+	}
+	for key, details := range allCRDs {
+		specJSON, err := json.Marshal(details.Spec)
+		if err != nil {
+			s.logger.Error("Failed to marshal CRD spec", zap.String("key", key), zap.Error(err))
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		statusJSON, err := json.Marshal(details.Status)
+		if err != nil {
+			s.logger.Error("Failed to marshal CRD status", zap.String("key", key), zap.Error(err))
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		resp.CRDCache[key] = messages.CRDCacheEntry{
+			CRDName: details.CRDName,
+			Spec:    specJSON,
+			Status:  statusJSON,
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.logger.Error("Failed to encode CRD cache response", zap.Error(err))
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *Server) scaleTargetForService(ctx context.Context, serviceName, namespace string) error {
