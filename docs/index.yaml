@@ -6,8 +6,8 @@ entries:
       artifacthub.io/links: |-
         - name: Source
           url: https://github.com/KubeElasti/KubeElasti
-        - name: Discord
-          url: https://discord.gg/qFyN73htgE
+        - name: CNCF Slack (#kubeelasti)
+          url: https://slack.cncf.io/
       artifacthub.io/operator: "true"
     apiVersion: v2
     appVersion: 0.1.21

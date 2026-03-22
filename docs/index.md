@@ -30,7 +30,7 @@ hide:
     KubeElasti <b>saves cost</b> using scale-to-zero <b>without losing any traffic</b>, requires <b>no code changes</b>, and integrates with your existing Kubernetes infrastructure.</p>
     <div class="hero-buttons">
       <a href="/src/gs-setup/" class="md-button md-button--primary">Get Started</a>
-      <a href="https://discord.gg/qFyN73htgE" class="md-button" rel="noopener noreferrer">Join our community</a>
+      <a href="https://slack.cncf.io/" class="md-button" rel="noopener noreferrer">Join #kubeelasti on CNCF Slack</a>
     </div>
   </div>
   <div class="hero-image">
@@ -194,9 +194,9 @@ spec:
       <span class="community-icon">🐱</span>
       <span class="community-text">GitHub</span>
     </a>
-    <a href="https://discord.gg/qFyN73htgE" class="community-link">
+    <a href="https://slack.cncf.io/" class="community-link">
       <span class="community-icon">💬</span>
-      <span class="community-text">Discord</span>
+      <span class="community-text">CNCF Slack #kubeelasti</span>
     </a>
     <a href="https://github.com/KubeElasti/KubeElasti/issues" class="community-link">
       <span class="community-icon">🆘</span>

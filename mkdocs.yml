@@ -116,8 +116,8 @@ plugins:
 
 extra:
   social:
-    - icon: fontawesome/brands/discord
-      link: https://discord.gg/qFyN73htgE
+    - icon: fontawesome/brands/slack
+      link: https://slack.cncf.io/
     - icon: fontawesome/brands/github
       link: https://github.com/truefoundry
     - icon: fontawesome/brands/x-twitter
@@ -134,7 +134,7 @@ extra:
       logo: "https://kubeelasti.dev/images/logo/logo_white_full.png"
       sameAs:
         - "https://github.com/truefoundry"
-        - "https://discord.gg/qFyN73htgE"
+        - "https://slack.cncf.io/"
     software:
       "@context": "https://schema.org"
       "@type": "SoftwareApplication"

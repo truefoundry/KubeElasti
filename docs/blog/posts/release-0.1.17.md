@@ -62,7 +62,6 @@ helm repo update
 helm upgrade kubeelasti truefoundry/elasti --version 0.1.17
 ```
 
-Ready to save costs with scale-to-zero? [Get started with KubeElasti today!](https://kubeelasti.dev/src/gs-setup/) 
+Ready to save costs with scale-to-zero? [Get started with KubeElasti today!](https://kubeelasti.dev/src/gs-setup/)
 
-[💬 Join our Discord](https://discord.gg/qFyN73htgE)
-
+[💬 Join #kubeelasti on CNCF Slack](https://slack.cncf.io/)
