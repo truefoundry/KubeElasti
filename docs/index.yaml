@@ -3,7 +3,7 @@ entries:
   elasti:
   - annotations:
       artifacthub.io/license: MIT
-      artifacthub.io/links: |-
+      artifacthub.io/links: |
         - name: Source
           url: https://github.com/KubeElasti/KubeElasti
         - name: CNCF Slack (#kubeelasti)
@@ -11,11 +11,11 @@ entries:
       artifacthub.io/operator: "true"
     apiVersion: v2
     appVersion: 0.1.21
-    created: "2026-03-03T08:20:49.161192032Z"
+    created: "2026-03-22T12:53:13.003254347Z"
     description: KubeElasti is a Kubernetes-native solution that offers scale-to-zero
       functionality when there is no traffic and automatic scale up to 1 when traffic
       arrives.
-    digest: c340a9310c217f24d9bb956f601276759eac4e6aa7101f96bb6e8a1fbd7533ab
+    digest: 6a9064f2d5ac233ba9958ebf2b3f4c609958e7d3350bb2cc070e64e6ca80632a
     home: https://kubeelasti.dev
     icon: https://raw.githubusercontent.com/KubeElasti/KubeElasti/refs/heads/main/docs/images/logo/logo_theme_200x200.png
     keywords:
@@ -40,4 +40,4 @@ entries:
     urls:
     - https://github.com/KubeElasti/KubeElasti/releases/download/v0.1.20/elasti-0.1.20.tgz
     version: 0.1.20
-generated: "2026-03-03T08:20:49.160044412Z"
+generated: "2026-03-22T12:53:13.002089727Z"
