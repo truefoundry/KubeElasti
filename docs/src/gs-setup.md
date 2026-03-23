@@ -105,11 +105,95 @@ You will see 2 components running.
 
 <br>
 
-### **3. Define an ElastiService**
+### **3. Deploy a Target Application**
+
+Before creating an ElastiService, you need a target deployment, service, and ingress for KubeElasti to manage. Below is a sample httpbin application you can use.
+
+Create a file named `target-deployment.yaml`:
+
+```yaml title="target-deployment.yaml" linenums="1"
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: target
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: target-deployment
+  namespace: target
+spec:
+  type: ClusterIP
+  selector:
+    app: target-deployment
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: target-deployment
+  namespace: target
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: target-deployment
+  template:
+    metadata:
+      labels:
+        app: target-deployment
+    spec:
+      containers:
+        - name: target-deployment
+          image: kennethreitz/httpbin
+          ports:
+            - containerPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpbin-ingress
+  namespace: target
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/upstream-vhost: "target-deployment.target.svc.cluster.local"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /httpbin(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: target-deployment
+                port:
+                  number: 80
+```
+
+Apply it:
+
+```bash
+kubectl apply -f target-deployment.yaml
+```
+
+Verify the target is running:
+
+```bash
+kubectl get pods -n target
+```
+
+<br>
+
+### **4. Define an ElastiService**
 
 To configure a service to handle its traffic via elasti, you'll need to create and apply a `ElastiService` custom resource.
 
-Here we are creating it for httpbin service.   
+Here we are creating it for httpbin service.
 
 Create a file named `elasti-service.yaml` and apply the configuration.
 
@@ -187,7 +271,7 @@ spec:
 
 <br>
 
-### **4. Apply the KubeElasti service configuration**
+### **5. Apply the KubeElasti service configuration**
 
 Apply the configuration to your Kubernetes cluster:
 
@@ -199,7 +283,7 @@ The pod will be scaled down to 0 replicas if there is no traffic.
 
 <br>
 
-### **5. Test the setup**
+### **6. Test the setup**
 
 You can test the setup by sending requests to the nginx load balancer service.
 
