@@ -1,14 +1,14 @@
 apiVersion: v2
 name: elasti
 description: KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionality when there is no traffic and automatic scale up to 1 when traffic arrives.
-icon: https://raw.githubusercontent.com/truefoundry/KubeElasti/refs/heads/main/docs/images/logo/logo_theme_200x200.png
+icon: https://raw.githubusercontent.com/KubeElasti/KubeElasti/refs/heads/main/docs/images/logo/logo_theme_200x200.png
 type: application
 version: 0.1.21
 appVersion: "0.1.21"
 # kubeVersion: ">=1.25.0-0"
 home: https://kubeelasti.dev
 sources:
-  - https://github.com/truefoundry/KubeElasti
+  - https://github.com/KubeElasti/KubeElasti
 keywords:
   - Scale-to-zero
   - Operator
@@ -19,6 +19,6 @@ annotations:
   "artifacthub.io/operator": "true"
   "artifacthub.io/links": |
     - name: Source
-      url: https://github.com/truefoundry/KubeElasti
-    - name: Discord
-      url: https://discord.gg/qFyN73htgE
+      url: https://github.com/KubeElasti/KubeElasti
+    - name: CNCF Slack (#kubeelasti)
+      url: https://slack.cncf.io/

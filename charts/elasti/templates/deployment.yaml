@@ -145,6 +145,18 @@ spec:
         ports:
         - containerPort: {{ .Values.elastiResolver.service.port }}
         - containerPort: {{ .Values.elastiResolver.reverseProxyService.port }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.elastiResolver.service.port }}
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: {{ .Values.elastiResolver.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
         resources:
           {{- toYaml .Values.elastiResolver.proxy.resources | nindent 10 }}
         securityContext:
