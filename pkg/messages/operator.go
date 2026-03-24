@@ -8,12 +8,12 @@ type RequestCount struct {
 	Namespace string `json:"namespace"`
 }
 
-type CRDCacheEntry struct {
-	CRDName string          `json:"crdName"`
-	Spec    json.RawMessage `json:"spec"`
-	Status  json.RawMessage `json:"status"`
+type ElastiServiceEntry struct {
+	Name   string          `json:"name"`
+	Spec   json.RawMessage `json:"spec"`
+	Status json.RawMessage `json:"status"`
 }
 
-type CRDCacheResponse struct {
-	CRDCache map[string]CRDCacheEntry `json:"crdCache"`
+type ElastiServiceCacheResponse struct {
+	Services map[string]ElastiServiceEntry `json:"services"`
 }

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/truefoundry/elasti/resolver/internal/crdcache"
 	"github.com/truefoundry/elasti/resolver/internal/prom"
 	"github.com/truefoundry/elasti/resolver/internal/throttler"
 
@@ -31,7 +30,6 @@ type (
 		timeout     time.Duration
 		operatorRPC Operator
 		hostManager HostManager
-		crdCache    crdcache.Provider
 	}
 
 	// Params is the configuration for the handler
@@ -42,7 +40,6 @@ type (
 		HostManager HostManager
 		Throttler   *throttler.Throttler
 		Transport   http.RoundTripper
-		CRDCache    crdcache.Provider
 	}
 
 	// Operator is to communicate with the operator
@@ -67,7 +64,6 @@ func NewHandler(hc *Params) *Handler {
 		timeout:     hc.ReqTimeout,
 		operatorRPC: hc.OperatorRPC,
 		hostManager: hc.HostManager,
-		crdCache:    hc.CRDCache,
 	}
 }
 

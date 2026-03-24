@@ -94,7 +94,7 @@ func main() {
 	k8sUtil := k8shelper.NewOps(logger, config)
 	newOperatorRPC := operator.NewOperatorClient(logger, time.Duration(env.OperatorRetryDuration)*time.Second)
 	newHostManager := hostmanager.NewHostManager(logger, time.Duration(env.TrafficReEnableDuration)*time.Second, env.HeaderForHost)
-	crdCache := crdcache.New(logger, time.Duration(env.CRDCachePollIntervalMinutes)*time.Minute)
+	crdCache := crdcache.New(logger, newOperatorRPC, time.Duration(env.CRDCachePollIntervalMinutes)*time.Minute)
 	crdCache.StartBackground()
 	newTransport := throttler.NewProxyAutoTransport(env.MaxIdleProxyConns, env.MaxIdleProxyConnsPerHost)
 	newThrottler := throttler.NewThrottler(&throttler.Params{
@@ -118,7 +118,6 @@ func main() {
 		HostManager: newHostManager,
 		Throttler:   newThrottler,
 		Transport:   newTransport,
-		CRDCache:    crdcache.NewProvider(crdCache),
 	})
 
 	// Handle all the incoming requests

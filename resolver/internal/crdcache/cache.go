@@ -1,48 +1,38 @@
 package crdcache
 
 import (
-	"context"
-	"encoding/json"
-	"net"
-	"net/http"
-	"strconv"
+	"fmt"
 	"sync"
 	"time"
 
-	"github.com/truefoundry/elasti/pkg/config"
 	"github.com/truefoundry/elasti/pkg/messages"
+	"github.com/truefoundry/elasti/resolver/internal/operator"
 	"go.uber.org/zap"
 )
 
-const (
-	defaultPollInterval = 5 * time.Minute
-	crdCachePath        = "/crd-cache"
-)
+const defaultPollInterval = 5 * time.Minute
 
 type Cache struct {
 	logger       *zap.Logger
-	operatorURL  string
+	operatorRPC  *operator.Client
 	pollInterval time.Duration
-	client       *http.Client
-	cache        *sync.Map // key: "namespace/name", value: *messages.CRDCacheEntry
-	stopCh       chan struct{}
-	stopOnce     sync.Once
+
+	mu    sync.RWMutex
+	cache *sync.Map // key: "namespace/service-name", value: *messages.ElastiServiceEntry
+
+	stopCh   chan struct{}
+	stopOnce sync.Once
 }
 
-// New creates a CRD cache that polls the operator every pollInterval.
-func New(logger *zap.Logger, pollInterval time.Duration) *Cache {
+// New creates a Cache that polls the operator every pollInterval.
+func New(logger *zap.Logger, operatorRPC *operator.Client, pollInterval time.Duration) *Cache {
 	if pollInterval <= 0 {
 		pollInterval = defaultPollInterval
 	}
-	operatorConfig := config.GetOperatorConfig()
-	operatorHost := operatorConfig.ServiceName + "." + operatorConfig.Namespace + ".svc." + config.GetKubernetesClusterDomain()
-	operatorHostPort := net.JoinHostPort(operatorHost, strconv.Itoa(int(operatorConfig.Port)))
-
 	return &Cache{
 		logger:       logger.With(zap.String("component", "crdcache")),
-		operatorURL:  "http://" + operatorHostPort + crdCachePath,
+		operatorRPC:  operatorRPC,
 		pollInterval: pollInterval,
-		client:       &http.Client{Timeout: 30 * time.Second},
 		cache:        &sync.Map{},
 		stopCh:       make(chan struct{}),
 	}
@@ -50,17 +40,21 @@ func New(logger *zap.Logger, pollInterval time.Duration) *Cache {
 
 // Start begins polling the operator for CRD cache updates.
 func (c *Cache) Start() {
-	c.logger.Info("Starting CRD cache poller", zap.Duration("interval", c.pollInterval))
-	c.fetch()
+	c.logger.Info("Starting ElastiService cache poller", zap.Duration("interval", c.pollInterval))
+	if err := c.fetch(); err != nil {
+		c.logger.Error("Initial ElastiService cache fetch failed", zap.Error(err))
+	}
 	ticker := time.NewTicker(c.pollInterval)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-c.stopCh:
-			c.logger.Info("CRD cache poller stopped")
+			c.logger.Info("ElastiService cache poller stopped")
 			return
 		case <-ticker.C:
-			c.fetch()
+			if err := c.fetch(); err != nil {
+				c.logger.Error("ElastiService cache fetch failed", zap.Error(err))
+			}
 		}
 	}
 }
@@ -70,64 +64,39 @@ func (c *Cache) StartBackground() {
 }
 
 func (c *Cache) Stop() {
-	c.stopOnce.Do(func() {
-		close(c.stopCh)
-	})
+	c.stopOnce.Do(func() { close(c.stopCh) })
 }
 
-// fetch retrieves the CRD cache from the operator and updates the local cache.
-func (c *Cache) fetch() {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.operatorURL, nil)
+// fetch retrieves the ElastiService cache from the operator and atomically replaces the local copy.
+func (c *Cache) fetch() error {
+	resp, err := c.operatorRPC.GetElastiServiceCache()
 	if err != nil {
-		c.logger.Error("Failed to create CRD cache request", zap.Error(err))
-		return
-	}
-	resp, err := c.client.Do(req)
-	if err != nil {
-		c.logger.Error("Failed to fetch CRD cache from operator", zap.Error(err))
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		c.logger.Error("CRD cache fetch returned non-OK status", zap.Int("status", resp.StatusCode))
-		return
-	}
-	var cacheResp messages.CRDCacheResponse
-	if err := json.NewDecoder(resp.Body).Decode(&cacheResp); err != nil {
-		c.logger.Error("Failed to decode CRD cache response", zap.Error(err))
-		return
+		return fmt.Errorf("fetch: %w", err)
 	}
 
-	// Build new cache then swap atomically to avoid partial reads
 	newCache := &sync.Map{}
-	for k, v := range cacheResp.CRDCache {
+	for k, v := range resp.Services {
 		entry := v
 		newCache.Store(k, &entry)
 	}
+
+	c.mu.Lock()
 	c.cache = newCache
-	c.logger.Debug("CRD cache updated", zap.Int("count", len(cacheResp.CRDCache)))
+	c.mu.Unlock()
+
+	c.logger.Debug("ElastiService cache updated", zap.Int("count", len(resp.Services)))
+	return nil
 }
 
-// GetCRD returns the cached CRD entry for the given namespaced name (namespace/name).
-func (c *Cache) GetCRD(namespacedName string) (*messages.CRDCacheEntry, bool) {
-	val, ok := c.cache.Load(namespacedName)
+// GetElastiService returns the cached entry for "namespace/service-name".
+func (c *Cache) GetElastiService(namespacedServiceName string) (*messages.ElastiServiceEntry, bool) {
+	c.mu.RLock()
+	cm := c.cache
+	c.mu.RUnlock()
+
+	val, ok := cm.Load(namespacedServiceName)
 	if !ok {
 		return nil, false
 	}
-	return val.(*messages.CRDCacheEntry), true
-}
-
-// GetCRDByService returns the cached CRD entry for namespace and service name.
-func (c *Cache) GetCRDByService(namespace, service string) (*messages.CRDCacheEntry, bool) {
-	return c.GetCRD(namespace + "/" + service)
-}
-
-type Provider interface {
-	GetCRD(namespacedName string) (*messages.CRDCacheEntry, bool)
-}
-
-func NewProvider(c *Cache) Provider {
-	return c
+	return val.(*messages.ElastiServiceEntry), true
 }

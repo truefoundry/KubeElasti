@@ -154,26 +154,26 @@ func (s *Server) crdCacheHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	allCRDs := crddirectory.ListAllCRDs()
-	resp := messages.CRDCacheResponse{
-		CRDCache: make(map[string]messages.CRDCacheEntry),
+	resp := messages.ElastiServiceCacheResponse{
+		Services: make(map[string]messages.ElastiServiceEntry),
 	}
 	for key, details := range allCRDs {
 		specJSON, err := json.Marshal(details.Spec)
 		if err != nil {
-			s.logger.Error("Failed to marshal CRD spec", zap.String("key", key), zap.Error(err))
+			s.logger.Error("Failed to marshal ElastiService spec", zap.String("key", key), zap.Error(err))
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 		statusJSON, err := json.Marshal(details.Status)
 		if err != nil {
-			s.logger.Error("Failed to marshal CRD status", zap.String("key", key), zap.Error(err))
+			s.logger.Error("Failed to marshal ElastiService status", zap.String("key", key), zap.Error(err))
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		resp.CRDCache[key] = messages.CRDCacheEntry{
-			CRDName: details.CRDName,
-			Spec:    specJSON,
-			Status:  statusJSON,
+		resp.Services[key] = messages.ElastiServiceEntry{
+			Name:   details.CRDName,
+			Spec:   specJSON,
+			Status: statusJSON,
 		}
 	}
 
