@@ -194,6 +194,7 @@ elastiResolver:
       reqTimeout: "600"
       trafficReEnableDuration: "5"
       enableH2C: false
+      crdCachePollIntervalMinutes: "5"
     image:
       ## @param elastiResolver.proxy.image.registry registry to use for the deployment
       ##

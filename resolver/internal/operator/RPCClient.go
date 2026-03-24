@@ -3,6 +3,7 @@ package operator
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -17,6 +18,8 @@ import (
 
 	"sync"
 )
+
+const elastiServiceCacheEndpoint = "/crd-cache"
 
 // Client is to communicate with the operator
 type Client struct {
@@ -39,10 +42,15 @@ func NewOperatorClient(logger *zap.Logger, retryDuration time.Duration) *Client 
 	operatorHost := operatorConfig.ServiceName + "." + operatorConfig.Namespace + ".svc." + config.GetKubernetesClusterDomain()
 	operatorHostPort := net.JoinHostPort(operatorHost, strconv.Itoa(int(operatorConfig.Port)))
 
+	return NewOperatorClientWithURL(logger, retryDuration, "http://"+operatorHostPort)
+}
+
+// NewOperatorClientWithURL creates a Client pointing at a specific base URL.
+func NewOperatorClientWithURL(logger *zap.Logger, retryDuration time.Duration, baseURL string) *Client {
 	return &Client{
 		logger:                  logger.With(zap.String("component", "operatorRPC")),
 		retryDuration:           retryDuration,
-		operatorURL:             "http://" + operatorHostPort,
+		operatorURL:             baseURL,
 		incomingRequestEndpoint: "/informer/incoming-request",
 		client:                  http.Client{},
 	}
@@ -99,6 +107,33 @@ func (o *Client) SendIncomingRequestInfo(ns, svc string) {
 	}
 	prom.OperatorRPCCounter.WithLabelValues("").Inc()
 	o.logger.Info("Request sent to controller", zap.Int("statusCode", resp.StatusCode), zap.Any("body", resp.Body))
+}
+
+// GetElastiServiceCache fetches the full ElastiService cache from the operator.
+func (o *Client) GetElastiServiceCache() (*messages.ElastiServiceCacheResponse, error) {
+	url := o.operatorURL + elastiServiceCacheEndpoint
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("GetElastiServiceCache: failed to create request: %w", err)
+	}
+	resp, err := o.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("GetElastiServiceCache: request failed: %w", err)
+	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			o.logger.Error("GetElastiServiceCache: failed to close response body", zap.Error(closeErr))
+		}
+	}()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("GetElastiServiceCache: operator returned status %d: %s", resp.StatusCode, string(body))
+	}
+	var result messages.ElastiServiceCacheResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("GetElastiServiceCache: failed to decode response: %w", err)
+	}
+	return &result, nil
 }
 
 func (o *Client) releaseMutexForServiceRPC(service string) {
