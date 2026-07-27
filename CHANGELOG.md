@@ -8,6 +8,16 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ## Unreleased
 
+## v0.1.31-rc1 (2026-07-27)
+
+### Fixes
+
+* fix: operator informer lifecycle - stop the sync-failure storm and goroutine leak when an informer fails to sync by `@ramantehlan` in [#303](https://github.com/KubeElasti/KubeElasti/pull/303)
+
+### Other
+
+* feat: add Go code coverage via Codecov by `@ramantehlan` in [#321](https://github.com/KubeElasti/KubeElasti/pull/321)
+
 ## v0.1.30 (2026-07-23)
 
 ### Improvements
