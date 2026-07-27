@@ -11,6 +11,7 @@
 
 
 ![Lint and Test](https://github.com/KubeElasti/KubeElasti/actions/workflows/lint-and-test.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/KubeElasti/KubeElasti/branch/main/graph/badge.svg)](https://codecov.io/gh/KubeElasti/KubeElasti)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/kubeelasti)](https://artifacthub.io/packages/search?repo=kubeelasti)
 [![CNCF Landscape](https://img.shields.io/badge/CNCF%20Landscape-5699C6)](https://landscape.cncf.io/?item=serverless--framework--kubeelasti)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12491/badge)](https://www.bestpractices.dev/projects/12491)
