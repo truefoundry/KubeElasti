@@ -18,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	kRuntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -29,17 +28,21 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const (
+	// defaultSyncTimeout bounds how long we block waiting for an informer's initial sync.
+	defaultSyncTimeout = 30 * time.Second
+)
+
 type (
 	// Manager helps manage lifecycle of informer
 	Manager struct {
-		client              *kubernetes.Clientset
-		dynamicClient       *dynamic.DynamicClient
-		logger              *zap.Logger
-		informers           sync.Map
-		resolver            info
-		resyncPeriod        time.Duration
-		healthCheckDuration time.Duration
-		healthCheckStopChan chan struct{}
+		client        *kubernetes.Clientset
+		dynamicClient dynamic.Interface
+		logger        *zap.Logger
+		informers     sync.Map
+		resolver      info
+		resyncPeriod  time.Duration
+		syncTimeout   time.Duration
 	}
 
 	info struct {
@@ -74,9 +77,8 @@ func NewInformerManager(logger *zap.Logger, kConfig *rest.Config) *Manager {
 		dynamicClient: dynamicClient,
 		logger:        logger.Named("InformerManager"),
 		// ResyncPeriod is the proactive resync we do, even when no events are received by the informer.
-		resyncPeriod:        5 * time.Minute,
-		healthCheckDuration: 5 * time.Second,
-		healthCheckStopChan: make(chan struct{}),
+		resyncPeriod: 5 * time.Minute,
+		syncTimeout:  defaultSyncTimeout,
 	}
 }
 
@@ -115,22 +117,31 @@ func (m *Manager) InitializeResolverInformer(handlers cache.ResourceEventHandler
 	m.resolver.StopCh = make(chan struct{})
 	go m.resolver.Informer.Run(m.resolver.StopCh)
 
-	if !cache.WaitForCacheSync(m.resolver.StopCh, m.resolver.Informer.HasSynced) {
-		m.logger.Error("Failed to sync informer", zap.String("key", m.getKeyFromRequestWatch(m.resolver.Req)))
+	if !m.waitForSync(m.resolver.StopCh, m.resolver.Informer.HasSynced) {
+		close(m.resolver.StopCh)
+		m.logger.Error("Failed to sync resolver informer within timeout")
 		return errors.New("failed to sync resolver informer")
 	}
 	m.logger.Info("Resolver informer started")
 	return nil
 }
 
-// Start is to initiate a health check on all the running informers
-// It uses HasSynced if a informer is not synced, if not, it restarts it
-func (m *Manager) Start() {
-	m.logger.Info("Starting InformerManager")
-	go wait.Until(m.monitorInformers, m.healthCheckDuration, m.healthCheckStopChan)
+// waitForSync waits for the informer cache to sync, bounded by syncTimeout.
+// It returns false if the stop channel is closed or the timeout expires first.
+func (m *Manager) waitForSync(stopCh <-chan struct{}, hasSynced cache.InformerSynced) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), m.syncTimeout)
+	defer cancel()
+	go func() {
+		select {
+		case <-stopCh:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
+	return cache.WaitForCacheSync(ctx.Done(), hasSynced)
 }
 
-// Stop is to close all the active informers and close the health monitor
+// Stop is to close all the active informers
 func (m *Manager) Stop() {
 	m.logger.Info("Stopping InformerManager")
 	// Loop through all the informers and stop them
@@ -144,8 +155,6 @@ func (m *Manager) Stop() {
 		}
 		return true
 	})
-	// Stop the health watch
-	close(m.healthCheckStopChan)
 	m.logger.Info("InformerManager stopped")
 }
 
@@ -199,26 +208,6 @@ func (m *Manager) StopInformer(key string) (err error) {
 	m.informers.Delete(key)
 	prom.InformerGauge.WithLabelValues(key).Dec()
 	return nil
-}
-
-func (m *Manager) monitorInformers() {
-	m.informers.Range(func(key, value interface{}) bool {
-		info, ok := value.(info)
-		if ok {
-			if !info.Informer.HasSynced() {
-				m.logger.Info("Informer not synced", zap.String("key", key.(string)))
-				err := m.StopInformer(m.getKeyFromRequestWatch(info.Req))
-				if err != nil {
-					m.logger.Error("Error in stopping informer", zap.Error(err))
-				}
-				err = m.enableInformer(info.Req)
-				if err != nil {
-					m.logger.Error("Error in enabling informer", zap.Error(err))
-				}
-			}
-		}
-		return true
-	})
 }
 
 // Add is to add a watch on a resource
@@ -299,10 +288,13 @@ func (m *Manager) enableInformer(req *RequestWatch) error {
 		Req:      req,
 	})
 
-	// Wait for the cache to syncß
-	if !cache.WaitForCacheSync(informerStop, informer.HasSynced) {
-		m.logger.Error("Failed to sync informer", zap.String("key", key))
-		return errors.New("failed to sync informer")
+	// Wait for the cache to sync, bounded by syncTimeout. On failure, stop the
+	// informer and remove it from the map so we don't leak its goroutine.
+	if !m.waitForSync(informerStop, informer.HasSynced) {
+		m.logger.Error("Failed to sync informer within timeout", zap.String("key", key))
+		close(informerStop)
+		m.informers.Delete(key)
+		return errors.New("failed to sync informer within timeout")
 	}
 	m.logger.Info("Informer started", zap.String("key", key))
 	return nil

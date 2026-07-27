@@ -194,6 +194,9 @@ func (r *ElastiServiceReconciler) watchScaleTargetRef(ctx context.Context, es *v
 		}
 	})
 	if informerErr != nil {
+		// Reset the sync.Once so the next reconcile retries starting the informer,
+		// otherwise a transient failure would permanently disable this watch.
+		r.resetMutexForInformer(r.getMutexKeyForTargetRef(req))
 		return informerErr
 	}
 	return nil
@@ -218,6 +221,9 @@ func (r *ElastiServiceReconciler) watchPublicService(ctx context.Context, es *v1
 		}
 	})
 	if informerErr != nil {
+		// Reset the sync.Once so the next reconcile retries starting the informer,
+		// otherwise a transient failure would permanently disable this watch.
+		r.resetMutexForInformer(r.getMutexKeyForPublicSVC(req))
 		return informerErr
 	}
 	return nil
