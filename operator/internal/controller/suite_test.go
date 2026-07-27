@@ -95,7 +95,6 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	informerManager = informer.NewInformerManager(uberZap.NewExample(), cfg)
-	informerManager.Start()
 	crddirectory.InitDirectory(uberZap.NewExample())
 
 	mgrCtx, mgrCancel = context.WithCancel(context.Background())

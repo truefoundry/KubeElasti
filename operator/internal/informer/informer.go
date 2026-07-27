@@ -18,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	kRuntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -37,15 +36,13 @@ const (
 type (
 	// Manager helps manage lifecycle of informer
 	Manager struct {
-		client              *kubernetes.Clientset
-		dynamicClient       dynamic.Interface
-		logger              *zap.Logger
-		informers           sync.Map
-		resolver            info
-		resyncPeriod        time.Duration
-		healthCheckDuration time.Duration
-		healthCheckStopChan chan struct{}
-		syncTimeout         time.Duration
+		client        *kubernetes.Clientset
+		dynamicClient dynamic.Interface
+		logger        *zap.Logger
+		informers     sync.Map
+		resolver      info
+		resyncPeriod  time.Duration
+		syncTimeout   time.Duration
 	}
 
 	info struct {
@@ -80,10 +77,8 @@ func NewInformerManager(logger *zap.Logger, kConfig *rest.Config) *Manager {
 		dynamicClient: dynamicClient,
 		logger:        logger.Named("InformerManager"),
 		// ResyncPeriod is the proactive resync we do, even when no events are received by the informer.
-		resyncPeriod:        5 * time.Minute,
-		healthCheckDuration: 5 * time.Second,
-		healthCheckStopChan: make(chan struct{}),
-		syncTimeout:         defaultSyncTimeout,
+		resyncPeriod: 5 * time.Minute,
+		syncTimeout:  defaultSyncTimeout,
 	}
 }
 
@@ -146,15 +141,7 @@ func (m *Manager) waitForSync(stopCh <-chan struct{}, hasSynced cache.InformerSy
 	return cache.WaitForCacheSync(ctx.Done(), hasSynced)
 }
 
-// Start is to initiate a health check on all the running informers.
-// It only logs when an informer has not finished its initial sync; it does not
-// restart. client-go's Reflector already retries LIST/WATCH failures.
-func (m *Manager) Start() {
-	m.logger.Info("Starting InformerManager")
-	go wait.Until(m.monitorInformers, m.healthCheckDuration, m.healthCheckStopChan)
-}
-
-// Stop is to close all the active informers and close the health monitor
+// Stop is to close all the active informers
 func (m *Manager) Stop() {
 	m.logger.Info("Stopping InformerManager")
 	// Loop through all the informers and stop them
@@ -168,8 +155,6 @@ func (m *Manager) Stop() {
 		}
 		return true
 	})
-	// Stop the health watch
-	close(m.healthCheckStopChan)
 	m.logger.Info("InformerManager stopped")
 }
 
@@ -223,21 +208,6 @@ func (m *Manager) StopInformer(key string) (err error) {
 	m.informers.Delete(key)
 	prom.InformerGauge.WithLabelValues(key).Dec()
 	return nil
-}
-
-func (m *Manager) monitorInformers() {
-	m.informers.Range(func(key, value interface{}) bool {
-		info, ok := value.(info)
-		if ok {
-			if !info.Informer.HasSynced() {
-				// Do not restart. Initial sync can take longer than the health-check
-				// interval; killing the informer here caused a permanent restart storm.
-				// Leave it running and let WaitForCacheSync / Reflector finish.
-				m.logger.Info("Informer not synced yet, waiting", zap.String("key", key.(string)))
-			}
-		}
-		return true
-	})
 }
 
 // Add is to add a watch on a resource

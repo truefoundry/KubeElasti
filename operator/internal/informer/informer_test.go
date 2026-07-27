@@ -40,12 +40,10 @@ func newTestDynamicClient(objects ...runtime.Object) *dynamicfake.FakeDynamicCli
 
 func newTestManager(dc dynamic.Interface) *Manager {
 	return &Manager{
-		dynamicClient:       dc,
-		logger:              zap.NewNop(),
-		resyncPeriod:        time.Minute,
-		healthCheckDuration: time.Second,
-		healthCheckStopChan: make(chan struct{}),
-		syncTimeout:         2 * time.Second,
+		dynamicClient: dc,
+		logger:        zap.NewNop(),
+		resyncPeriod:  time.Minute,
+		syncTimeout:   2 * time.Second,
 	}
 }
 
@@ -105,35 +103,5 @@ func TestAddCleansUpOnSyncTimeout(t *testing.T) {
 	}
 	if _, ok := m.informers.Load(key); ok {
 		t.Fatal("unsynced informer left in map after sync timeout")
-	}
-}
-
-func TestMonitorDoesNotRestartUnsyncedInformer(t *testing.T) {
-	m := newTestManager(newTestDynamicClient(newTestDeployment("demo", "target")))
-	req := newTestRequestWatch("demo", "target")
-	key := m.getKeyFromRequestWatch(req)
-
-	stopCh := make(chan struct{})
-	defer close(stopCh)
-	unsynced := cache.NewSharedInformer(&cache.ListWatch{}, &unstructured.Unstructured{}, m.resyncPeriod)
-	m.informers.Store(key, info{
-		Informer: unsynced,
-		StopCh:   stopCh,
-		Req:      req,
-	})
-
-	m.monitorInformers()
-
-	value, ok := m.informers.Load(key)
-	if !ok {
-		t.Fatal("monitor removed unsynced informer")
-	}
-	if value.(info).StopCh != stopCh {
-		t.Fatal("monitor restarted unsynced informer")
-	}
-	select {
-	case <-stopCh:
-		t.Fatal("monitor closed stop channel of unsynced informer")
-	default:
 	}
 }

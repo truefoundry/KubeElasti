@@ -178,9 +178,8 @@ func mainWithError() error {
 
 	// Start the shared CRD Directory
 	crddirectory.InitDirectory(zapLogger)
-	// Initiate and start the shared informerManager manager
+	// Initiate the shared informerManager manager
 	informerManager := informer.NewInformerManager(zapLogger, mgr.GetConfig())
-	informerManager.Start()
 	defer informerManager.Stop()
 
 	// Initiate and start the shared scaleHandler
