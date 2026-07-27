@@ -1,0 +1,58 @@
+name: Code coverage
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'operator/**'
+      - 'resolver/**'
+      - 'pkg/**'
+      - '*.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'go.work'
+      - 'go.work.sum'
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: 1.26.5
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module: operator
+          - module: resolver
+          - module: pkg
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: "0"
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: Install dependencies
+        run: go mod tidy
+        working-directory: ${{ matrix.module }}
+      - name: Run tests with coverage
+        run: cd ${{ matrix.module }} && make test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ matrix.module }}/cover.out
+          flags: ${{ matrix.module }}
+          name: ${{ matrix.module }}
+          fail_ci_if_error: false

@@ -18,5 +18,5 @@ vet: ## Run go vet against code.
 
 .PHONY: test
 test: fmt vet ## Run tests.
-	go test ./... -race
+	go test ./... -race -coverprofile=cover.out -covermode=atomic
 

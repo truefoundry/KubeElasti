@@ -1,0 +1,38 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: operator
+      paths:
+        - operator/
+    - name: resolver
+      paths:
+        - resolver/
+    - name: pkg
+      paths:
+        - pkg/
+
+ignore:
+  - "**/*_test.go"
+  - "**/zz_generated.*.go"
+  - "**/mock_*.go"
+  - "operator/api/**"
+  - "tests/**"
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
