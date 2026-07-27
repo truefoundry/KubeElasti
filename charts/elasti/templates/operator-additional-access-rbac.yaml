@@ -1,3 +1,44 @@
+{{- if .Values.global.allowedNamespaces -}}
+{{- range $ns := splitList "," (include "elasti.watchNamespaces" $) }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "elasti.fullname" $ }}-operator-additional-access
+  namespace: {{ $ns }}
+  labels:
+    {{- include "elasti-operator.commonLabels" $ | nindent 4 }}
+  annotations:
+    {{- include "elasti-operator.commonAnnotations" $ | nindent 4 }}
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch"]
+# Required to scale any resource
+- apiGroups: ["*"]
+  resources: ["*/scale"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
+  verbs: ["get", "list", "watch", "update", "patch", "delete", "create"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "update", "patch", "delete", "create"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch", "update"]
+- apiGroups: ["argoproj.io"]
+  resources: ["rollouts"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["keda.sh"]
+  resources: ["scaledobjects"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+# Required to get pod details in informer
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+{{- end }}
+{{- else -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -33,3 +74,4 @@ rules:
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["get", "list", "watch"]
+{{- end }}

@@ -1,3 +1,45 @@
+{{- if .Values.global.allowedNamespaces -}}
+{{- range $ns := splitList "," (include "elasti.watchNamespaces" $) }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "elasti.fullname" $ }}-operator-manager-role
+  namespace: {{ $ns }}
+  labels:
+    {{- include "elasti-operator.commonLabels" $ | nindent 4 }}
+  annotations:
+    {{- include "elasti-operator.commonAnnotations" $ | nindent 4 }}
+rules:
+- apiGroups: ["elasti.truefoundry.com"]
+  resources: ["elastiservices"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["elasti.truefoundry.com"]
+  resources: ["elastiservices/finalizers"]
+  verbs: ["update"]
+- apiGroups: ["elasti.truefoundry.com"]
+  resources: ["elastiservices/status"]
+  verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "elasti.fullname" $ }}-operator-manager-rolebinding
+  namespace: {{ $ns }}
+  labels:
+    {{- include "elasti-operator.commonLabels" $ | nindent 4 }}
+  annotations:
+    {{- include "elasti-operator.commonAnnotations" $ | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "elasti.fullname" $ }}-operator-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "elasti.fullname" $ }}-operator-controller-manager
+  namespace: '{{ $.Release.Namespace }}'
+{{- end }}
+{{- else -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -33,3 +75,4 @@ subjects:
 - kind: ServiceAccount
   name: {{ include "elasti.fullname" . }}-operator-controller-manager
   namespace: '{{ .Release.Namespace }}'
+{{- end }}

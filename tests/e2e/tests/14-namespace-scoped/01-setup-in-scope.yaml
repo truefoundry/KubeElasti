@@ -1,0 +1,7 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  # Deploy the target, KEDA ScaledObject, and ElastiService in this (in-scope) namespace.
+  - command: ../../manifest/setup.sh --manifest-dir ../../manifest
+    namespaced: true
+  - command: sleep 5

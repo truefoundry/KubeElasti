@@ -1,0 +1,7 @@
+# In-scope: the scoped operator reconciles this ElastiService and moves it to proxy mode.
+apiVersion: elasti.truefoundry.com/v1alpha1
+kind: ElastiService
+metadata:
+  name: target-elastiservice
+status:
+  mode: proxy

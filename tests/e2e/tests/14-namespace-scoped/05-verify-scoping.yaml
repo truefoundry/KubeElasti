@@ -1,0 +1,17 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  # The out-of-scope ElastiService must be ignored by the scoped operator, so it never
+  # gets a status.mode. The in-scope one already reached proxy (step 03), which proves
+  # the operator is alive and reconciling, so an empty mode here means "ignored", not "slow".
+  - script: |
+      sleep 20
+      mode=$(kubectl get elastiservice target-elastiservice -n "$NAMESPACE-oos" -o jsonpath='{.status.mode}')
+      echo "out-of-scope ElastiService status.mode='$mode' (expected empty)"
+      test -z "$mode"
+  # No cluster-scoped RBAC must exist for elasti in scoped mode.
+  - script: |
+      objs=$(kubectl get clusterrole,clusterrolebinding -l app.kubernetes.io/instance=elasti -o name)
+      echo "elasti cluster-scoped RBAC objects (expected none):"
+      echo "$objs"
+      test -z "$objs"

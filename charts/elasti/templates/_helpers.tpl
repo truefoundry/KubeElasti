@@ -38,6 +38,13 @@ Namespace
 {{- end }}
 
 {{/*
+Comma-separated allowedNamespaces plus the release namespace, de-duplicated.
+*/}}
+{{- define "elasti.watchNamespaces" -}}
+{{- append .Values.global.allowedNamespaces .Release.Namespace | uniq | join "," -}}
+{{- end }}
+
+{{/*
 Global Labels
 */}}
 {{- define "global.labels" }}

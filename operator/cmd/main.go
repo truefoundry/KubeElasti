@@ -45,6 +45,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -142,8 +143,22 @@ func mainWithError() error {
 		TLSOpts: tlsOpts,
 	})
 
+	// Determine the namespaces to confine KubeElasti to. An empty result keeps the default
+	// cluster-scoped behavior. When scoped, the operator's and resolver's own namespaces are
+	// always folded in so leader-election leases and the resolver's EndpointSlices stay reachable.
+	watch := config.GetWatchNamespaces()
+	if len(watch) == 0 && watchNamespace != metav1.NamespaceAll {
+		// Backward compatibility with the legacy single-namespace --watch-namespace flag.
+		watch = []string{watchNamespace}
+	}
+	watchNamespaces := effectiveWatchNamespaces(watch, config.GetOperatorConfig().Namespace, config.GetResolverConfig().Namespace)
+	if len(watchNamespaces) > 0 {
+		setupLog.Info("running in namespace-scoped mode", "namespaces", watchNamespaces)
+	}
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
+		Cache:  buildCacheOptions(watchNamespaces),
 		Metrics: metricsserver.Options{
 			BindAddress:   metricsAddr,
 			SecureServing: secureMetrics,
@@ -169,7 +184,7 @@ func mainWithError() error {
 	defer informerManager.Stop()
 
 	// Initiate and start the shared scaleHandler
-	scaleHandler := scaling.NewScaleHandler(zapLogger, mgr.GetConfig(), watchNamespace, mgr.GetEventRecorderFor("elasti-operator"))
+	scaleHandler := scaling.NewScaleHandler(zapLogger, mgr.GetConfig(), watchNamespaces, mgr.GetEventRecorderFor("elasti-operator"))
 
 	// Set up the ElastiService controller
 	reconciler := &controller.ElastiServiceReconciler{
@@ -180,7 +195,7 @@ func mainWithError() error {
 		ScaleHandler:    scaleHandler,
 	}
 
-	if err = reconciler.SetupWithManager(mgr, watchNamespace); err != nil {
+	if err = reconciler.SetupWithManager(mgr, watchNamespaces); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ElastiService")
 		sentry.CaptureException(err)
 		return fmt.Errorf("main: %w", err)
@@ -237,7 +252,7 @@ func mainWithError() error {
 		return fmt.Errorf("failed to sync cache")
 	}
 
-	if err = reconciler.Initialize(context.Background(), watchNamespace); err != nil {
+	if err = reconciler.Initialize(context.Background(), watchNamespaces); err != nil {
 		setupLog.Error(err, "unable to initialize controller")
 		return fmt.Errorf("main: %w", err)
 	}
@@ -248,6 +263,49 @@ func mainWithError() error {
 	}
 
 	return nil
+}
+
+// effectiveWatchNamespaces returns the de-duplicated set of namespaces to confine the manager
+// cache and clients to. An empty watch slice means cluster scope (returns nil). When scoped, the
+// alwaysInclude namespaces (operator + resolver) are folded in — this is a correctness invariant,
+// not a nicety, since the resolver's own EndpointSlices must remain reachable.
+func effectiveWatchNamespaces(watch []string, alwaysInclude ...string) []string {
+	if len(watch) == 0 {
+		return nil
+	}
+
+	all := make([]string, 0, len(watch)+len(alwaysInclude))
+	all = append(all, watch...)
+	all = append(all, alwaysInclude...)
+
+	seen := make(map[string]struct{}, len(all))
+	out := make([]string, 0, len(all))
+	for _, ns := range all {
+		if ns == "" {
+			continue
+		}
+		if _, ok := seen[ns]; ok {
+			continue
+		}
+		seen[ns] = struct{}{}
+		out = append(out, ns)
+	}
+	return out
+}
+
+// buildCacheOptions restricts the manager cache to the given namespaces. When the list is empty it
+// returns the zero-value cache.Options — byte-for-byte identical to the default cluster-scoped
+// behavior.
+func buildCacheOptions(watchNamespaces []string) cache.Options {
+	if len(watchNamespaces) == 0 {
+		return cache.Options{}
+	}
+
+	defaultNamespaces := make(map[string]cache.Config, len(watchNamespaces))
+	for _, ns := range watchNamespaces {
+		defaultNamespaces[ns] = cache.Config{}
+	}
+	return cache.Options{DefaultNamespaces: defaultNamespaces}
 }
 
 func _(mgr ctrl.Manager) healthz.Checker {

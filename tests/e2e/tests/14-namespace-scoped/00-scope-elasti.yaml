@@ -1,0 +1,12 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  # Reconfigure the shared elasti release into namespace-scoped mode, confined to
+  # this test's namespace plus the release namespace (elasti). The chart also folds
+  # in the release namespace on its own; we pass it explicitly for clarity.
+  - script: |
+      cd ../../ && helm upgrade elasti ../../charts/elasti -n elasti \
+        -f ./manifest/global/values-elasti.yaml \
+        --set "global.allowedNamespaces={$NAMESPACE,elasti}" \
+        --wait --timeout 300s
+  - command: kubectl rollout status deployment elasti-operator-controller-manager -n elasti --timeout=300s

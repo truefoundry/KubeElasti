@@ -255,8 +255,9 @@ nav:
           - Overview: src/about/comparisons/main.md
           - KubeElasti vs KEDA: src/about/comparisons/kubeelasti-vs-keda.md
           - KubeElasti vs Knative: src/about/comparisons/kubeelasti-vs-knative.md
-  - Install: 
+  - Install:
       - Installation: src/install/installation.md
+      - Namespace-scoped install: src/install/namespace-scoped.md
       - Demo setup: src/install/demo-setup.md
       - Pre-Requisites: src/install/pre-requisites.md
       - Configuration: src/install/configure-elastiservice.md

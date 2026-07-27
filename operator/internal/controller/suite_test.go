@@ -124,7 +124,7 @@ var _ = BeforeSuite(func() {
 		InformerStartLocks: sync.Map{},
 		ReconcileLocks:     sync.Map{},
 	}
-	Expect(controllerReconciler.SetupWithManager(mgr, metav1.NamespaceAll)).To(Succeed())
+	Expect(controllerReconciler.SetupWithManager(mgr, nil)).To(Succeed())
 })
 
 var _ = AfterSuite(func() {

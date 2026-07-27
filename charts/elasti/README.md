@@ -6,26 +6,27 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 
 ### Global parameters for elasti helm chart
 
-| Name                                | Description                                  | Value           |
-| ----------------------------------- | -------------------------------------------- | --------------- |
-| `global.kubernetesClusterDomain`    | domain of the Kubernetes cluster             | `cluster.local` |
-| `global.nameOverride`               | name of the deployment                       | `""`            |
-| `global.fullnameOverride`           | full name of the deployment                  | `""`            |
-| `global.enableMonitoring`           | whether to enable monitoring                 | `false`         |
-| `global.secretName`                 | name of the secret to use for the deployment | `elasti-secret` |
-| `global.image.registry`             | registry to use for the deployment           | `ghcr.io`       |
-| `global.imagePullSecrets`           | image pull secrets to use for the deployment | `[]`            |
-| `global.labels`                     | labels to apply to all resources             | `{}`            |
-| `global.annotations`                | annotations to apply to all resources        | `{}`            |
-| `global.podLabels`                  | labels to apply to all pods                  | `{}`            |
-| `global.podAnnotations`             | annotations to apply to all pods             | `{}`            |
-| `global.serviceLabels`              | labels to apply to all services              | `{}`            |
-| `global.serviceAnnotations`         | annotations to apply to all services         | `{}`            |
-| `global.deploymentLabels`           | labels to apply to all deployments           | `{}`            |
-| `global.deploymentAnnotations`      | annotations to apply to all deployments      | `{}`            |
-| `global.serviceAccount`             | service account configuration                | `{}`            |
-| `global.serviceAccount.annotations` | annotations to apply to all service accounts | `{}`            |
-| `global.serviceAccount.labels`      | labels to apply to all service accounts      | `{}`            |
+| Name                                | Description                                                                                        | Value           |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
+| `global.kubernetesClusterDomain`    | domain of the Kubernetes cluster                                                                   | `cluster.local` |
+| `global.allowedNamespaces`          | namespaces to confine KubeElasti to; empty installs cluster-scoped RBAC and watches all namespaces | `[]`            |
+| `global.nameOverride`               | name of the deployment                                                                             | `""`            |
+| `global.fullnameOverride`           | full name of the deployment                                                                        | `""`            |
+| `global.enableMonitoring`           | whether to enable monitoring                                                                       | `false`         |
+| `global.secretName`                 | name of the secret to use for the deployment                                                       | `elasti-secret` |
+| `global.image.registry`             | registry to use for the deployment                                                                 | `ghcr.io`       |
+| `global.imagePullSecrets`           | image pull secrets to use for the deployment                                                       | `[]`            |
+| `global.labels`                     | labels to apply to all resources                                                                   | `{}`            |
+| `global.annotations`                | annotations to apply to all resources                                                              | `{}`            |
+| `global.podLabels`                  | labels to apply to all pods                                                                        | `{}`            |
+| `global.podAnnotations`             | annotations to apply to all pods                                                                   | `{}`            |
+| `global.serviceLabels`              | labels to apply to all services                                                                    | `{}`            |
+| `global.serviceAnnotations`         | annotations to apply to all services                                                               | `{}`            |
+| `global.deploymentLabels`           | labels to apply to all deployments                                                                 | `{}`            |
+| `global.deploymentAnnotations`      | annotations to apply to all deployments                                                            | `{}`            |
+| `global.serviceAccount`             | service account configuration                                                                      | `{}`            |
+| `global.serviceAccount.annotations` | annotations to apply to all service accounts                                                       | `{}`            |
+| `global.serviceAccount.labels`      | labels to apply to all service accounts                                                            | `{}`            |
 
 ### Elasti controller parameters
 
@@ -36,7 +37,7 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 | `elastiController.manager.podSecurityContext`       | pod security context                                   | `{}`                         |
 | `elastiController.manager.image.registry`           | registry to use for the deployment                     | `""`                         |
 | `elastiController.manager.image.repository`         | repository to use for the deployment                   | `kubeelasti/elasti-operator` |
-| `elastiController.manager.image.tag`                | tag to use for the deployment                          | `0.1.30-rc1`                 |
+| `elastiController.manager.image.tag`                | tag to use for the deployment                          | `0.1.30`                     |
 | `elastiController.manager.imagePullPolicy`          | image pull policy                                      | `IfNotPresent`               |
 | `elastiController.manager.resources`                | resources to use for the deployment                    | `{}`                         |
 | `elastiController.manager.sentry.enabled`           | whether to enable sentry                               | `false`                      |
@@ -71,7 +72,7 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 | `elastiResolver.proxy.env`                                  | environment to use for the deployment                       | `{}`                         |
 | `elastiResolver.proxy.image.registry`                       | registry to use for the deployment                          | `""`                         |
 | `elastiResolver.proxy.image.repository`                     | repository to use for the deployment                        | `kubeelasti/elasti-resolver` |
-| `elastiResolver.proxy.image.tag`                            | tag to use for the deployment                               | `0.1.30-rc1`                 |
+| `elastiResolver.proxy.image.tag`                            | tag to use for the deployment                               | `0.1.30`                     |
 | `elastiResolver.proxy.imagePullPolicy`                      | image pull policy                                           | `IfNotPresent`               |
 | `elastiResolver.proxy.resources`                            | resources to use for the deployment                         | `{}`                         |
 | `elastiResolver.proxy.containerSecurityContext`             | container security context                                  | `{}`                         |

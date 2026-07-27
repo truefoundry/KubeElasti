@@ -48,6 +48,10 @@ spec:
         - name: SENTRY_ENVIRONMENT
           value: {{ .Values.elastiController.manager.sentry.environment }}
         {{- end }}
+        {{- if .Values.global.allowedNamespaces }}
+        - name: WATCH_NAMESPACES
+          value: {{ include "elasti.watchNamespaces" . | quote }}
+        {{- end }}
         {{ include "elasti.commonEnvValues" . | nindent 8 }}
         image: {{ .Values.elastiController.manager.image.registry | default .Values.global.image.registry | trimSuffix "/" }}/{{ .Values.elastiController.manager.image.repository }}:{{ .Values.elastiController.manager.image.tag | default .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.elastiController.manager.imagePullPolicy }}

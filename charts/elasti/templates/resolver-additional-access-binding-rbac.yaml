@@ -1,3 +1,25 @@
+{{- if .Values.global.allowedNamespaces -}}
+{{- range $ns := splitList "," (include "elasti.watchNamespaces" $) }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "elasti.fullname" $ }}-resolver-additional-access-binding
+  namespace: {{ $ns }}
+  labels:
+    {{- include "elasti-resolver.commonLabels" $ | nindent 4 }}
+  annotations:
+    {{- include "elasti-resolver.commonAnnotations" $ | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "elasti.fullname" $ }}-resolver-additional-access
+subjects:
+- kind: ServiceAccount
+  name: {{ include "elasti.fullname" $ }}-resolver
+  namespace: '{{ $.Release.Namespace }}'
+{{- end }}
+{{- else -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -14,3 +36,4 @@ subjects:
 - kind: ServiceAccount
   name: {{ include "elasti.fullname" . }}-resolver
   namespace: '{{ .Release.Namespace }}'
+{{- end }}

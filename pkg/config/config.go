@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -17,6 +18,9 @@ const (
 	EnvOperatorServiceName     = "ELASTI_OPERATOR_SERVICE_NAME"
 	EnvOperatorPort            = "ELASTI_OPERATOR_PORT"
 	EnvKubernetesClusterDomain = "KUBERNETES_CLUSTER_DOMAIN"
+	// EnvWatchNamespaces is an optional, comma-separated list of namespaces to confine
+	// KubeElasti to. When unset or empty, KubeElasti runs cluster-scoped (the default).
+	EnvWatchNamespaces = "WATCH_NAMESPACES"
 )
 
 // Config holds component namespace/name/service and listen port sourced from env.
@@ -61,6 +65,23 @@ func GetOperatorConfig() Config {
 		ServiceName:    getEnvStringOrPanic(EnvOperatorServiceName),
 		Port:           getEnvPortOrPanic(EnvOperatorPort),
 	}
+}
+
+// GetWatchNamespaces returns the list of namespaces KubeElasti is confined to, parsed from the
+// WATCH_NAMESPACES env var (comma-separated). An empty result means cluster scope (the default).
+func GetWatchNamespaces() []string {
+	raw := os.Getenv(EnvWatchNamespaces)
+	if raw == "" {
+		return nil
+	}
+
+	namespaces := make([]string, 0)
+	for _, ns := range strings.Split(raw, ",") {
+		if trimmed := strings.TrimSpace(ns); trimmed != "" {
+			namespaces = append(namespaces, trimmed)
+		}
+	}
+	return namespaces
 }
 
 // getEnvStringOrPanic returns the env value or panics if unset.

@@ -1,3 +1,21 @@
+{{- if .Values.global.allowedNamespaces -}}
+{{- range $ns := splitList "," (include "elasti.watchNamespaces" $) }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "elasti.fullname" $ }}-resolver-additional-access
+  namespace: {{ $ns }}
+  labels:
+    {{- include "elasti-resolver.commonLabels" $ | nindent 4 }}
+  annotations:
+    {{- include "elasti-resolver.commonAnnotations" $ | nindent 4 }}
+rules:
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
+  verbs: ["list"]
+{{- end }}
+{{- else -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -10,3 +28,4 @@ rules:
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]
   verbs: ["list"]
+{{- end }}

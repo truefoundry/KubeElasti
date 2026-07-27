@@ -23,7 +23,6 @@ import (
 	"truefoundry/elasti/operator/api/v1alpha1"
 
 	"go.uber.org/zap"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type (
@@ -116,7 +115,7 @@ func (r *ElastiServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	return res, nil
 }
 
-func (r *ElastiServiceReconciler) SetupWithManager(mgr ctrl.Manager, watchNamespace string) error {
+func (r *ElastiServiceReconciler) SetupWithManager(mgr ctrl.Manager, watchNamespaces []string) error {
 	err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.ElastiService{}).
 		WithEventFilter(predicate.NewPredicateFuncs(func(obj client.Object) bool {
@@ -124,10 +123,7 @@ func (r *ElastiServiceReconciler) SetupWithManager(mgr ctrl.Manager, watchNamesp
 			if !ok {
 				return false
 			}
-			if watchNamespace == metav1.NamespaceAll || es.Namespace == watchNamespace {
-				return true
-			}
-			return false
+			return namespaceInScope(watchNamespaces, es.Namespace)
 		})).
 		Complete(r)
 	if err != nil {
@@ -136,13 +132,27 @@ func (r *ElastiServiceReconciler) SetupWithManager(mgr ctrl.Manager, watchNamesp
 	return nil
 }
 
+// namespaceInScope reports whether the given namespace is within the configured watch set.
+// An empty watch set means cluster scope (every namespace is in scope).
+func namespaceInScope(watchNamespaces []string, namespace string) bool {
+	if len(watchNamespaces) == 0 {
+		return true
+	}
+	for _, ns := range watchNamespaces {
+		if ns == namespace {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *ElastiServiceReconciler) getMutexForReconcile(key string) *sync.Mutex {
 	l, _ := r.ReconcileLocks.LoadOrStore(key, &sync.Mutex{})
 	return l.(*sync.Mutex)
 }
 
-func (r *ElastiServiceReconciler) Initialize(ctx context.Context, watchNamespace string) error {
-	if err := r.reconcileExistingCRDs(ctx, watchNamespace); err != nil {
+func (r *ElastiServiceReconciler) Initialize(ctx context.Context, watchNamespaces []string) error {
+	if err := r.reconcileExistingCRDs(ctx, watchNamespaces); err != nil {
 		return fmt.Errorf("failed to reconcile existing CRDs: %w", err)
 	}
 	if err := r.InformerManager.InitializeResolverInformer(r.getResolverChangeHandler(ctx)); err != nil {
@@ -152,14 +162,20 @@ func (r *ElastiServiceReconciler) Initialize(ctx context.Context, watchNamespace
 	return nil
 }
 
-func (r *ElastiServiceReconciler) reconcileExistingCRDs(ctx context.Context, watchNamespace string) error {
+func (r *ElastiServiceReconciler) reconcileExistingCRDs(ctx context.Context, watchNamespaces []string) error {
 	crdList := &v1alpha1.ElastiServiceList{}
-	if err := r.List(ctx, crdList, client.InNamespace(watchNamespace)); err != nil {
+	// A bare List is served by the manager cache: it returns every ElastiService in cluster mode
+	// (empty watch set) and exactly the union of watched namespaces in namespace-scoped mode.
+	if err := r.List(ctx, crdList); err != nil {
 		return fmt.Errorf("failed to list ElastiServices: %w", err)
 	}
 	count := 0
 
 	for _, es := range crdList.Items {
+		// Defense-in-depth: skip anything outside the configured watch set (no-op in cluster mode).
+		if !namespaceInScope(watchNamespaces, es.Namespace) {
+			continue
+		}
 		// Skip if being deleted
 		if !es.DeletionTimestamp.IsZero() {
 			r.Logger.Debug("Skipping ElastiService because it is being deleted", zap.String("name", es.Name), zap.String("namespace", es.Namespace))

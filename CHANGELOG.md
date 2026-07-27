@@ -8,6 +8,12 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ## Unreleased
 
+## v0.1.30 (2026-07-23)
+
+### Improvements
+
+* feat: add opt-in namespace-scoped mode. Set `global.allowedNamespaces` (Helm) or the `WATCH_NAMESPACES` operator env var to confine KubeElasti to an explicit list of namespaces using namespace-scoped Role/RoleBinding instead of cluster-wide RBAC. Cluster-scoped stays the default and is unchanged. Adds the `global.installCRD` toggle so an admin can apply the CRD once and let namespace-confined tenants install without cluster-wide permissions by `@ramantehlan` in [#317](https://github.com/KubeElasti/KubeElasti/pull/317)
+
 ## v0.1.30-rc1 (2026-07-22)
 
 ### Breaking Changes

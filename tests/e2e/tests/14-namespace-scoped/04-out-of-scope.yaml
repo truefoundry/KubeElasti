@@ -1,0 +1,7 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  # Create a namespace that is NOT in allowedNamespaces, with an ElastiService in it.
+  - script: |
+      kubectl create namespace "$NAMESPACE-oos" --dry-run=client -o yaml | kubectl apply -f -
+      kubectl apply -n "$NAMESPACE-oos" -f oos-elastiservice.yaml

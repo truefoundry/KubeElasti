@@ -1,0 +1,12 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  # Revert the shared release to cluster-scoped (allowedNamespaces back to default [])
+  # so the cluster is restored for anything that runs after this test.
+  - script: |
+      cd ../../ && helm upgrade elasti ../../charts/elasti -n elasti \
+        -f ./manifest/global/values-elasti.yaml \
+        --wait --timeout 300s
+  - command: kubectl rollout status deployment elasti-operator-controller-manager -n elasti --timeout=300s
+  - script: |
+      kubectl delete namespace "$NAMESPACE-oos" --ignore-not-found=true

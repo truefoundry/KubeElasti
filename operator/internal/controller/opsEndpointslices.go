@@ -18,9 +18,15 @@ import (
 
 func (r *ElastiServiceReconciler) getIPsForResolver(ctx context.Context) ([]string, error) {
 	resolverSlices := &networkingv1.EndpointSliceList{}
-	if err := r.List(ctx, resolverSlices, client.MatchingLabels{
-		"kubernetes.io/service-name": config.GetResolverConfig().ServiceName,
-	}); err != nil {
+	listOpts := []client.ListOption{
+		client.MatchingLabels{"kubernetes.io/service-name": config.GetResolverConfig().ServiceName},
+	}
+	// In namespace-scoped mode, confine the list to the resolver's own namespace (the release
+	// namespace, always in the watch set). In cluster mode the list stays cluster-wide (unchanged).
+	if len(config.GetWatchNamespaces()) > 0 {
+		listOpts = append(listOpts, client.InNamespace(config.GetResolverConfig().Namespace))
+	}
+	if err := r.List(ctx, resolverSlices, listOpts...); err != nil {
 		r.Logger.Error("Failed to get Resolver endpoint slices", zap.Error(err))
 		return nil, fmt.Errorf("getIPsForResolver: %w", err)
 	}
