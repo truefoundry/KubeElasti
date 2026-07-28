@@ -5,6 +5,22 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.global.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{/* Merged pod securityContext, local-over-global; "" when disabled. */}}
+{{- define "elasti.podSecurityContext" -}}
+{{- $l := .local | default dict -}}{{- $g := .global | default dict -}}
+{{- if ternary $l.enabled $g.enabled (hasKey $l "enabled") -}}
+{{- toYaml (mergeOverwrite (deepCopy (omit $g "enabled")) (omit $l "enabled")) -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Merged container securityContext, local-over-global; "" when disabled. */}}
+{{- define "elasti.containerSecurityContext" -}}
+{{- $l := .local | default dict -}}{{- $g := .global | default dict -}}
+{{- if ternary $l.enabled $g.enabled (hasKey $l "enabled") -}}
+{{- toYaml (mergeOverwrite (deepCopy (omit $g "enabled")) (omit $l "enabled")) -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).

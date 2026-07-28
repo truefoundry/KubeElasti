@@ -56,6 +56,14 @@ global:
     annotations: {}
     ## @param global.serviceAccount.labels [object] labels to apply to all service accounts
     labels: {}
+  ## @param global.podSecurityContext.enabled toggle pod security contexts for all elasti components; set false to drop them (e.g. on OpenShift/ROSA so the platform assigns IDs)
+  ##
+  podSecurityContext:
+    enabled: true
+  ## @param global.containerSecurityContext.enabled toggle container security contexts for all elasti components
+  ##
+  containerSecurityContext:
+    enabled: true
 ## @section Elasti controller parameters
 elastiController:
   manager:
@@ -68,6 +76,8 @@ elastiController:
     ## @param elastiController.manager.containerSecurityContext [object] container security context
     ##
     containerSecurityContext:
+      ## Enable/disable this to override the global.containerSecurityContext
+      # enabled: true
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
       capabilities:
@@ -76,6 +86,8 @@ elastiController:
     ## @param elastiController.manager.podSecurityContext [object] pod security context
     ##
     podSecurityContext:
+      ## Enable/disable this to override the global.podSecurityContext
+      # enabled: true
       runAsNonRoot: true
       runAsUser: 65532
       runAsGroup: 65532
@@ -233,6 +245,8 @@ elastiResolver:
     ## @param elastiResolver.proxy.containerSecurityContext [object] container security context
     ##
     containerSecurityContext:
+      ## Enable/disable this to override the global.containerSecurityContext
+      # enabled: true
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
       capabilities:
@@ -242,6 +256,8 @@ elastiResolver:
     ## @param elastiResolver.proxy.podSecurityContext [object] pod security context
     ##
     podSecurityContext:
+      ## Enable/disable this to override the global.podSecurityContext
+      # enabled: true
       runAsNonRoot: true
       runAsUser: 65532
       runAsGroup: 65532
