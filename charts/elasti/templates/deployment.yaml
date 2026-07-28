@@ -39,6 +39,10 @@ spec:
         - name: PROMETHEUS_TRIGGER_AUTHORIZATION_HEADER
           value: {{ . | quote }}
         {{- end }}
+        {{- with .Values.elastiController.manager.env.prometheusTriggerAllowedServerAddresses }}
+        - name: PROMETHEUS_TRIGGER_ALLOWED_SERVER_ADDRESSES
+          value: {{ . | quote }}
+        {{- end }}
         {{- if .Values.elastiController.manager.sentry.enabled }}
         - name: SENTRY_DSN
           valueFrom:
