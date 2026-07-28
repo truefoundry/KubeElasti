@@ -10,7 +10,7 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ### Fixes
 
-* fix: harden the Prometheus scaler against SSRF (CWE-918). The operator now refuses outbound scaler requests to loopback, link-local, and cloud metadata addresses (IPv4 `169.254.169.254`) at dial time, rejects HTTP redirects, and no longer lets a trigger's `metadata.headers` override the operator-configured `Authorization` header. A new optional `PROMETHEUS_TRIGGER_ALLOWED_SERVER_ADDRESSES` operator env var (Helm: `elastiController.manager.env.prometheusTriggerAllowedServerAddresses`) restricts which Prometheus hosts an `ElastiService` trigger may target; when set it is the sole gate on the destination (an explicitly allowed host is reachable even if it would otherwise be blocked) by `@ramantehlan` in [#319](https://github.com/KubeElasti/KubeElasti/pull/319)
+* fix: harden the Prometheus scaler against SSRF (CWE-918). The operator now refuses outbound scaler requests to loopback, link-local, and cloud metadata addresses (IPv4 `169.254.169.254`) at dial time, rejects HTTP redirects, and no longer lets a trigger's `metadata.headers` override the operator-configured `Authorization` header. A new optional `PROMETHEUS_TRIGGER_ALLOWED_SERVER_ADDRESSES` operator env var (Helm: `elastiController.manager.env.prometheusTriggerAllowedServerAddresses`) restricts which Prometheus hosts an `ElastiService` trigger may target; when set it is the sole gate on the destination (an explicitly allowed host is reachable even if it would otherwise be blocked) by `@ramantehlan` in [#324](https://github.com/KubeElasti/KubeElasti/pull/324)
 
 ## v0.1.30 (2026-07-23)
 
