@@ -169,11 +169,11 @@ func queryEscape(query string) string {
 func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (float64, error) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	queryEscaped := queryEscape(query)
-	if err := s.validateServerAddress(); err != nil {
-		return -1, err
-	}
 	serverAddress, err := s.getServerAddress()
 	if err != nil {
+		return -1, err
+	}
+	if err := s.validateServerAddress(serverAddress); err != nil {
 		return -1, err
 	}
 	queryURL := fmt.Sprintf("%s/api/v1/query?query=%s&time=%s", serverAddress, queryEscaped, t)
@@ -248,18 +248,18 @@ func (s *prometheusScaler) getServerAddress() (string, error) {
 	return s.defaultServerAddress, nil
 }
 
-// validateServerAddress enforces the optional admin allowlist against a
-// CRD-supplied serverAddress, matching on either host or host:port. It is a
-// no-op when no CRD override is set or no allowlist is configured; the operator
-// default is always trusted.
-func (s *prometheusScaler) validateServerAddress() error {
-	if s.metadata.ServerAddress == "" || len(s.allowedServerAddresses) == 0 {
+// validateServerAddress enforces the optional admin allowlist against the
+// effective server address, matching on either host or host:port. The operator
+// default is always trusted, and an empty allowlist accepts any address; only a
+// non-default address absent from a configured allowlist is rejected.
+func (s *prometheusScaler) validateServerAddress(serverAddress string) error {
+	if serverAddress == s.defaultServerAddress || len(s.allowedServerAddresses) == 0 {
 		return nil
 	}
 
-	u, err := url.Parse(s.metadata.ServerAddress)
+	u, err := url.Parse(serverAddress)
 	if err != nil {
-		return fmt.Errorf("failed to parse serverAddress %q: %w", s.metadata.ServerAddress, err)
+		return fmt.Errorf("failed to parse serverAddress %q: %w", serverAddress, err)
 	}
 	host := u.Hostname()
 	hostPort := u.Host
@@ -269,7 +269,7 @@ func (s *prometheusScaler) validateServerAddress() error {
 			return nil
 		}
 	}
-	return fmt.Errorf("serverAddress %q is not in the allowed list", s.metadata.ServerAddress)
+	return fmt.Errorf("serverAddress %q is not in the allowed list", serverAddress)
 }
 
 func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) {
