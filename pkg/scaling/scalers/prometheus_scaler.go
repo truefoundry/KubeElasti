@@ -85,18 +85,7 @@ func newHTTPClient(dialGuard bool) *http.Client {
 	if dialGuard {
 		dialer := &net.Dialer{
 			Control: func(_, address string, _ syscall.RawConn) error {
-				host, _, err := net.SplitHostPort(address)
-				if err != nil {
-					return fmt.Errorf("failed to parse dial address %q: %w", address, err)
-				}
-				ip := net.ParseIP(host)
-				if ip == nil {
-					return fmt.Errorf("failed to parse dial IP %q", host)
-				}
-				if isBlockedIP(ip) {
-					return fmt.Errorf("connection to %s blocked to prevent SSRF", ip)
-				}
-				return nil
+				return guardDialAddress(address)
 			},
 		}
 		transport.DialContext = dialer.DialContext
@@ -109,6 +98,24 @@ func newHTTPClient(dialGuard bool) *http.Client {
 			return fmt.Errorf("redirects are not allowed")
 		},
 	}
+}
+
+// guardDialAddress rejects a "host:port" dial target whose IP is a
+// never-legitimate Prometheus destination. It runs after DNS resolution, so it
+// also covers hostnames that resolve to a blocked IP and redirect targets.
+func guardDialAddress(address string) error {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return fmt.Errorf("failed to parse dial address %q: %w", address, err)
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return fmt.Errorf("failed to parse dial IP %q", host)
+	}
+	if isBlockedIP(ip) {
+		return fmt.Errorf("connection to %s blocked to prevent SSRF", ip)
+	}
+	return nil
 }
 
 // isBlockedIP reports whether an IP is a never-legitimate Prometheus target.
