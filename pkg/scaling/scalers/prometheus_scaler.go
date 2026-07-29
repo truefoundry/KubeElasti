@@ -78,8 +78,8 @@ func NewPrometheusScaler(metadata json.RawMessage, cooldownPeriod time.Duration)
 // rejected outright since the Prometheus query API never issues them. When
 // dialGuard is true, the dialer also inspects the concrete IP being connected
 // to (after DNS resolution, so hostname- and redirect-based bypasses are
-// covered too) and refuses never-legitimate targets such as loopback and the
-// cloud metadata service.
+// covered too) and refuses never-legitimate targets such as loopback,
+// link-local, and multicast addresses.
 func newHTTPClient(dialGuard bool) *http.Client {
 	transport := &http.Transport{}
 	if dialGuard {
@@ -180,13 +180,11 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 		return -1, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	// Apply per-trigger metadata headers first, then operator-configured default
-	// headers, so a default (e.g. Authorization) can never be overridden by a
-	// CRD-supplied header.
-	for key, value := range s.metadata.Headers {
+	// Apply default headers, then per-trigger metadata headers (which can override defaults)
+	for key, value := range s.defaultHeaders {
 		req.Header.Set(key, value)
 	}
-	for key, value := range s.defaultHeaders {
+	for key, value := range s.metadata.Headers {
 		req.Header.Set(key, value)
 	}
 

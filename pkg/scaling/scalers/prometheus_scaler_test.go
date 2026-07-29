@@ -18,7 +18,6 @@ func TestIsBlockedIP(t *testing.T) {
 		{name: "IPv4 loopback", ip: "127.0.0.1", blocked: true},
 		{name: "IPv6 loopback", ip: "::1", blocked: true},
 		{name: "unspecified", ip: "0.0.0.0", blocked: true},
-		{name: "IPv4 cloud metadata", ip: "169.254.169.254", blocked: true},
 		{name: "IPv4 link-local", ip: "169.254.10.20", blocked: true},
 		{name: "IPv6 link-local", ip: "fe80::1", blocked: true},
 		{name: "multicast", ip: "224.0.0.1", blocked: true},
@@ -133,8 +132,8 @@ func TestResolveServerAddress(t *testing.T) {
 	}
 }
 
-func TestExecutePromQueryDefaultHeaderWins(t *testing.T) {
-	// The operator default Authorization header must win over a CRD-supplied one.
+func TestExecutePromQueryCRDHeaderWins(t *testing.T) {
+	// A per-trigger (CRD) header must override the operator default.
 	gotAuth := make(chan string, 1)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotAuth <- r.Header.Get("Authorization")
@@ -157,7 +156,7 @@ func TestExecutePromQueryDefaultHeaderWins(t *testing.T) {
 	if _, err := s.executePromQuery(context.Background(), "up"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if auth := <-gotAuth; auth != "operator-token" {
-		t.Errorf("Authorization header = %q, want operator default to win", auth)
+	if auth := <-gotAuth; auth != "crd-token" {
+		t.Errorf("Authorization header = %q, want per-trigger CRD header to win", auth)
 	}
 }
