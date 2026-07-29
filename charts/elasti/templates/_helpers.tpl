@@ -5,7 +5,7 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.global.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/* Merged pod securityContext, local-over-global; "" when disabled. */}}
+{{/* Merged pod securityContext, local-over-global; */}}
 {{- define "elasti.podSecurityContext" -}}
 {{- $l := .local | default dict -}}{{- $g := .global | default dict -}}
 {{- if ternary $l.enabled $g.enabled (hasKey $l "enabled") -}}
@@ -13,7 +13,7 @@ Expand the name of the chart.
 {{- end -}}
 {{- end -}}
 
-{{/* Merged container securityContext, local-over-global; "" when disabled. */}}
+{{/* Merged container securityContext, local-over-global; */}}
 {{- define "elasti.containerSecurityContext" -}}
 {{- $l := .local | default dict -}}{{- $g := .global | default dict -}}
 {{- if ternary $l.enabled $g.enabled (hasKey $l "enabled") -}}
