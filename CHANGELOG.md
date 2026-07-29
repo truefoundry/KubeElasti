@@ -8,11 +8,12 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ## Unreleased
 
-## v0.1.31-rc1 (2026-07-27)
+## v0.1.31-rc1 (2026-07-29)
 
 ### Fixes
 
 * fix: operator informer lifecycle - stop the sync-failure storm and goroutine leak when an informer fails to sync by `@ramantehlan` in [#303](https://github.com/KubeElasti/KubeElasti/pull/303)
+* fix: harden the Prometheus scaler against SSRF (CWE-918). The operator now refuses outbound scaler requests to loopback, link-local, and multicast addresses at dial time and rejects HTTP redirects. A new optional `PROMETHEUS_TRIGGER_ALLOWED_SERVER_ADDRESSES` operator env var (Helm: `elastiController.manager.env.prometheusTriggerAllowedServerAddresses`) restricts which Prometheus hosts an `ElastiService` trigger may target; when set it is the sole gate on the destination (an explicitly allowed host is reachable even if it would otherwise be blocked) by `@ramantehlan` in [#324](https://github.com/KubeElasti/KubeElasti/pull/324)
 
 ### Other
 

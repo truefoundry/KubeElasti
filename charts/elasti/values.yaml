@@ -124,6 +124,12 @@ elastiController:
       # e.g. prometheusTriggerAuthorizationHeader: Basic xxx
       ##
       prometheusTriggerAuthorizationHeader:
+      ## elastiController.manager.env.prometheusTriggerAllowedServerAddresses: optional comma-separated allowlist of Prometheus hosts (host or host:port)
+      # that an ElastiService trigger may set as serverAddress. When empty, any serverAddress is accepted (still protected against SSRF to
+      # loopback/link-local/multicast addresses). Set this to restrict which Prometheus endpoints tenants can point the operator at.
+      # e.g. prometheusTriggerAllowedServerAddresses: prometheus-operated.monitoring.svc.cluster.local:9090
+      ##
+      prometheusTriggerAllowedServerAddresses:
 
   ## @param elastiController.replicas number of replicas to use for the deployment
   ##

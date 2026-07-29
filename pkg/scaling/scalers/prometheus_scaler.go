@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -25,6 +27,10 @@ type prometheusScaler struct {
 	cooldownPeriod       time.Duration
 	defaultServerAddress string
 	defaultHeaders       map[string]string
+	// allowedServerAddresses is an optional admin-configured allowlist of hosts
+	// (host or host:port) that a CRD-supplied serverAddress must match. When
+	// empty, any serverAddress is accepted (still subject to the dial guard).
+	allowedServerAddresses []string
 }
 
 type prometheusMetadata struct {
@@ -52,17 +58,91 @@ func NewPrometheusScaler(metadata json.RawMessage, cooldownPeriod time.Duration)
 		return nil, fmt.Errorf("error creating prometheus scaler: %w", err)
 	}
 
-	client := &http.Client{
-		Timeout: httpClientTimeout,
-	}
+	allowedServerAddresses := fetchAllowedServerAddresses()
 
 	return &prometheusScaler{
-		metadata:             parsedMetadata,
-		httpClient:           client,
-		cooldownPeriod:       cooldownPeriod,
-		defaultServerAddress: os.Getenv("PROMETHEUS_TRIGGER_SERVER_ADDRESS"),
-		defaultHeaders:       fetchDefaultHeaders(),
+		metadata: parsedMetadata,
+		// When an admin allowlist is configured it is the sole gate on the
+		// destination (allowlist beats blocklist), so the dial guard is disabled
+		// and an explicitly-allowed host is reachable even if it is otherwise
+		// blocked. Without an allowlist, the dial guard is the protection.
+		httpClient:             newHTTPClient(len(allowedServerAddresses) == 0),
+		cooldownPeriod:         cooldownPeriod,
+		defaultServerAddress:   os.Getenv("PROMETHEUS_TRIGGER_SERVER_ADDRESS"),
+		defaultHeaders:         fetchDefaultHeaders(),
+		allowedServerAddresses: allowedServerAddresses,
 	}, nil
+}
+
+// newHTTPClient builds an http.Client hardened against SSRF. Redirects are
+// rejected outright since the Prometheus query API never issues them. When
+// dialGuard is true, the dialer also inspects the concrete IP being connected
+// to (after DNS resolution, so hostname- and redirect-based bypasses are
+// covered too) and refuses never-legitimate targets such as loopback,
+// link-local, and multicast addresses.
+func newHTTPClient(dialGuard bool) *http.Client {
+	transport := &http.Transport{}
+	if dialGuard {
+		dialer := &net.Dialer{
+			Control: func(_, address string, _ syscall.RawConn) error {
+				return guardDialAddress(address)
+			},
+		}
+		transport.DialContext = dialer.DialContext
+	}
+
+	return &http.Client{
+		Timeout:   httpClientTimeout,
+		Transport: transport,
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+			return fmt.Errorf("redirects are not allowed")
+		},
+	}
+}
+
+// guardDialAddress rejects a "host:port" dial target whose IP is a
+// never-legitimate Prometheus destination. It runs after DNS resolution, so it
+// also covers hostnames that resolve to a blocked IP and redirect targets.
+func guardDialAddress(address string) error {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return fmt.Errorf("failed to parse dial address %q: %w", address, err)
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return fmt.Errorf("failed to parse dial IP %q", host)
+	}
+	if isBlockedIP(ip) {
+		return fmt.Errorf("connection to %s blocked to prevent SSRF", ip)
+	}
+	return nil
+}
+
+// isBlockedIP reports whether an IP is a never-legitimate Prometheus target.
+// Private ranges are intentionally allowed: an in-cluster Prometheus is reached
+// via a private ClusterIP or a *.svc.cluster.local name resolving to one.
+func isBlockedIP(ip net.IP) bool {
+	return ip.IsLoopback() ||
+		ip.IsUnspecified() ||
+		ip.IsLinkLocalUnicast() ||
+		ip.IsLinkLocalMulticast() ||
+		ip.IsMulticast()
+}
+
+// fetchAllowedServerAddresses parses the optional operator allowlist.
+func fetchAllowedServerAddresses() []string {
+	raw := os.Getenv("PROMETHEUS_TRIGGER_ALLOWED_SERVER_ADDRESSES")
+	if raw == "" {
+		return nil
+	}
+
+	allowed := make([]string, 0)
+	for _, addr := range strings.Split(raw, ",") {
+		if trimmed := strings.TrimSpace(addr); trimmed != "" {
+			allowed = append(allowed, trimmed)
+		}
+	}
+	return allowed
 }
 
 func fetchDefaultHeaders() map[string]string {
@@ -96,12 +176,12 @@ func queryEscape(query string) string {
 func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (float64, error) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	queryEscaped := queryEscape(query)
-	serverAddress := s.defaultServerAddress
-	if s.metadata.ServerAddress != "" {
-		serverAddress = s.metadata.ServerAddress
+	serverAddress, err := s.getServerAddress()
+	if err != nil {
+		return -1, err
 	}
-	if serverAddress == "" {
-		return -1, fmt.Errorf("prometheus serverAddress not configured")
+	if err := s.validateServerAddress(serverAddress); err != nil {
+		return -1, err
 	}
 	queryURL := fmt.Sprintf("%s/api/v1/query?query=%s&time=%s", serverAddress, queryEscaped, t)
 
@@ -161,6 +241,42 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 	}
 
 	return v, nil
+}
+
+// getServerAddress returns the effective Prometheus address: the CRD-supplied
+// serverAddress when present, otherwise the operator-configured default.
+func (s *prometheusScaler) getServerAddress() (string, error) {
+	if s.metadata.ServerAddress != "" {
+		return s.metadata.ServerAddress, nil
+	}
+	if s.defaultServerAddress == "" {
+		return "", fmt.Errorf("prometheus serverAddress not configured")
+	}
+	return s.defaultServerAddress, nil
+}
+
+// validateServerAddress enforces the optional admin allowlist against the
+// effective server address, matching on either host or host:port. The operator
+// default is always trusted, and an empty allowlist accepts any address; only a
+// non-default address absent from a configured allowlist is rejected.
+func (s *prometheusScaler) validateServerAddress(serverAddress string) error {
+	if serverAddress == s.defaultServerAddress || len(s.allowedServerAddresses) == 0 {
+		return nil
+	}
+
+	u, err := url.Parse(serverAddress)
+	if err != nil {
+		return fmt.Errorf("failed to parse serverAddress %q: %w", serverAddress, err)
+	}
+	host := u.Hostname()
+	hostPort := u.Host
+
+	for _, allowed := range s.allowedServerAddresses {
+		if allowed == host || allowed == hostPort {
+			return nil
+		}
+	}
+	return fmt.Errorf("serverAddress %q is not in the allowed list", serverAddress)
 }
 
 func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) {
