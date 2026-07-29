@@ -17,9 +17,9 @@ jobs:
       contents: write
     steps:
       - name: Install readme-generator-for-helm
-        run: npm install -g @bitnami/readme-generator-for-helm
+        run: npm install -g @bitnami/readme-generator-for-helm@2.7.2
       - name: Checkout charts
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}

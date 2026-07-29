@@ -23,7 +23,7 @@ jobs:
       operator_tag: ${{ steps.read_chart.outputs.OPERATOR_TAG }}
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: "0"
 
@@ -104,18 +104,18 @@ jobs:
       id-token: write # required for keyless cosign signing of the chart
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: "0"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
 
       # cosign reads Docker's credential store (~/.docker/config.json), which
       # `helm registry login` does not populate. Log in with Docker so cosign can
       # pull the pushed chart to sign it.
       - name: Log in to GHCR (for cosign)
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -161,7 +161,7 @@ jobs:
           cosign sign --yes "${CHART_REF}"
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         id: syft
 
       - name: Generate Helm chart SBOM
@@ -195,19 +195,19 @@ jobs:
           done
 
       - name: Download operator image SBOM and signatures
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: ${{ needs.build-operator.outputs.sbom_artifact_name }}
           path: image-sboms
 
       - name: Download resolver image SBOM and signatures
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: ${{ needs.build-resolver.outputs.sbom_artifact_name }}
           path: image-sboms
 
       - name: Upload Helm chart, SBOMs and signatures to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
             # Chart .tgz + chart SBOM + their .sigstore.json bundles, plus the
             # per-image SBOMs and cosign signature files (.sig/.pem/.payload/.sigstore.json).
