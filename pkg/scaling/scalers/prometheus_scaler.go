@@ -169,7 +169,10 @@ func queryEscape(query string) string {
 func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (float64, error) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	queryEscaped := queryEscape(query)
-	serverAddress, err := s.resolveServerAddress()
+	if err := s.validateServerAddress(); err != nil {
+		return -1, err
+	}
+	serverAddress, err := s.getServerAddress()
 	if err != nil {
 		return -1, err
 	}
@@ -233,34 +236,30 @@ func (s *prometheusScaler) executePromQuery(ctx context.Context, query string) (
 	return v, nil
 }
 
-// resolveServerAddress picks the effective Prometheus address. A CRD-supplied
-// serverAddress takes precedence over the operator default, but when an admin
-// allowlist is configured the CRD host must be present in it.
-func (s *prometheusScaler) resolveServerAddress() (string, error) {
-	if s.metadata.ServerAddress == "" {
-		if s.defaultServerAddress == "" {
-			return "", fmt.Errorf("prometheus serverAddress not configured")
-		}
-		return s.defaultServerAddress, nil
+// getServerAddress returns the effective Prometheus address: the CRD-supplied
+// serverAddress when present, otherwise the operator-configured default.
+func (s *prometheusScaler) getServerAddress() (string, error) {
+	if s.metadata.ServerAddress != "" {
+		return s.metadata.ServerAddress, nil
 	}
-
-	if err := s.checkServerAddressAllowed(s.metadata.ServerAddress); err != nil {
-		return "", err
+	if s.defaultServerAddress == "" {
+		return "", fmt.Errorf("prometheus serverAddress not configured")
 	}
-	return s.metadata.ServerAddress, nil
+	return s.defaultServerAddress, nil
 }
 
-// checkServerAddressAllowed enforces the optional admin allowlist against a
-// CRD-supplied serverAddress. A match on either host or host:port is accepted.
-// When the allowlist is empty the address is accepted (dial guard still applies).
-func (s *prometheusScaler) checkServerAddressAllowed(serverAddress string) error {
-	if len(s.allowedServerAddresses) == 0 {
+// validateServerAddress enforces the optional admin allowlist against a
+// CRD-supplied serverAddress, matching on either host or host:port. It is a
+// no-op when no CRD override is set or no allowlist is configured; the operator
+// default is always trusted.
+func (s *prometheusScaler) validateServerAddress() error {
+	if s.metadata.ServerAddress == "" || len(s.allowedServerAddresses) == 0 {
 		return nil
 	}
 
-	u, err := url.Parse(serverAddress)
+	u, err := url.Parse(s.metadata.ServerAddress)
 	if err != nil {
-		return fmt.Errorf("failed to parse serverAddress %q: %w", serverAddress, err)
+		return fmt.Errorf("failed to parse serverAddress %q: %w", s.metadata.ServerAddress, err)
 	}
 	host := u.Hostname()
 	hostPort := u.Host
@@ -270,7 +269,7 @@ func (s *prometheusScaler) checkServerAddressAllowed(serverAddress string) error
 			return nil
 		}
 	}
-	return fmt.Errorf("serverAddress %q is not in the allowed list", serverAddress)
+	return fmt.Errorf("serverAddress %q is not in the allowed list", s.metadata.ServerAddress)
 }
 
 func (s *prometheusScaler) ShouldScaleToZero(ctx context.Context) (bool, error) {

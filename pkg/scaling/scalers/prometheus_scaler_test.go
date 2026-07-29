@@ -90,32 +90,26 @@ func TestNewSafeHTTPClientRejectsRedirects(t *testing.T) {
 	}
 }
 
-func TestResolveServerAddress(t *testing.T) {
+func TestGetServerAddress(t *testing.T) {
 	tests := []struct {
 		name         string
 		metadataAddr string
 		defaultAddr  string
-		allowed      []string
 		want         string
 		wantErr      bool
 	}{
 		{name: "crd overrides default", metadataAddr: "http://prom.monitoring:9090", defaultAddr: "http://d:9090", want: "http://prom.monitoring:9090"},
 		{name: "falls back to default", defaultAddr: "http://d:9090", want: "http://d:9090"},
 		{name: "nothing configured errors", wantErr: true},
-		{name: "allowlist host match", metadataAddr: "http://prom.monitoring:9090", allowed: []string{"prom.monitoring"}, want: "http://prom.monitoring:9090"},
-		{name: "allowlist host:port match", metadataAddr: "http://prom.monitoring:9090", allowed: []string{"prom.monitoring:9090"}, want: "http://prom.monitoring:9090"},
-		{name: "allowlist rejects unlisted host", metadataAddr: "http://request-catcher.evil:9090", allowed: []string{"prom.monitoring"}, wantErr: true},
-		{name: "empty allowlist accepts any", metadataAddr: "http://anything:9090", want: "http://anything:9090"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &prometheusScaler{
-				metadata:               &prometheusMetadata{ServerAddress: tt.metadataAddr},
-				defaultServerAddress:   tt.defaultAddr,
-				allowedServerAddresses: tt.allowed,
+				metadata:             &prometheusMetadata{ServerAddress: tt.metadataAddr},
+				defaultServerAddress: tt.defaultAddr,
 			}
-			got, err := s.resolveServerAddress()
+			got, err := s.getServerAddress()
 			if tt.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got address %q", got)
@@ -126,7 +120,38 @@ func TestResolveServerAddress(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if got != tt.want {
-				t.Errorf("resolveServerAddress() = %q, want %q", got, tt.want)
+				t.Errorf("getServerAddress() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestValidateServerAddress(t *testing.T) {
+	tests := []struct {
+		name         string
+		metadataAddr string
+		allowed      []string
+		wantErr      bool
+	}{
+		{name: "no crd override is a no-op", allowed: []string{"prom.monitoring"}},
+		{name: "empty allowlist accepts any", metadataAddr: "http://anything:9090"},
+		{name: "host match", metadataAddr: "http://prom.monitoring:9090", allowed: []string{"prom.monitoring"}},
+		{name: "host:port match", metadataAddr: "http://prom.monitoring:9090", allowed: []string{"prom.monitoring:9090"}},
+		{name: "rejects unlisted host", metadataAddr: "http://request-catcher.evil:9090", allowed: []string{"prom.monitoring"}, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &prometheusScaler{
+				metadata:               &prometheusMetadata{ServerAddress: tt.metadataAddr},
+				allowedServerAddresses: tt.allowed,
+			}
+			err := s.validateServerAddress()
+			if tt.wantErr && err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if !tt.wantErr && err != nil {
+				t.Fatalf("unexpected error: %v", err)
 			}
 		})
 	}
