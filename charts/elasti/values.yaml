@@ -105,7 +105,7 @@ elastiController:
       repository: kubeelasti/elasti-operator
       ## @param elastiController.manager.image.tag tag to use for the deployment
       ##
-      tag: 0.1.30
+      tag: 0.1.31-rc1
     ## @param elastiController.manager.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
@@ -139,6 +139,12 @@ elastiController:
       # e.g. prometheusTriggerAuthorizationHeader: Basic xxx
       ##
       prometheusTriggerAuthorizationHeader:
+      ## elastiController.manager.env.prometheusTriggerAllowedServerAddresses: optional comma-separated allowlist of Prometheus hosts (host or host:port)
+      # that an ElastiService trigger may set as serverAddress. When empty, any serverAddress is accepted (still protected against SSRF to
+      # loopback/link-local/multicast addresses). Set this to restrict which Prometheus endpoints tenants can point the operator at.
+      # e.g. prometheusTriggerAllowedServerAddresses: prometheus-operated.monitoring.svc.cluster.local:9090
+      ##
+      prometheusTriggerAllowedServerAddresses:
 
   ## @param elastiController.replicas number of replicas to use for the deployment
   ##
@@ -231,7 +237,7 @@ elastiResolver:
       repository: kubeelasti/elasti-resolver
       ## @param elastiResolver.proxy.image.tag tag to use for the deployment
       ##
-      tag: 0.1.30
+      tag: 0.1.31-rc1
     ## @param elastiResolver.proxy.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
