@@ -20,9 +20,10 @@ import (
 // ElastiServiceChecker reports whether an ElastiService CR exists for a given
 // "namespace/service" key. It is satisfied by the resolver's crdcache.Cache and lets the
 // HostManager reject Host headers that don't map to a real ElastiService before they are
-// cached, proxied, or exported as metrics.
+// cached, proxied, or exported as metrics. The Fresh variant refreshes from the operator on
+// a miss (rate-limited) so a newly-created ElastiService is recognized on its first request.
 type ElastiServiceChecker interface {
-	GetElastiService(namespacedServiceName string) (*messages.ElastiServiceEntry, bool)
+	GetElastiServiceFresh(namespacedServiceName string) (*messages.ElastiServiceEntry, bool)
 }
 
 // HostManager is to manage the hosts, and their traffic
@@ -74,7 +75,7 @@ func (hm *HostManager) GetHost(req *http.Request) (*messages.Host, error) {
 		// unauthenticated caller could make the resolver cache, proxy to, and probe
 		// arbitrary in-cluster services across namespaces (CWE-200 / cross-namespace SSRF).
 		if hm.crdChecker != nil {
-			if _, exists := hm.crdChecker.GetElastiService(namespace + "/" + sourceService); !exists {
+			if _, exists := hm.crdChecker.GetElastiServiceFresh(namespace + "/" + sourceService); !exists {
 				prom.HostExtractionCounter.WithLabelValues("rejected", "unknown-service").Inc()
 				return &messages.Host{}, fmt.Errorf("no ElastiService registered for host: %s", logger.MaskMiddle(incomingHost, 4, 4))
 			}

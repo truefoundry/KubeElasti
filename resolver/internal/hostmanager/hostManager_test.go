@@ -15,7 +15,7 @@ type fakeChecker struct {
 	known map[string]bool
 }
 
-func (f *fakeChecker) GetElastiService(key string) (*messages.ElastiServiceEntry, bool) {
+func (f *fakeChecker) GetElastiServiceFresh(key string) (*messages.ElastiServiceEntry, bool) {
 	if f.known[key] {
 		return &messages.ElastiServiceEntry{Name: key}, true
 	}

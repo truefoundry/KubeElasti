@@ -13,13 +13,22 @@ import (
 
 const defaultPollInterval = 5 * time.Minute
 
+// minOnDemandRefreshInterval bounds how often a cache miss may trigger a synchronous refresh
+// from the operator. It lets a newly-created ElastiService be picked up on its first request
+// (instead of waiting for the next poll) while preventing probing for unknown hosts from
+// turning into an operator fetch storm.
+const minOnDemandRefreshInterval = 2 * time.Second
+
 type Cache struct {
 	logger       *zap.Logger
 	operatorRPC  *operator.Client
 	pollInterval time.Duration
 
-	mu    sync.RWMutex
-	cache *sync.Map // key: "namespace/service-name", value: *messages.ElastiServiceEntry
+	mu        sync.RWMutex
+	cache     *sync.Map // key: "namespace/service-name", value: *messages.ElastiServiceEntry
+	lastFetch time.Time // time of the last successful fetch (poll or on-demand); guarded by mu
+
+	refreshMu sync.Mutex // serializes on-demand refreshes triggered by GetElastiServiceFresh
 
 	stopCh   chan struct{}
 	stopOnce sync.Once
@@ -83,6 +92,7 @@ func (c *Cache) fetch() error {
 
 	c.mu.Lock()
 	c.cache = newCache
+	c.lastFetch = time.Now()
 	c.mu.Unlock()
 
 	c.logger.Debug("ElastiService cache updated", zap.Int("count", len(resp.Services)))
@@ -100,6 +110,35 @@ func (c *Cache) GetElastiService(namespacedServiceName string) (*messages.Elasti
 		return nil, false
 	}
 	return val.(*messages.ElastiServiceEntry), true
+}
+
+// GetElastiServiceFresh returns the entry for "namespace/service-name". On a miss it triggers
+// a rate-limited synchronous refresh from the operator and re-checks, so an ElastiService
+// created since the last poll is recognized on its first request rather than being rejected
+// until the next poll interval. The refresh is throttled by minOnDemandRefreshInterval so
+// requests for unknown hosts cannot flood the operator with fetches.
+func (c *Cache) GetElastiServiceFresh(namespacedServiceName string) (*messages.ElastiServiceEntry, bool) {
+	if entry, ok := c.GetElastiService(namespacedServiceName); ok {
+		return entry, true
+	}
+	c.refreshOnDemand()
+	return c.GetElastiService(namespacedServiceName)
+}
+
+// refreshOnDemand fetches from the operator at most once per minOnDemandRefreshInterval.
+func (c *Cache) refreshOnDemand() {
+	c.refreshMu.Lock()
+	defer c.refreshMu.Unlock()
+
+	c.mu.RLock()
+	since := time.Since(c.lastFetch)
+	c.mu.RUnlock()
+	if since < minOnDemandRefreshInterval {
+		return
+	}
+	if err := c.fetch(); err != nil {
+		c.logger.Warn("on-demand ElastiService cache refresh failed", zap.Error(err))
+	}
 }
 
 // CachedService is one ElastiService in the resolver's local cache (key is namespace/service-name).
