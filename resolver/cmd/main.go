@@ -93,9 +93,9 @@ func main() {
 	// Get components required for the handler
 	k8sUtil := k8shelper.NewOps(logger, config)
 	newOperatorRPC := operator.NewOperatorClient(logger, time.Duration(env.OperatorRetryDuration)*time.Second)
-	newHostManager := hostmanager.NewHostManager(logger, time.Duration(env.TrafficReEnableDuration)*time.Second, time.Duration(env.TrafficDisableGraceDuration)*time.Second, env.HeaderForHost)
 	crdCache := crdcache.New(logger, newOperatorRPC, time.Duration(env.CRDCachePollIntervalMinutes)*time.Minute)
 	crdCache.StartBackground()
+	newHostManager := hostmanager.NewHostManager(logger, time.Duration(env.TrafficReEnableDuration)*time.Second, time.Duration(env.TrafficDisableGraceDuration)*time.Second, env.HeaderForHost, crdCache)
 	newTransport := throttler.NewProxyAutoTransport(env.MaxIdleProxyConns, env.MaxIdleProxyConnsPerHost)
 	newThrottler := throttler.NewThrottler(&throttler.Params{
 		QueueRetryDuration:      time.Duration(env.QueueRetryDuration) * time.Second,
