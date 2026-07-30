@@ -77,7 +77,7 @@ jobs:
       # Without this, autobuild uses the runner default Go (e.g. 1.24) and fails with:
       #   go.work requires go >= 1.25.9 (running go 1.24.x)
       - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.work
           cache: true
