@@ -31,10 +31,9 @@ Run from the repo root:
 - Lint is `golangci-lint` (config: `.golangci.yaml`).
 - E2E tests live in `tests/e2e`; load tests in `tests/load`.
 
-**Code coverage:** the goal is 100% unit-test coverage across the codebase, reached
-incrementally. Every change you make - new code or edits to existing code - must ship with
-unit tests that cover 100% of the lines and branches it touches. Do not leave new or modified
-code uncovered.
+**Code coverage:** the goal is ~90% unit-test coverage across the codebase, reached
+incrementally. Every change you make - new code or edits to existing code - should ship with
+unit tests covering the lines and branches it touches, keeping coverage at or above that bar.
 
 Use Go at `/Users/tf/.homebrew/bin/go` (1.26.5) if `go` on PATH is older.
 
