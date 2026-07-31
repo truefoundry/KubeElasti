@@ -56,6 +56,31 @@ global:
     annotations: {}
     ## @param global.serviceAccount.labels [object] labels to apply to all service accounts
     labels: {}
+  ## @param global.podSecurityContext.enabled toggle pod security contexts for all elasti components
+  ##
+  podSecurityContext:
+    enabled: true
+    ## @param global.podSecurityContext.runAsNonRoot default runAsNonRoot for all elasti component pods; a component can override per field
+    runAsNonRoot: true
+    ## @param global.podSecurityContext.runAsUser default runAsUser (UID) for all elasti component pods; a component can override per field
+    runAsUser: 65532
+    ## @param global.podSecurityContext.runAsGroup default runAsGroup (GID) for all elasti component pods; a component can override per field
+    runAsGroup: 65532
+    ## @param global.podSecurityContext.seccompProfile.type default seccomp profile for all elasti component pods
+    seccompProfile:
+      type: RuntimeDefault
+  ## @param global.containerSecurityContext.enabled toggle container security contexts for all elasti components
+  ##
+  containerSecurityContext:
+    enabled: true
+    ## @param global.containerSecurityContext.allowPrivilegeEscalation default allowPrivilegeEscalation for all elasti component containers
+    allowPrivilegeEscalation: false
+    ## @param global.containerSecurityContext.readOnlyRootFilesystem default readOnlyRootFilesystem for all elasti component containers
+    readOnlyRootFilesystem: true
+    ## @param global.containerSecurityContext.capabilities.drop [array] default dropped capabilities for all elasti component containers
+    capabilities:
+      drop:
+        - ALL
 ## @section Elasti controller parameters
 elastiController:
   manager:
@@ -65,22 +90,12 @@ elastiController:
       - --leader-elect
       - --health-probe-bind-address=:8081
       - --metrics-bind-address=0
-    ## @param elastiController.manager.containerSecurityContext [object] container security context
+    ## @param elastiController.manager.containerSecurityContext [object] container security context. Inherits global.containerSecurityContext; set fields here (or `enabled: false`) to override.
     ##
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      capabilities:
-        drop:
-          - ALL
-    ## @param elastiController.manager.podSecurityContext [object] pod security context
+    containerSecurityContext: {}
+    ## @param elastiController.manager.podSecurityContext [object] pod security context. Inherits global.podSecurityContext; set fields here (or `enabled: false`) to override.
     ##
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 65532
-      runAsGroup: 65532
-      seccompProfile:
-        type: RuntimeDefault
+    podSecurityContext: {}
     ## @param elastiController.manager.image.registry registry to use for the deployment
     ##
     image:
@@ -90,7 +105,7 @@ elastiController:
       repository: kubeelasti/elasti-operator
       ## @param elastiController.manager.image.tag tag to use for the deployment
       ##
-      tag: b754d0bd8edef78ddc473f4a7e2a485d9bb569bc
+      tag: 34583b7f7e0911651a048c8e4d6d9a3612c9c66d
     ## @param elastiController.manager.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
@@ -218,7 +233,7 @@ elastiResolver:
       repository: kubeelasti/elasti-resolver
       ## @param elastiResolver.proxy.image.tag tag to use for the deployment
       ##
-      tag: b754d0bd8edef78ddc473f4a7e2a485d9bb569bc
+      tag: 34583b7f7e0911651a048c8e4d6d9a3612c9c66d
     ## @param elastiResolver.proxy.imagePullPolicy image pull policy
     ##
     imagePullPolicy: IfNotPresent
@@ -231,22 +246,12 @@ elastiResolver:
       requests:
         cpu: 100m
         memory: 40Mi
-    ## @param elastiResolver.proxy.containerSecurityContext [object] container security context
+    ## @param elastiResolver.proxy.containerSecurityContext [object] container security context. Inherits global.containerSecurityContext; set fields here (or `enabled: false`) to override.
     ##
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      capabilities:
-        drop:
-          - ALL
-    ## @param elastiResolver.proxy.podSecurityContext [object] pod security context
+    containerSecurityContext: {}
+    ## @param elastiResolver.proxy.podSecurityContext [object] pod security context. Inherits global.podSecurityContext; set fields here (or `enabled: false`) to override.
     ##
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 65532
-      runAsGroup: 65532
-      seccompProfile:
-        type: RuntimeDefault
+    podSecurityContext: {}
     sentry:
       ## @param elastiResolver.proxy.sentry.enabled whether to enable sentry
       ##
