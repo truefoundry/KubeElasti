@@ -55,4 +55,4 @@ jobs:
           files: ${{ matrix.module }}/cover.out
           flags: ${{ matrix.module }}
           name: ${{ matrix.module }}
-          fail_ci_if_error: false
+          fail_ci_if_error: true
