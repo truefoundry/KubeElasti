@@ -78,10 +78,14 @@ spec:
           periodSeconds: 10
         resources:
           {{- toYaml .Values.elastiController.manager.resources | nindent 10 }}
+        {{- with (include "elasti.containerSecurityContext" (dict "local" .Values.elastiController.manager.containerSecurityContext "global" .Values.global.containerSecurityContext)) }}
         securityContext:
-          {{- toYaml .Values.elastiController.manager.containerSecurityContext | nindent 10 }}
+          {{- . | nindent 10 }}
+        {{- end }}
+      {{- with (include "elasti.podSecurityContext" (dict "local" .Values.elastiController.manager.podSecurityContext "global" .Values.global.podSecurityContext)) }}
       securityContext:
-        {{- toYaml .Values.elastiController.manager.podSecurityContext | nindent 8 }}
+        {{- . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "elasti.fullname" . }}-operator-controller-manager
       terminationGracePeriodSeconds: 10
       imagePullSecrets:
@@ -183,10 +187,14 @@ spec:
           periodSeconds: 10
         resources:
           {{- toYaml .Values.elastiResolver.proxy.resources | nindent 10 }}
+        {{- with (include "elasti.containerSecurityContext" (dict "local" .Values.elastiResolver.proxy.containerSecurityContext "global" .Values.global.containerSecurityContext)) }}
         securityContext:
-          {{- toYaml .Values.elastiResolver.proxy.containerSecurityContext | nindent 10 }}
+          {{- . | nindent 10 }}
+        {{- end }}
+      {{- with (include "elasti.podSecurityContext" (dict "local" .Values.elastiResolver.proxy.podSecurityContext "global" .Values.global.podSecurityContext)) }}
       securityContext:
-        {{- toYaml .Values.elastiResolver.proxy.podSecurityContext | nindent 8 }}
+        {{- . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
         {{- include "elasti.imagePullSecrets" . | nindent 8 }}
       serviceAccountName: {{ include "elasti.fullname" . }}-resolver

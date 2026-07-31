@@ -6,27 +6,36 @@ KubeElasti is a Kubernetes-native solution that offers scale-to-zero functionali
 
 ### Global parameters for elasti helm chart
 
-| Name                                | Description                                                                                        | Value           |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------- | --------------- |
-| `global.kubernetesClusterDomain`    | domain of the Kubernetes cluster                                                                   | `cluster.local` |
-| `global.allowedNamespaces`          | namespaces to confine KubeElasti to; empty installs cluster-scoped RBAC and watches all namespaces | `[]`            |
-| `global.nameOverride`               | name of the deployment                                                                             | `""`            |
-| `global.fullnameOverride`           | full name of the deployment                                                                        | `""`            |
-| `global.enableMonitoring`           | whether to enable monitoring                                                                       | `false`         |
-| `global.secretName`                 | name of the secret to use for the deployment                                                       | `elasti-secret` |
-| `global.image.registry`             | registry to use for the deployment                                                                 | `ghcr.io`       |
-| `global.imagePullSecrets`           | image pull secrets to use for the deployment                                                       | `[]`            |
-| `global.labels`                     | labels to apply to all resources                                                                   | `{}`            |
-| `global.annotations`                | annotations to apply to all resources                                                              | `{}`            |
-| `global.podLabels`                  | labels to apply to all pods                                                                        | `{}`            |
-| `global.podAnnotations`             | annotations to apply to all pods                                                                   | `{}`            |
-| `global.serviceLabels`              | labels to apply to all services                                                                    | `{}`            |
-| `global.serviceAnnotations`         | annotations to apply to all services                                                               | `{}`            |
-| `global.deploymentLabels`           | labels to apply to all deployments                                                                 | `{}`            |
-| `global.deploymentAnnotations`      | annotations to apply to all deployments                                                            | `{}`            |
-| `global.serviceAccount`             | service account configuration                                                                      | `{}`            |
-| `global.serviceAccount.annotations` | annotations to apply to all service accounts                                                       | `{}`            |
-| `global.serviceAccount.labels`      | labels to apply to all service accounts                                                            | `{}`            |
+| Name                                                       | Description                                                                                                                         | Value            |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `global.kubernetesClusterDomain`                           | domain of the Kubernetes cluster                                                                                                    | `cluster.local`  |
+| `global.allowedNamespaces`                                 | namespaces to confine KubeElasti to; empty installs cluster-scoped RBAC and watches all namespaces                                  | `[]`             |
+| `global.nameOverride`                                      | name of the deployment                                                                                                              | `""`             |
+| `global.fullnameOverride`                                  | full name of the deployment                                                                                                         | `""`             |
+| `global.enableMonitoring`                                  | whether to enable monitoring                                                                                                        | `false`          |
+| `global.secretName`                                        | name of the secret to use for the deployment                                                                                        | `elasti-secret`  |
+| `global.image.registry`                                    | registry to use for the deployment                                                                                                  | `ghcr.io`        |
+| `global.imagePullSecrets`                                  | image pull secrets to use for the deployment                                                                                        | `[]`             |
+| `global.labels`                                            | labels to apply to all resources                                                                                                    | `{}`             |
+| `global.annotations`                                       | annotations to apply to all resources                                                                                               | `{}`             |
+| `global.podLabels`                                         | labels to apply to all pods                                                                                                         | `{}`             |
+| `global.podAnnotations`                                    | annotations to apply to all pods                                                                                                    | `{}`             |
+| `global.serviceLabels`                                     | labels to apply to all services                                                                                                     | `{}`             |
+| `global.serviceAnnotations`                                | annotations to apply to all services                                                                                                | `{}`             |
+| `global.deploymentLabels`                                  | labels to apply to all deployments                                                                                                  | `{}`             |
+| `global.deploymentAnnotations`                             | annotations to apply to all deployments                                                                                             | `{}`             |
+| `global.serviceAccount`                                    | service account configuration                                                                                                       | `{}`             |
+| `global.serviceAccount.annotations`                        | annotations to apply to all service accounts                                                                                        | `{}`             |
+| `global.serviceAccount.labels`                             | labels to apply to all service accounts                                                                                             | `{}`             |
+| `global.podSecurityContext.enabled`                        | toggle pod security contexts for all elasti components; set false to drop them (e.g. on OpenShift/ROSA so the platform assigns IDs) | `true`           |
+| `global.podSecurityContext.runAsNonRoot`                   | default runAsNonRoot for all elasti component pods; a component can override per field                                              | `true`           |
+| `global.podSecurityContext.runAsUser`                      | default runAsUser (UID) for all elasti component pods; a component can override per field                                           | `65532`          |
+| `global.podSecurityContext.runAsGroup`                     | default runAsGroup (GID) for all elasti component pods; a component can override per field                                          | `65532`          |
+| `global.podSecurityContext.seccompProfile.type`            | default seccomp profile for all elasti component pods                                                                               | `RuntimeDefault` |
+| `global.containerSecurityContext.enabled`                  | toggle container security contexts for all elasti components                                                                        | `true`           |
+| `global.containerSecurityContext.allowPrivilegeEscalation` | default allowPrivilegeEscalation for all elasti component containers                                                                | `false`          |
+| `global.containerSecurityContext.readOnlyRootFilesystem`   | default readOnlyRootFilesystem for all elasti component containers                                                                  | `true`           |
+| `global.containerSecurityContext.capabilities.drop`        | default dropped capabilities for all elasti component containers                                                                    | `[]`             |
 
 ### Elasti controller parameters
 
