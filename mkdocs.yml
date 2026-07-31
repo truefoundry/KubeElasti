@@ -149,6 +149,9 @@ plugins:
       cache_safe: true
 
 extra:
+  analytics:
+    provider: google
+    property: G-MMVMBYSN0Z
   scope: /
   # Browser chrome (theme-color / TileColor); aligns with Material `primary: teal` default palette
   theme_color: "#00796b"
