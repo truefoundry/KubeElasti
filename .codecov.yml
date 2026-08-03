@@ -1,15 +1,19 @@
 coverage:
   status:
+    # Ratchet: `target: auto` compares each PR against its base commit and
+    # `threshold: 0%` fails CI if overall coverage drops at all. Because every
+    # merge to main sets a new baseline, the floor only ever rises.
     project:
       default:
         target: auto
-        threshold: 1%
-        informational: true
+        threshold: 0%
+        informational: false
+    # New/changed lines in a PR must be >=90% covered, matching the coverage
+    # goal in AGENTS.md - tests ship with every change.
     patch:
       default:
-        target: auto
-        threshold: 1%
-        informational: true
+        target: 90%
+        informational: false
 
 flag_management:
   default_rules:
