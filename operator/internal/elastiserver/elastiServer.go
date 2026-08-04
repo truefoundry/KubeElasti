@@ -13,7 +13,6 @@ import (
 	"time"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
-	"github.com/truefoundry/elasti/pkg/k8shelper"
 	"github.com/truefoundry/elasti/pkg/scaling"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -206,19 +205,7 @@ func (s *Server) scaleTargetForService(ctx context.Context, serviceName, namespa
 		}
 	}
 
-	scaleTargetRef := crd.Spec.GetScaleTargetRef()
-
-	targetGVK, err := k8shelper.APIVersionStrToGVK(scaleTargetRef.APIVersion, scaleTargetRef.Kind)
-	if err != nil {
-		return fmt.Errorf("failed to parse API version: %w", err)
-	}
-
-	if _, err := s.scaleHandler.Scale(ctx,
-		namespace,
-		targetGVK,
-		scaleTargetRef.Name,
-		crd.Spec.MinTargetReplicas,
-	); err != nil {
+	if _, err := s.scaleHandler.ScaleToMinReplicas(ctx, namespace, crd.Spec); err != nil {
 		prom.TargetScaleCounter.WithLabelValues(serviceName, namespace, crd.Spec.ScaleTargetRef.Kind+"-"+crd.Spec.ScaleTargetRef.Name, err.Error()).Inc()
 		return fmt.Errorf("scaleTargetForService - error: %w, targetRefKind: %s, targetRefName: %s", err, crd.Spec.ScaleTargetRef.Kind, crd.Spec.ScaleTargetRef.Name)
 	}
