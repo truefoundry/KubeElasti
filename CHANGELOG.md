@@ -8,6 +8,31 @@ All the unreleased changes are listed under `Unreleased` section. Add your chang
 
 ## Unreleased
 
+## v0.1.31-rc2 (2026-08-06)
+
+### Improvements
+
+* feat: add `global.podSecurityContext.enabled` and `global.containerSecurityContext.enabled` toggles to turn security contexts on or off chart-wide (useful on OpenShift/ROSA where the platform assigns IDs); each component can still override individual fields by `@abhishekpradeep124` in [#346](https://github.com/KubeElasti/KubeElasti/pull/346)
+
+### Fixes
+
+* fix: pin build and release workflow dependencies by hash, satisfying the OpenSSF Scorecard Pinned-Dependencies check by `@ramantehlan` in [#325](https://github.com/KubeElasti/KubeElasti/pull/325)
+
+### Other
+
+* feat: add Google Analytics property to the docs site by `@ramantehlan` in [#347](https://github.com/KubeElasti/KubeElasti/pull/347)
+* docs: target ~90% unit-test coverage and disable dependabot by `@ramantehlan` in [#344](https://github.com/KubeElasti/KubeElasti/pull/344)
+* deps: bump `k8s.io/apimachinery` from 0.34.1 to 0.36.3 in /resolver by `@dependabot` in [#340](https://github.com/KubeElasti/KubeElasti/pull/340)
+* ci: bump `docker/setup-buildx-action` from 3.12.0 to 4.2.0 by `@dependabot` in [#330](https://github.com/KubeElasti/KubeElasti/pull/330)
+* ci: bump `codecov/codecov-action` from 5.5.5 to 7.0.0 by `@dependabot` in [#329](https://github.com/KubeElasti/KubeElasti/pull/329)
+* ci: bump `actions/setup-go` from 4.3.0 to 7.0.0 by `@dependabot` in [#328](https://github.com/KubeElasti/KubeElasti/pull/328)
+* ci: bump `actions/stale` from 9.0.0 to 11.0.0 by `@dependabot` in [#327](https://github.com/KubeElasti/KubeElasti/pull/327)
+* ci: bump `sigstore/cosign-installer` from 3.9.1 to 4.1.2 by `@dependabot` in [#326](https://github.com/KubeElasti/KubeElasti/pull/326)
+
+### New Contributors
+
+* `@abhishekpradeep124` made their first contribution in [#346](https://github.com/KubeElasti/KubeElasti/pull/346)
+
 ## v0.1.31-rc1 (2026-07-29)
 
 ### Fixes
