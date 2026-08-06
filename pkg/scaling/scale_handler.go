@@ -319,20 +319,25 @@ func (h *ScaleHandler) handleScaleFromZero(ctx context.Context, es *v1alpha1.Ela
 		}
 	}
 
-	targetGVK, err := k8shelper.APIVersionStrToGVK(spec.ScaleTargetRef.APIVersion, spec.ScaleTargetRef.Kind)
-	if err != nil {
-		return fmt.Errorf("failed to parse API version: %w", err)
-	}
-	if _, err := h.Scale(ctx,
-		es.Namespace,
-		targetGVK,
-		spec.ScaleTargetRef.Name,
-		spec.MinTargetReplicas,
-	); err != nil {
+	if _, err := h.ScaleToMinReplicas(ctx, es.Namespace, spec); err != nil {
 		return fmt.Errorf("failed to scale target from zero: %w", err)
 	}
 
 	return nil
+}
+
+// ScaleToMinReplicas scales the target in spec to MinTargetReplicas (at least 1).
+func (h *ScaleHandler) ScaleToMinReplicas(ctx context.Context, namespace string, spec v1alpha1.ElastiServiceSpec) (bool, error) {
+	scaleTargetRef := spec.GetScaleTargetRef()
+	replicas := spec.MinTargetReplicas
+	if replicas < 1 {
+		replicas = 1
+	}
+	targetGVK, err := k8shelper.APIVersionStrToGVK(scaleTargetRef.APIVersion, scaleTargetRef.Kind)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse API version: %w", err)
+	}
+	return h.Scale(ctx, namespace, targetGVK, scaleTargetRef.Name, replicas)
 }
 
 func (h *ScaleHandler) createScalerForTrigger(trigger *v1alpha1.ScaleTrigger, cooldownPeriod time.Duration) (scalers.Scaler, error) {

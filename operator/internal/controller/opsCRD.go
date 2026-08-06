@@ -121,7 +121,7 @@ func (r *ElastiServiceReconciler) finalizeCRD(ctx context.Context, es *v1alpha1.
 		}
 		err3 = r.ScaleHandler.UpdateKedaScaledObjectPausedState(ctx, es.Spec.Autoscaler.Name, es.Namespace, false)
 		if apierrors.IsNotFound(err3) {
-			// ScaledObject already gone — nothing to unpause.
+			// ScaledObject already gone - nothing to unpause.
 			err3 = nil
 		}
 		if err3 == nil {
@@ -129,14 +129,29 @@ func (r *ElastiServiceReconciler) finalizeCRD(ctx context.Context, es *v1alpha1.
 		}
 	}()
 	wg.Wait()
+
+	// Scale the target back up after cleanup (including KEDA unpause) so deleting
+	// ElastiService while scaled to zero does not leave the workload at 0 replicas.
+	var err4 error
+	_, err4 = r.ScaleHandler.ScaleToMinReplicas(ctx, es.Namespace, es.GetSpec())
+	if apierrors.IsNotFound(err4) {
+		err4 = nil
+	}
+	if err4 == nil {
+		r.Logger.Info("[Done] Scale target restored",
+			zap.String("kind", es.Spec.ScaleTargetRef.Kind),
+			zap.String("name", es.Spec.ScaleTargetRef.Name),
+			zap.String("namespace", es.Namespace))
+	}
+
 	// Remove CRD details from service directory
 	crddirectory.RemoveCRD(targetNamespacedName.String())
 	r.Logger.Info("[Done] CRD removed from service directory", zap.String("es", req.String()))
 
-	if err1 != nil || err2 != nil || err3 != nil {
-		return fmt.Errorf("failed to finalize CRD. \n delete endpointslice: %w \n delete private service: %w \n unpause keda scaledobject: %w", err1, err2, err3)
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		return fmt.Errorf("failed to finalize CRD. \n delete endpointslice: %w \n delete private service: %w \n unpause keda scaledobject: %w \n scale target: %w", err1, err2, err3, err4)
 	}
-	r.Logger.Info("[SERVE MODE ENABLED]")
+	r.Logger.Info("[Done] ElastiService finalized, target scaled up")
 	return nil
 }
 
