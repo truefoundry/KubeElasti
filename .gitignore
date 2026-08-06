@@ -34,4 +34,4 @@ cosign.key
 
 # Go coverage profiles
 cover.out
-
+go.work.sum
