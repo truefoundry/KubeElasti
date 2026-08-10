@@ -34,7 +34,10 @@ Out‑of‑scope issues include but are not limited to:
 
 ## 📬 Reporting a Vulnerability
 
-1. **Email** a detailed report to our private list: **[security@truefoundry.com](mailto:security@truefoundry.com)**.
+1. **Email** a detailed report to the project maintainers listed in [MAINTAINERS](./MAINTAINERS):
+   - [abhishek@truefoundry.com](mailto:abhishek@truefoundry.com)
+   - [shubham@truefoundry.com](mailto:shubham@truefoundry.com)
+   - [ramantehlan@gmail.com](mailto:ramantehlan@gmail.com)
 2. Include:
 
    * A descriptive title (e.g., *"Denial‑of‑Service via oversized HTTP header"*).

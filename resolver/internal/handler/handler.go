@@ -159,7 +159,7 @@ func (h *Handler) handleAnyRequest(w http.ResponseWriter, req *http.Request) (*m
 		}); tryErr != nil {
 		// NOTE: Below line throws a CWE, but we identified it as false positive
 		// As we just pass host information like namespace and service name, it is safe to ignore this
-		// See: https://github.com/truefoundry/KubeElasti/pull/177
+		// See: https://github.com/KubeElasti/KubeElasti/pull/177
 		h.logger.Error("throttler try error: ", zap.Error(tryErr))
 		hub := sentry.GetHubFromContext(req.Context())
 		if hub != nil {
