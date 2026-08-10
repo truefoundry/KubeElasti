@@ -34,7 +34,7 @@ import (
 	"truefoundry/elasti/operator/internal/crddirectory"
 	"truefoundry/elasti/operator/internal/informer"
 
-	tfLogger "github.com/truefoundry/elasti/pkg/logger"
+	pkglogger "github.com/truefoundry/elasti/pkg/logger"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -96,7 +96,7 @@ func mainWithError() error {
 	var watchNamespace string
 	flag.StringVar(&watchNamespace, "watch-namespace", metav1.NamespaceAll, "Namespace to watch for resources")
 
-	zapLogger, err := tfLogger.NewLogger("dev", sentryEnabled)
+	zapLogger, err := pkglogger.NewLogger("dev", sentryEnabled)
 	if err != nil {
 		setupLog.Error(err, "unable to create logger")
 	}
