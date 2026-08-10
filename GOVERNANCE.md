@@ -217,6 +217,13 @@ history, and returning later means applying again through the normal process.
 - **GitHub discussions**: questions, design exploration, community conversation.
 - **CNCF Slack [#kubeelasti](https://cloud-native.slack.com/archives/C0AMUFC5Y3D)**: real-time
   discussion and support.
+- **KubeElasti Community Day** (public community call): second Thursday of each month,
+  19:00-19:30 [Asia/Kolkata](https://www.timeanddate.com/time/zones/ist)
+  (13:30-14:00 UTC). Join on
+  [Google Meet](https://meet.google.com/wns-mqdn-veb).
+  Dial-in: +1 484-546-8063, PIN 800 916 416#.
+  Agenda and notes are shared in [#kubeelasti](https://cloud-native.slack.com/archives/C0AMUFC5Y3D)
+  and GitHub Discussions when used.
 
 Project decisions are not made in private, with two exceptions: security reports and Code of
 Conduct matters.
