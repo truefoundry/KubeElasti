@@ -1,0 +1,4 @@
+# Default owners for everything in the repository.
+# Matches Organization Maintainers listed in /MAINTAINERS.
+# See GOVERNANCE.md "Access Control" for how this maps to GitHub permissions.
+* @innoavator @shubhamrai1993 @ramantehlan

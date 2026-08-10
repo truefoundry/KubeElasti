@@ -1,3 +1,9 @@
-Abhishek Choudhary <abhishek@truefoundry.com> @innoavator
-Shubham Rai <shubham@truefoundry.com> @shubhamrai1993
-Raman Tehlan <ramantehlan@gmail.com> @ramantehlan
+# KubeElasti Organization Maintainers
+# See GOVERNANCE.md for the role, the bar, and how to apply.
+# This file is the single source of truth for maintainers.
+
+| Name | GitHub | Email | Affiliation | Domain of Responsibility |
+| --- | --- | --- | --- | --- |
+| Abhishek Choudhary | [@innoavator](https://github.com/innoavator) | abhishek@truefoundry.com | TrueFoundry | Project direction, architecture |
+| Shubham Rai | [@shubhamrai1993](https://github.com/shubhamrai1993) | shubham@truefoundry.com | TrueFoundry | Operator, scaling, releases |
+| Raman Tehlan | [@ramantehlan](https://github.com/ramantehlan) | ramantehlan@gmail.com | Independent | Documentation, CI/CD, community |
