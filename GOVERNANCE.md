@@ -14,6 +14,14 @@ community spaces the project runs.
 - **Sustainable**: leadership is shared and written down, so the project outlives any one person
   or company.
 
+## Vendor Neutrality
+
+KubeElasti is a vendor-neutral CNCF project. Maintainers set project direction, roadmap, and
+technical decisions in the interest of the whole community, not any single employer or vendor.
+Affiliation does not grant preferential treatment in reviews, roadmap decisions, release timing,
+or applications for reviewer or maintainer roles. See the CNCF guidance on
+[vendor neutrality](https://contribute.cncf.io/maintainers/community/vendor-neutrality/).
+
 ## Roles
 
 Anyone who opens an issue, sends a pull request, writes docs, answers questions, or helps in
@@ -209,6 +217,13 @@ history, and returning later means applying again through the normal process.
 - **GitHub discussions**: questions, design exploration, community conversation.
 - **CNCF Slack [#kubeelasti](https://cloud-native.slack.com/archives/C0AMUFC5Y3D)**: real-time
   discussion and support.
+- **KubeElasti Community Day** (public community call): second Thursday of each month,
+  19:00-19:30 [Asia/Kolkata](https://www.timeanddate.com/time/zones/ist)
+  (13:30-14:00 UTC). Join on
+  [Google Meet](https://meet.google.com/wns-mqdn-veb).
+  Dial-in: +1 484-546-8063, PIN 800 916 416#.
+  Agenda and notes are shared in [#kubeelasti](https://cloud-native.slack.com/archives/C0AMUFC5Y3D)
+  and GitHub Discussions when used.
 
 Project decisions are not made in private, with two exceptions: security reports and Code of
 Conduct matters.
@@ -221,9 +236,29 @@ including maintainers. Report violations through the path in
 
 ## Security
 
-Report security issues per [SECURITY.md](./SECURITY.md). Never open a public issue for a
-security problem until coordinated disclosure allows it. Maintainers may handle reports directly
-or delegate to a smaller trusted group.
+Report security issues only through GitHub Private Vulnerability Reporting, as described in
+[SECURITY.md](./SECURITY.md). Never open a public issue for a security problem until coordinated
+disclosure allows it. Maintainers may handle reports directly or delegate to a smaller trusted
+group.
+
+## Access Control
+
+Repository and organization access follow the roles in this document:
+
+- **[CODEOWNERS](./.github/CODEOWNERS)** assigns default review ownership to the Organization
+  Maintainers listed in [MAINTAINERS](./MAINTAINERS). Code and docs ownership in GitHub matches
+  those documented roles.
+- **Organization Maintainers** receive write (or admin, when needed for releases and settings)
+  on KubeElasti repositories, and can merge after the approval rules above.
+- **Organization Reviewers** receive triage permissions sufficient to review, label, and manage
+  issues and pull requests, without merge rights.
+- **Two-factor authentication (2FA)** is required for every member of the KubeElasti GitHub
+  organization. Maintainers keep org-wide 2FA enforcement enabled.
+- **Branch protection** on default branches requires pull requests, passing required status
+  checks, and maintainer review before merge. Force-pushes to protected default branches are
+  not allowed.
+- Access is granted when someone is added to [MAINTAINERS](./MAINTAINERS) or
+  [REVIEWERS](./REVIEWERS), and revoked when they step down or are removed.
 
 ## Changing This Document
 

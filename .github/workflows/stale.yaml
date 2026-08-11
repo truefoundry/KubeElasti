@@ -12,7 +12,7 @@ jobs:
       issues: write
       discussions: write
       pull-requests: write
-    if: github.repository == 'truefoundry/elasti'
+    if: github.repository == 'KubeElasti/KubeElasti'
     name: Stale issue bot
     steps:
       - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0

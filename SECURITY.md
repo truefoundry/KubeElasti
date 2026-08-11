@@ -34,7 +34,9 @@ Out‑of‑scope issues include but are not limited to:
 
 ## 📬 Reporting a Vulnerability
 
-1. **Email** a detailed report to our private list: **[security@truefoundry.com](mailto:security@truefoundry.com)**.
+Report security issues through **[GitHub Private Vulnerability Reporting](https://github.com/KubeElasti/KubeElasti/security/advisories/new)** on this repository.
+
+1. Open [Report a vulnerability](https://github.com/KubeElasti/KubeElasti/security/advisories/new) (Security tab → Advisories → Report a vulnerability).
 2. Include:
 
    * A descriptive title (e.g., *"Denial‑of‑Service via oversized HTTP header"*).
@@ -44,6 +46,7 @@ Out‑of‑scope issues include but are not limited to:
    * Impact assessment (confidentiality, integrity, availability).
    * *Optional* patch or mitigation ideas.
 3. *Do NOT* open a public GitHub issue for security problems.
+4. *Do NOT* email maintainers privately for security reports; Private Vulnerability Reporting is the only accepted path so reports stay tracked and visible to the current maintainer set.
 
 ---
 

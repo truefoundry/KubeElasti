@@ -58,6 +58,8 @@ Every change should be added to our changelog under `Unreleased` which is locate
 
 We encourage you to participate in discussions. Stay connected, share ideas, and get to know fellow contributors.
 
+Join **KubeElasti Community Day**, our public community call, on the second Thursday of each month at 19:00-19:30 Asia/Kolkata via [Google Meet](https://meet.google.com/wns-mqdn-veb). Full schedule and dial-in details are in [GOVERNANCE.md](./GOVERNANCE.md#communication).
+
 Your contributions not only help improve the project but also the wider community of users and developers.
 
 Happy contributing!

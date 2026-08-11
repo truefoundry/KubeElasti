@@ -106,6 +106,8 @@ See the list of organizations who are using KubeElasti in Production or in Stagi
 
 We have a dedicated [Discussions](https://github.com/KubeElasti/KubeElasti/discussions) section for getting help and discussing ideas.
 
+**KubeElasti Community Day** is a public community call on the second Thursday of each month, 19:00-19:30 Asia/Kolkata (13:30-14:00 UTC). Join on [Google Meet](https://meet.google.com/wns-mqdn-veb). Details live in [GOVERNANCE.md](./GOVERNANCE.md#communication).
+
 # Roadmap
 
 We are maintaining the future roadmap using the [issues](https://github.com/KubeElasti/KubeElasti/issues) and [milestones](https://github.com/KubeElasti/KubeElasti/milestones). You can also suggest ideas and vote for them by adding a 👍 reaction to the issue.
