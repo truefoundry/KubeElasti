@@ -1,8 +1,9 @@
 name: StaleBot
 on:
+  # Disabled for now: the daily schedule is off, so this only runs manually.
   workflow_dispatch:
-  schedule:
-    - cron: '0 12 * * *'
+  # schedule:
+  #   - cron: '0 12 * * *'
 permissions:
   contents: read
 jobs:
