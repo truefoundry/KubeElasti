@@ -17,6 +17,15 @@ import (
 	"go.uber.org/zap"
 )
 
+// ElastiServiceChecker reports whether an ElastiService CR exists for a given
+// "namespace/service" key. It is satisfied by the resolver's crdcache.Cache and lets the
+// HostManager reject Host headers that don't map to a real ElastiService before they are
+// cached, proxied, or exported as metrics. The Fresh variant refreshes from the operator on
+// a miss (rate-limited) so a newly-created ElastiService is recognized on its first request.
+type ElastiServiceChecker interface {
+	GetElastiServiceFresh(namespacedServiceName string) (*messages.ElastiServiceEntry, bool)
+}
+
 // HostManager is to manage the hosts, and their traffic
 // It is used to process incoming requests and cache the host details in "hosts" map
 // For further requests, the cache is used to get the host details
@@ -26,16 +35,20 @@ type HostManager struct {
 	trafficReEnableDuration     time.Duration
 	trafficDisableGraceDuration time.Duration
 	headerForHost               string
+	crdChecker                  ElastiServiceChecker
 }
 
-// NewHostManager returns a new HostManager
-func NewHostManager(logger *zap.Logger, trafficReEnableDuration, trafficDisableGraceDuration time.Duration, headerForHost string) *HostManager {
+// NewHostManager returns a new HostManager.
+// crdChecker validates that a parsed (namespace, service) belongs to a known ElastiService;
+// pass nil to disable that check (used in tests).
+func NewHostManager(logger *zap.Logger, trafficReEnableDuration, trafficDisableGraceDuration time.Duration, headerForHost string, crdChecker ElastiServiceChecker) *HostManager {
 	return &HostManager{
 		logger:                      logger.With(zap.String("component", "hostManager")),
 		hosts:                       sync.Map{},
 		trafficReEnableDuration:     trafficReEnableDuration,
 		trafficDisableGraceDuration: trafficDisableGraceDuration,
 		headerForHost:               headerForHost,
+		crdChecker:                  crdChecker,
 	}
 }
 
@@ -45,17 +58,30 @@ func (hm *HostManager) GetHost(req *http.Request) (*messages.Host, error) {
 	if values, ok := req.Header[hm.headerForHost]; ok {
 		incomingHost = values[0]
 	}
+	// Normalize the key by dropping the request path/wildcard (the actual path is taken from
+	// req.RequestURI at proxy time). This collapses the otherwise-unbounded set of path
+	// variations for a given host:port into a single cache entry, so a caller cannot grow
+	// hm.hosts without bound by sending many distinct paths for the same service.
+	incomingHost = hm.removeTrailingWildcardIfNeeded(incomingHost)
+	incomingHost = hm.removeTrailingPathIfNeeded(incomingHost)
 	host, ok := hm.hosts.Load(incomingHost)
 	if !ok {
 		sourceService, namespace, err := hm.extractNamespaceAndService(incomingHost)
 		if err != nil {
-			prom.HostExtractionCounter.WithLabelValues("error", incomingHost, hm.headerForHost, err.Error()).Inc()
+			prom.HostExtractionCounter.WithLabelValues("error", "invalid-format").Inc()
 			return &messages.Host{}, err
 		}
+		// Reject Host headers that don't map to a known ElastiService. Without this an
+		// unauthenticated caller could make the resolver cache, proxy to, and probe
+		// arbitrary in-cluster services across namespaces (CWE-200 / cross-namespace SSRF).
+		if hm.crdChecker != nil {
+			if _, exists := hm.crdChecker.GetElastiServiceFresh(namespace + "/" + sourceService); !exists {
+				prom.HostExtractionCounter.WithLabelValues("rejected", "unknown-service").Inc()
+				return &messages.Host{}, fmt.Errorf("no ElastiService registered for host: %s", logger.MaskMiddle(incomingHost, 4, 4))
+			}
+		}
 		targetService := utils.GetPrivateServiceName(sourceService)
-		sourceHost := hm.removeTrailingWildcardIfNeeded(incomingHost)
-		sourceHost = hm.removeTrailingPathIfNeeded(sourceHost)
-		sourceHost = hm.addHTTPIfNeeded(sourceHost)
+		sourceHost := hm.addHTTPIfNeeded(incomingHost)
 		targetHost := hm.replaceServiceName(sourceHost, targetService)
 		targetHost = hm.addHTTPIfNeeded(targetHost)
 		newHost := &messages.Host{
@@ -68,10 +94,10 @@ func (hm *HostManager) GetHost(req *http.Request) (*messages.Host, error) {
 			TrafficAllowed: true,
 		}
 		hm.hosts.Store(incomingHost, newHost)
-		prom.HostExtractionCounter.WithLabelValues("cache-miss", incomingHost, hm.headerForHost, "").Inc()
+		prom.HostExtractionCounter.WithLabelValues("cache-miss", "").Inc()
 		return newHost, nil
 	}
-	prom.HostExtractionCounter.WithLabelValues("cache-hit", incomingHost, hm.headerForHost, "").Inc()
+	prom.HostExtractionCounter.WithLabelValues("cache-hit", "").Inc()
 	return host.(*messages.Host), nil
 }
 
@@ -129,41 +155,38 @@ func (hm *HostManager) enableTrafficForHost(hostName string) {
 	}
 }
 
-func (hm *HostManager) extractNamespaceAndService(url string) (string, string, error) {
-	// Define regular expression patterns for different Kubernetes internal URL formats
-	patterns := []string{
-		`http://([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc\.cluster\.local:\d+/\*`,
-		`([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc\.cluster\.local:\d+/\*`,
-		`http://([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc\.cluster\.local:\d+`,
-		`([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc\.cluster\.local:\d+`,
-		`http://([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc\.cluster\.local`,
-		`([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc\.cluster\.local`,
-		`http://([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc`,
-		`([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)\.svc`,
-		`http://([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)`,
-		`([a-zA-Z0-9-]+)\.([a-zA-Z0-9-]+)`,
-		`http://([a-zA-Z0-9-]+)\.svc\.cluster\.local`,
-		`([a-zA-Z0-9-]+)\.svc\.cluster\.local`,
-		`http://([a-zA-Z0-9-]+)\.svc`,
-		`([a-zA-Z0-9-]+)\.svc`,
-		`http://([a-zA-Z0-9-]+)`,
-		`([a-zA-Z0-9-]+)`,
+// k8sServiceHostRe matches only the Kubernetes service DNS forms
+// "<service>.<namespace>.svc" and "<service>.<namespace>.svc.cluster.local", where each
+// of <service> and <namespace> is a valid RFC 1123 DNS label. The previous catch-all
+// patterns accepted any two-segment or single-segment string, which let attackers inject
+// arbitrary Host headers (CWE-200); those are intentionally gone.
+var k8sServiceHostRe = regexp.MustCompile(
+	`^([a-z0-9]([-a-z0-9]*[a-z0-9])?)\.([a-z0-9]([-a-z0-9]*[a-z0-9])?)\.svc(?:\.cluster\.local)?$`,
+)
+
+// maxDNSLabelLength is the RFC 1123 limit for a single DNS label (service/namespace name).
+const maxDNSLabelLength = 63
+
+func (hm *HostManager) extractNamespaceAndService(rawHost string) (string, string, error) {
+	// Strip scheme, path/wildcard, and port so only the DNS name remains.
+	host := strings.TrimPrefix(rawHost, "http://")
+	host = strings.TrimPrefix(host, "https://")
+	if idx := strings.IndexByte(host, '/'); idx != -1 {
+		host = host[:idx]
 	}
-	var serviceName, namespace string
-	for _, pattern := range patterns {
-		re := regexp.MustCompile(pattern)
-		matches := re.FindStringSubmatch(url)
-		if len(matches) == 3 {
-			serviceName = matches[1]
-			namespace = matches[2]
-			return serviceName, namespace, nil
-		} else if len(matches) == 2 {
-			serviceName = matches[1]
-			namespace = "default"
-			return serviceName, namespace, fmt.Errorf("namespace not found in URL: %s", logger.MaskMiddle(url, 4, 4))
-		}
+	if idx := strings.LastIndexByte(host, ':'); idx != -1 {
+		host = host[:idx]
 	}
-	return "", "", fmt.Errorf("invalid Kubernetes URL: %s", logger.MaskMiddle(url, 4, 4))
+
+	matches := k8sServiceHostRe.FindStringSubmatch(host)
+	if matches == nil {
+		return "", "", fmt.Errorf("invalid Kubernetes service host: %s", logger.MaskMiddle(rawHost, 4, 4))
+	}
+	serviceName, namespace := matches[1], matches[3]
+	if len(serviceName) > maxDNSLabelLength || len(namespace) > maxDNSLabelLength {
+		return "", "", fmt.Errorf("invalid Kubernetes service host: %s", logger.MaskMiddle(rawHost, 4, 4))
+	}
+	return serviceName, namespace, nil
 }
 
 // addHTTPIfNeeded adds http if not present in the service URL

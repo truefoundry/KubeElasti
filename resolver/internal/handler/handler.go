@@ -93,11 +93,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	prom.IncomingRequestHistogram.WithLabelValues(
 		host.SourceService,
 		host.TargetService,
-		host.SourceHost,
-		host.TargetHost,
 		host.Namespace,
 		req.Method,
-		req.RequestURI,
 		responseStatus,
 		errorMessage,
 	).Observe(duration)

@@ -6,6 +6,10 @@ import (
 )
 
 var (
+	// HostExtractionCounter deliberately carries no request-derived free-text labels
+	// (raw Host header, error string). Those are attacker-controlled and would both leak
+	// service/namespace info through /metrics and blow up label cardinality (CWE-200).
+	// "reason" is a fixed, bounded classification set by the resolver.
 	HostExtractionCounter = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "elasti_resolver_host_extraction_count",
@@ -13,9 +17,7 @@ var (
 		},
 		[]string{
 			"extractionType",
-			"source",
-			"hostHeader",
-			"error",
+			"reason",
 		},
 	)
 
@@ -30,6 +32,11 @@ var (
 		},
 	)
 
+	// IncomingRequestHistogram intentionally omits raw request-derived labels
+	// (sourceHost, targetHost, requestURI). requestURI is fully attacker-controlled and
+	// unbounded; the host URLs echo internal DNS/naming conventions. "source"/"target"/
+	// "namespace" are validated against a known ElastiService before this is recorded, so
+	// they are bounded and safe to expose.
 	IncomingRequestHistogram = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "elasti_resolver_incoming_requests",
@@ -38,11 +45,8 @@ var (
 		},
 		[]string{"source",
 			"target",
-			"sourceHost",
-			"targetHost",
 			"namespace",
 			"method",
-			"requestURI",
 			"status",
 			"error"},
 	)

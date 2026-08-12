@@ -125,6 +125,57 @@ func TestGetElastiServiceMiss(t *testing.T) {
 	}
 }
 
+// TestGetElastiServiceFreshRefreshesOnMiss checks that a miss triggers an on-demand refresh,
+// so a service registered since the last poll is found without waiting for the next poll.
+func TestGetElastiServiceFreshRefreshesOnMiss(t *testing.T) {
+	var calls atomic.Int64
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		respondWith(&messages.ElastiServiceCacheResponse{
+			Services: map[string]messages.ElastiServiceEntry{"ns/svc": {Name: "es"}},
+		})(w, r)
+	}))
+	defer srv.Close()
+
+	c := newTestCache(t, srv, time.Minute)
+
+	// Nothing fetched yet: a plain get misses.
+	if _, ok := c.GetElastiService("ns/svc"); ok {
+		t.Fatal("expected miss before any fetch")
+	}
+	// The Fresh variant refreshes on the miss and finds it.
+	if _, ok := c.GetElastiServiceFresh("ns/svc"); !ok {
+		t.Fatal("expected GetElastiServiceFresh to find service after on-demand refresh")
+	}
+	if calls.Load() == 0 {
+		t.Fatal("expected on-demand refresh to reach the operator")
+	}
+}
+
+// TestGetElastiServiceFreshThrottlesRefresh checks that repeated misses inside the throttle
+// window trigger only a single operator fetch, so probing for unknown hosts can't flood it.
+func TestGetElastiServiceFreshThrottlesRefresh(t *testing.T) {
+	var calls atomic.Int64
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		respondWith(&messages.ElastiServiceCacheResponse{
+			Services: map[string]messages.ElastiServiceEntry{},
+		})(w, r)
+	}))
+	defer srv.Close()
+
+	c := newTestCache(t, srv, time.Minute)
+
+	for i := 0; i < 5; i++ {
+		if _, ok := c.GetElastiServiceFresh("ns/unknown"); ok {
+			t.Fatal("expected miss for unknown key")
+		}
+	}
+	if got := calls.Load(); got != 1 {
+		t.Fatalf("expected exactly 1 on-demand refresh within throttle window, got %d", got)
+	}
+}
+
 // TestConcurrentFetchAndGet exercises the RWMutex guarding the cache pointer.
 func TestConcurrentFetchAndGet(t *testing.T) {
 	srv := httptest.NewServer(respondWith(&messages.ElastiServiceCacheResponse{
