@@ -1,0 +1,104 @@
+name: Apply for a project role
+description: Apply to become a KubeElasti Organization Reviewer or Organization Maintainer
+title: "[ROLE] <your GitHub handle>"
+labels:
+  - governance
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for wanting to help run **KubeElasti**.
+
+        You apply for yourself, no nomination needed. Read
+        [GOVERNANCE.md](https://github.com/KubeElasti/KubeElasti/blob/main/GOVERNANCE.md)
+        for what each role can do and how the decision is made.
+
+        **Minimum bar**
+
+        | Role | Merged PRs | Time active in the community |
+        | --- | --- | --- |
+        | Organization Reviewer | 1 | 1 month |
+        | Organization Maintainer | 2 | 1 month |
+
+        Meeting the minimum makes you eligible, not automatically accepted. Maintainers discuss
+        this issue in public and vote. Expect a first response within 2 weeks.
+
+  - type: dropdown
+    id: role
+    attributes:
+      label: Role you are applying for
+      options:
+        - Organization Reviewer
+        - Organization Maintainer
+    validations:
+      required: true
+
+  - type: input
+    id: handle
+    attributes:
+      label: GitHub handle
+      placeholder: "@your-handle"
+    validations:
+      required: true
+
+  - type: textarea
+    id: merged-prs
+    attributes:
+      label: Merged pull requests
+      description: Link them. 1 for Reviewer, 2 for Maintainer. More is fine.
+      placeholder: |
+        - https://github.com/KubeElasti/KubeElasti/pull/123
+        - https://github.com/KubeElasti/KubeElasti/pull/145
+    validations:
+      required: true
+
+  - type: input
+    id: active-since
+    attributes:
+      label: Active in the community since
+      description: Roughly when you started participating. Must be at least 1 month ago.
+      placeholder: "2026-05 (first issue), regular since then"
+    validations:
+      required: true
+
+  - type: textarea
+    id: participation
+    attributes:
+      label: Other participation
+      description: Reviews, issue triage, docs, discussions, Slack help, talks, anything else. Links help.
+      placeholder: |
+        - Reviewed #150, #158
+        - Triaged the resolver flake reports
+        - Answer questions in #kubeelasti on CNCF Slack
+    validations:
+      required: false
+
+  - type: textarea
+    id: focus
+    attributes:
+      label: What you want to work on
+      description: Which parts of the project (operator, resolver, pkg, charts, docs, CI, releases) and what you plan to do in the role.
+      placeholder: "Mostly the resolver and its tests. I'd like to own review for that area and help keep the e2e suite green."
+    validations:
+      required: true
+
+  - type: input
+    id: affiliation
+    attributes:
+      label: Employer / affiliation (optional)
+      description: For transparency only. It does not affect the decision.
+      placeholder: "Acme Corp, or independent"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: agreements
+    attributes:
+      label: Confirmations
+      options:
+        - label: I meet the minimum bar for the role I selected.
+          required: true
+        - label: I agree to follow the [Code of Conduct](https://github.com/KubeElasti/KubeElasti/blob/main/CODE_OF_CONDUCT.md) and [GOVERNANCE.md](https://github.com/KubeElasti/KubeElasti/blob/main/GOVERNANCE.md).
+          required: true
+        - label: I can stay reasonably active, and I will say so if that changes.
+          required: true

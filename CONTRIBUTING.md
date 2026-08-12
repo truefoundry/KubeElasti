@@ -10,7 +10,7 @@ Open source is at the heart of Elasti. We appreciate feedback, ideas, and enhanc
 
 Before contributing, please take a moment to read through the [README](./README.md) as it provides a comprehensive understanding of the project and are essential reading to ensure that we're all on the same page.
 
-For information about project roles, maintainer responsibilities, and decision-making, see [GOVERNANCE.md](./GOVERNANCE.md).
+For information about project roles, maintainer responsibilities, and decision-making, see [GOVERNANCE.md](./GOVERNANCE.md). If you want to take on a reviewer or maintainer role, apply with the [role application form](https://github.com/KubeElasti/KubeElasti/issues/new?template=role_application.yml).
 
 ## 💻 Development
 
@@ -57,6 +57,8 @@ Every change should be added to our changelog under `Unreleased` which is locate
 ## 🗨️ Stay Connected
 
 We encourage you to participate in discussions. Stay connected, share ideas, and get to know fellow contributors.
+
+Join **KubeElasti Community Day**, our public community call, on the second Thursday of each month at 19:00-19:30 Asia/Kolkata via [Google Meet](https://meet.google.com/wns-mqdn-veb). Full schedule and dial-in details are in [GOVERNANCE.md](./GOVERNANCE.md#communication).
 
 Your contributions not only help improve the project but also the wider community of users and developers.
 

@@ -1,7 +1,7 @@
 # Site
 site_name: KubeElasti
 site_url: https://kubeelasti.dev/
-site_author: KubeElasti Authors
+site_author: KubeElasti Contributors
 site_description: >-
   KubeElasti is a Kubernetes operator that automatically scales-to-zero your services when they are idle and scales them back up when they receive traffic.
 extra_css:
@@ -114,8 +114,8 @@ markdown_extensions:
   - pymdownx.magiclink:
       normalize_issue_symbols: true
       repo_url_shorthand: true
-      user: truefoundry
-      repo: cruisekube
+      user: KubeElasti
+      repo: KubeElasti
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.snippets

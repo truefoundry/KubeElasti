@@ -96,7 +96,7 @@ Contribution details can be found in the [Contribution](./CONTRIBUTING.md) guide
 
 # Governance
 
-Project governance details, including roles, decision-making, and maintainer responsibilities, are documented in [GOVERNANCE.md](./GOVERNANCE.md).
+Project governance details, including roles, decision-making, and maintainer responsibilities, are documented in [GOVERNANCE.md](./GOVERNANCE.md). The formal voting process is in [VOTING.md](./VOTING.md).
 
 # Adopters
 
@@ -105,6 +105,8 @@ See the list of organizations who are using KubeElasti in Production or in Stagi
 # Getting Help
 
 We have a dedicated [Discussions](https://github.com/KubeElasti/KubeElasti/discussions) section for getting help and discussing ideas.
+
+**KubeElasti Community Day** is a public community call on the second Thursday of each month, 19:00-19:30 Asia/Kolkata (13:30-14:00 UTC). Join on [Google Meet](https://meet.google.com/wns-mqdn-veb). Details live in [GOVERNANCE.md](./GOVERNANCE.md#communication).
 
 # Roadmap
 
@@ -118,7 +120,7 @@ KubeElasti is built by a growing community of contributors. Thank you to everyon
   <img src="https://contrib.rocks/image?repo=KubeElasti/KubeElasti" alt="KubeElasti contributors" />
 </a>
 
-We are actively looking for additional maintainers to help grow and steer the project. If you are interested in taking on a larger role, please reach out on [Slack](https://cloud-native.slack.com/archives/C0AMUFC5Y3D), start a thread in our [Discussions](https://github.com/KubeElasti/KubeElasti/discussions), or open an [issue](https://github.com/KubeElasti/KubeElasti/issues/new). See the [Contribution](#contribution) and [Governance](#governance) guides to get started.
+We are actively looking for additional reviewers and maintainers to help grow and steer the project. If you are interested in taking on a larger role, apply with the [role application form](https://github.com/KubeElasti/KubeElasti/issues/new?template=role_application.yml). The bar is 2 merged PRs and a month of activity for maintainer, 1 merged PR and a month for reviewer. Not there yet? Say hi on [Slack](https://cloud-native.slack.com/archives/C0AMUFC5Y3D) or start a thread in our [Discussions](https://github.com/KubeElasti/KubeElasti/discussions). See the [Contribution](#contribution) and [Governance](#governance) guides to get started.
 
 # Project Supporters
 

@@ -60,8 +60,7 @@ Shoutout to [Shubham](https://github.com/shubhamrai1993) and [Rethil](https://gi
 To upgrade to v0.1.17, update your Helm chart:
 
 ```bash
-helm repo update
-helm upgrade kubeelasti truefoundry/elasti --version 0.1.17
+helm upgrade elasti oci://ghcr.io/kubeelasti/charts/elasti --version 0.1.17 --namespace elasti
 ```
 
 Ready to save costs with scale-to-zero? [Get started with KubeElasti today!](https://kubeelasti.dev/src/install/installation/)

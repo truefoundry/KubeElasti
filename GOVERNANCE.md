@@ -1,151 +1,268 @@
 # KubeElasti Governance
 
-## Overview
+This document describes who runs KubeElasti, how decisions are made, and how you can take on a
+role in the project.
 
-KubeElasti is an open source project for Kubernetes-native scale-to-zero and scale-from-zero workflows. This document describes how the project is governed, how decisions are made, and how contributors can grow into leadership roles.
-
-The project follows a maintainer-led governance model aligned with CNCF governance guidance. Governance in KubeElasti is centered on people, their responsibilities, and the public processes used to make decisions.
-
-This governance applies to the KubeElasti GitHub organization and repositories, including code, documentation, release processes, issue tracking, and community spaces operated for the project.
+It covers the whole KubeElasti GitHub organization: code, docs, releases, issues, and the
+community spaces the project runs.
 
 ## Values
 
-KubeElasti maintainers and contributors are expected to uphold these values:
+- **Open**: discussion and decisions happen in public whenever possible.
+- **Fair**: people are judged on their work, not their employer or background.
+- **Respectful**: all interaction follows the [Code of Conduct](./CODE_OF_CONDUCT.md).
+- **Sustainable**: leadership is shared and written down, so the project outlives any one person
+  or company.
 
-- Openness: project discussion, design review, and decision-making should happen in public whenever possible.
-- Fairness: contributors are evaluated on the quality and consistency of their work, not on employer or background.
-- Respect: community interactions must follow the project's Code of Conduct.
-- Collaboration: issues, pull requests, and proposals should move forward through constructive review and iteration.
-- Sustainability: leadership should be shared and documented so the project can continue to grow beyond any one individual or company.
+## Vendor Neutrality
+
+KubeElasti is a vendor-neutral CNCF project. Maintainers set project direction, roadmap, and
+technical decisions in the interest of the whole community, not any single employer or vendor.
+Affiliation does not grant preferential treatment in reviews, roadmap decisions, release timing,
+or applications for reviewer or maintainer roles. See the CNCF guidance on
+[vendor neutrality](https://contribute.cncf.io/maintainers/community/vendor-neutrality/).
 
 ## Roles
 
-### Contributors
+Anyone who opens an issue, sends a pull request, writes docs, answers questions, or helps in
+Slack is a contributor. That needs no application and grants no special permissions. Beyond
+that, KubeElasti has two roles. Both are organization-wide: there are no per-repository roles.
 
-Contributors are anyone who participates in the project, including through code, documentation, testing, issue triage, design discussion, or community support.
+### Organization Reviewer
 
-Contributors are expected to:
+A reviewer is a trusted contributor who helps keep the queue moving. The current reviewers are
+listed in [REVIEWERS](./REVIEWERS).
 
-- Follow the processes described in [CONTRIBUTING.md](./CONTRIBUTING.md).
-- Abide by the [Code of Conduct](./CODE_OF_CONDUCT.md).
-- Work collaboratively with reviewers and maintainers.
+**Can:**
 
-### Reviewers
+- Review pull requests and leave binding review feedback.
+- Triage, label, and close issues.
+- Be requested for review on any repository in the organization.
 
-Reviewers are contributors who have demonstrated sustained, high-quality participation and are trusted by maintainers to review contributions in one or more areas of the project.
+**Cannot:**
 
-Reviewers are expected to:
+- Merge pull requests.
+- Vote on maintainer or governance decisions.
 
-- Provide timely, constructive, and technically sound feedback.
-- Help contributors navigate project expectations and quality bars.
-- Escalate significant design, release, or governance questions to maintainers when needed.
+**Expected to:**
 
-Reviewers are appointed by maintainers based on sustained contribution quality and ongoing engagement with the project.
+- Give timely, constructive, technically sound reviews.
+- Help contributors meet the project's quality bar.
+- Escalate design, release, or governance questions to maintainers.
 
-### Maintainers
+### Organization Maintainer
 
-Maintainers are the project's decision-making body and stewards of the overall health of KubeElasti. They are responsible for technical direction, release oversight, project processes, and community continuity.
+Maintainers are the decision-making body and are accountable for the health of the project.
+The current roster is in [MAINTAINERS](./MAINTAINERS), which is the single source of truth.
 
-The current maintainers are listed in [MAINTAINERS](./MAINTAINERS). That file is the source of truth for the active maintainer roster.
+**Can:**
 
-Maintainers are expected to:
+- Approve and merge pull requests.
+- Cut and publish releases.
+- Vote on roles, governance changes, and project direction.
+- Administer repository and organization settings.
 
-- Review and approve changes across the project.
-- Make and document project decisions in public channels whenever practical.
-- Curate releases, roadmap priorities, and project health.
+**Expected to:**
+
+- Review changes and keep the queue from stalling.
+- Make and record decisions in public.
+- Own release quality and the roadmap.
 - Mentor contributors and reviewers.
-- Enforce project policies, including this governance document.
-- Act in accordance with the [Code of Conduct](./CODE_OF_CONDUCT.md) and [Security Policy](./SECURITY.md).
+- Enforce this document, the [Code of Conduct](./CODE_OF_CONDUCT.md), and the
+  [Security Policy](./SECURITY.md).
+
+## Applying for a Role
+
+You apply for yourself. You do not need a nomination from an existing maintainer.
+
+Open a [role application issue](https://github.com/KubeElasti/KubeElasti/issues/new?template=role_application.yml)
+and fill in the short form.
+
+### Requirements
+
+**Organization Reviewer**
+
+- At least 1 pull request merged into a KubeElasti repository.
+- Active in the community (issues, reviews, discussions, or Slack) for at least 1 month.
+
+**Organization Maintainer**
+
+- At least 2 pull requests merged into a KubeElasti repository.
+- Active in the community for at least 1 month before applying.
+- Working knowledge of the project's architecture, release process, and contributor workflow.
+
+Non-code work counts: documentation, testing, triage, community support, and release operations
+are all valid ways to meet the bar, as long as the contribution history is public and verifiable.
+
+Meeting the minimums makes you eligible, not automatically accepted. Maintainers also weigh the
+quality and consistency of your work and your conduct in the community.
+
+### What Happens Next
+
+1. You open the application issue.
+2. Maintainers discuss it publicly on the issue. Expect a response within 2 weeks.
+3. Maintainers vote on the issue, following [VOTING.md](./VOTING.md).
+4. If approved, a maintainer opens a pull request adding you to [MAINTAINERS](./MAINTAINERS) or
+   [REVIEWERS](./REVIEWERS), and grants the matching GitHub permissions.
+5. If declined, maintainers say why on the issue and what would make a future application
+   stronger. You may reapply after 3 months.
 
 ## Decision Making
 
-### General Principle
+Most decisions need no process. Discuss it in a public issue, pull request, or discussion, and
+go with the consensus.
 
-KubeElasti prefers discussion and consensus over formal process. Most technical and community decisions should be made through public discussion in GitHub issues, pull requests, and discussions.
+**Lazy consensus** is the default. If a proposal is made in public and no maintainer raises a
+substantive objection within a reasonable review period, it proceeds. An objection must come
+with reasoning and, where possible, a way to resolve it.
 
-### Lazy Consensus
+**A formal vote** is required when:
 
-The default decision model is lazy consensus. If a proposal is made in a public project channel and no maintainer raises a substantive objection within a reasonable review period, the proposal may proceed.
+- Maintainers disagree and cannot resolve it through discussion.
+- The decision is high impact or hard to reverse.
+- This document requires one (adding or removing a role holder, changing governance).
 
-A substantive objection should include clear reasoning and, where possible, a path to resolution.
+### Voting
 
-### When a Formal Vote Is Required
+The full process, ballot format, and templates are in [VOTING.md](./VOTING.md). In short:
 
-A formal maintainer vote should be used when:
+- Only active maintainers vote, one vote each.
+- Votes happen in a public GitHub issue, open for 2 weeks.
+- At least half of active maintainers must vote for the result to count.
+- Adding or removing a reviewer or maintainer needs two-thirds of votes cast.
+- Everything else needs a simple majority.
+- A tie means the proposal does not pass.
 
-- There is unresolved disagreement among maintainers.
-- The decision is high impact, difficult to reverse, or materially affects project direction.
-- This document explicitly requires a vote.
+## Approving and Merging Pull Requests
 
-Formal votes should happen in a publicly visible GitHub issue or pull request whenever possible.
+Maintainers merge a pull request when:
 
-### Voting Rules
+- It fits the goals of the project.
+- All required CI checks pass. A maintainer may merge past a failing check only after reviewing
+  it and confirming the failure is unrelated (for example, a flaky end-to-end test).
+- It follows [CONTRIBUTING.md](./CONTRIBUTING.md) and does not violate the
+  [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-- Each active maintainer has one vote.
-- A simple majority of all active maintainers approves routine formal votes.
-- At least half of all active maintainers must participate for the vote to be valid.
-- Votes to add or remove a maintainer require a two-thirds majority of all active maintainers.
-- In the event of a tie, the proposal does not pass.
+Non-trivial changes need at least 1 maintainer approval. Changes that alter the API, the
+security posture, or the release process need 2. Dependency bumps and small fixes need 1.
 
-## Becoming a Maintainer
+If maintainers disagree on a pull request, other maintainers are asked to review and settle it.
 
-New maintainers are selected from active contributors who have demonstrated:
+## Inactivity and Removal
 
-- Sustained, high-quality contributions over time.
-- Good judgment in technical and community discussions.
-- Reliability in review, follow-through, and collaboration.
-- Familiarity with the project's architecture, release needs, and contributor workflows.
-- Commitment to the project's values and Code of Conduct.
+Reviewers and maintainers are expected to stay reasonably active.
 
-The process for adding a maintainer is:
+A role holder with no meaningful participation for roughly 3 months who does not answer a
+check-in may be marked inactive. Inactive maintainers do not count toward vote totals or quorum.
+They can return to active status by resuming participation, with agreement from the active
+maintainers.
 
-1. An existing maintainer nominates the candidate in a public GitHub issue or pull request.
-2. Active maintainers discuss the nomination publicly whenever practical.
-3. The nomination is approved by a two-thirds vote of all active maintainers.
-4. Once approved, the maintainer roster is updated in [MAINTAINERS](./MAINTAINERS) and, if needed, in other project access controls.
+Anyone may be removed for extended inactivity, repeatedly failing the responsibilities of their
+role, or conduct that harms the project or community. Removal requires a two-thirds vote, held
+per [VOTING.md](./VOTING.md). Code of Conduct violations are handled through
+[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) first; a removal vote may follow.
 
-Non-code contributions, including documentation, testing, triage, community support, and release operations, are valid paths to maintainership if they demonstrate sustained project leadership.
+## Stepping Down
 
-## Maintainer Inactivity and Removal
+You can step down at any time, for any reason, and you do not owe anyone an explanation. It is
+better for the project to have an accurate roster than a stale one, and stepping down does not
+stop you from contributing or reapplying later.
 
-Maintainers are expected to remain reasonably active in project review, decision-making, or release and community work.
+To step down:
 
-A maintainer may be moved to inactive status when they have had little or no meaningful participation for approximately three months and do not respond to a check-in from the other maintainers.
+1. Open a public issue in [KubeElasti/KubeElasti](https://github.com/KubeElasti/KubeElasti/issues/new)
+   using the template below. There is no issue form for this; copy the text and fill it in.
+2. Hand off anything in flight: open pull requests, in-progress releases, and anything you are
+   the only person who knows how to do.
+3. A maintainer opens a pull request removing you from [MAINTAINERS](./MAINTAINERS) or
+   [REVIEWERS](./REVIEWERS) and revokes the matching GitHub, registry, and Slack permissions. No vote is
+   needed; stepping down is your decision alone.
 
-Inactive maintainers:
+**Template:**
 
-- Are not counted as active maintainers for voting purposes.
-- May return to active status after resuming participation and agreement from the active maintainers.
+```markdown
+Title: [STEP DOWN] <your GitHub handle>
 
-A maintainer may be removed for extended inactivity, repeated failure to meet maintainer responsibilities, or conduct that harms the project or community. Removal requires a two-thirds vote of all active maintainers.
+## Role
 
-Maintainers may also step down voluntarily at any time by notifying the other maintainers, after which [MAINTAINERS](./MAINTAINERS) should be updated.
+<Organization Reviewer | Organization Maintainer>
 
-## Communications
+## Effective date
 
-Official project communication and decision-making channels include:
+<YYYY-MM-DD, or "immediately">
 
-- GitHub issues: bug reports, proposals, roadmap items, and formal votes.
-- GitHub pull requests: code review and change approval.
-- GitHub discussions: broader questions, design exploration, and community conversation.
-- CNCF Slack `#kubeelasti`: real-time community discussion and support.
+## Reason (optional)
 
-Private discussions should be avoided for project decisions except where confidentiality is required, such as security reports or Code of Conduct matters.
+<One line, if you want to share it. Feel free to skip.>
+
+## Handover
+
+- Open PRs / issues to reassign: <links, or "none">
+- Releases or duties in progress: <details, or "none">
+- Access to revoke: <GitHub org, ghcr.io, Slack admin, anything else>
+- Knowledge to write down before I go: <docs to update, or "none">
+
+## Staying involved
+
+<e.g. "I plan to keep contributing occasionally", or "stepping away entirely">
+```
+
+Emeritus maintainers keep the credit for their work. Past contributions are not removed from
+history, and returning later means applying again through the normal process.
+
+## Communication
+
+- **GitHub issues**: bugs, proposals, roadmap items, role applications, formal votes.
+- **GitHub pull requests**: code review and change approval.
+- **GitHub discussions**: questions, design exploration, community conversation.
+- **CNCF Slack [#kubeelasti](https://cloud-native.slack.com/archives/C0AMUFC5Y3D)**: real-time
+  discussion and support.
+- **KubeElasti Community Day** (public community call): second Thursday of each month,
+  19:00-19:30 [Asia/Kolkata](https://www.timeanddate.com/time/zones/ist)
+  (13:30-14:00 UTC). Join on
+  [Google Meet](https://meet.google.com/wns-mqdn-veb).
+  Dial-in: +1 484-546-8063, PIN 800 916 416#.
+  Agenda and notes are shared in [#kubeelasti](https://cloud-native.slack.com/archives/C0AMUFC5Y3D)
+  and GitHub Discussions when used.
+
+Project decisions are not made in private, with two exceptions: security reports and Code of
+Conduct matters.
 
 ## Code of Conduct
 
-KubeElasti follows the [CNCF Code of Conduct](./CODE_OF_CONDUCT.md). All community members, including contributors, reviewers, and maintainers, are expected to uphold it.
+KubeElasti follows the [CNCF Code of Conduct](./CODE_OF_CONDUCT.md). It applies to everyone,
+including maintainers. Report violations through the path in
+[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 
-Reports of Code of Conduct violations should follow the reporting path documented in [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md). Maintainers may coordinate response and resolution as appropriate.
+## Security
 
-## Security Response
+Report security issues only through GitHub Private Vulnerability Reporting, as described in
+[SECURITY.md](./SECURITY.md). Never open a public issue for a security problem until coordinated
+disclosure allows it. Maintainers may handle reports directly or delegate to a smaller trusted
+group.
 
-Security issues must be reported according to [SECURITY.md](./SECURITY.md). Maintainers may handle security reports directly or delegate response coordination to a smaller trusted group as needed.
+## Access Control
 
-Security reports must not be raised as public GitHub issues until a coordinated disclosure path allows it.
+Repository and organization access follow the roles in this document:
 
-## Changes to Governance
+- **[CODEOWNERS](./.github/CODEOWNERS)** assigns default review ownership to the Organization
+  Maintainers listed in [MAINTAINERS](./MAINTAINERS). Code and docs ownership in GitHub matches
+  those documented roles.
+- **Organization Maintainers** receive write (or admin, when needed for releases and settings)
+  on KubeElasti repositories, and can merge after the approval rules above.
+- **Organization Reviewers** receive triage permissions sufficient to review, label, and manage
+  issues and pull requests, without merge rights.
+- **Two-factor authentication (2FA)** is required for every member of the KubeElasti GitHub
+  organization. Maintainers keep org-wide 2FA enforcement enabled.
+- **Branch protection** on default branches requires pull requests, passing required status
+  checks, and maintainer review before merge. Force-pushes to protected default branches are
+  not allowed.
+- Access is granted when someone is added to [MAINTAINERS](./MAINTAINERS) or
+  [REVIEWERS](./REVIEWERS), and revoked when they step down or are removed.
 
-Changes to this governance document must be proposed through a pull request and approved by a simple majority of all active maintainers.
+## Changing This Document
 
-Material changes should be announced in the pull request description and discussed in public before approval.
+Open a pull request. It needs approval from a simple majority of active maintainers, voted per
+[VOTING.md](./VOTING.md). Say clearly
+in the description what is changing and why, and give the community time to comment before
+merging.
