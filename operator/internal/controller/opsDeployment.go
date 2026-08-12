@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
 	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
 
 	"github.com/kubeelasti/kubeelasti/pkg/config"

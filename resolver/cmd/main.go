@@ -17,10 +17,10 @@ import (
 	"github.com/kubeelasti/kubeelasti/resolver/internal/throttler"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	elasti_config "github.com/kubeelasti/kubeelasti/pkg/config"
 	"github.com/kubeelasti/kubeelasti/pkg/k8shelper"
 	"github.com/kubeelasti/kubeelasti/pkg/logger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"k8s.io/client-go/rest"
 )

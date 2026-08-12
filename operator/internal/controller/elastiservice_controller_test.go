@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kubeelasti/kubeelasti/pkg/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/kubeelasti/kubeelasti/pkg/config"
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/types"

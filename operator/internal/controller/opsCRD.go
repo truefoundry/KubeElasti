@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
 	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
 	"github.com/kubeelasti/kubeelasti/operator/internal/informer"

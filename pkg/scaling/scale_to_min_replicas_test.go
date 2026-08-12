@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"truefoundry/elasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
 	"go.uber.org/zap"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"

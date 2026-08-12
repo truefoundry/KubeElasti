@@ -19,8 +19,8 @@ import (
 	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
 	"github.com/kubeelasti/kubeelasti/operator/internal/prom"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/kubeelasti/kubeelasti/pkg/messages"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 

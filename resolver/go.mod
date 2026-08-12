@@ -5,10 +5,10 @@ go 1.26.5
 require (
 	github.com/getsentry/sentry-go v0.35.3
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/prometheus/client_golang v1.23.2
-	github.com/stretchr/testify v1.11.1
 	github.com/kubeelasti/kubeelasti/operator v0.0.0
 	github.com/kubeelasti/kubeelasti/pkg v0.0.0
+	github.com/prometheus/client_golang v1.23.2
+	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.56.0
 	k8s.io/apimachinery v0.36.3

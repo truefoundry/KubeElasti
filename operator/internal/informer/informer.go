@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"github.com/kubeelasti/kubeelasti/operator/internal/prom"
 
 	"github.com/kubeelasti/kubeelasti/pkg/config"

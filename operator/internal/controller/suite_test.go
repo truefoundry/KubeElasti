@@ -24,6 +24,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+
 	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
 	"github.com/kubeelasti/kubeelasti/operator/internal/informer"
 

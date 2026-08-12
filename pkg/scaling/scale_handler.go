@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
 	"k8s.io/client-go/scale"

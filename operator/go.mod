@@ -4,10 +4,10 @@ go 1.26.5
 
 require (
 	github.com/getsentry/sentry-go v0.35.3
+	github.com/kubeelasti/kubeelasti/pkg v0.0.0
 	github.com/onsi/ginkgo/v2 v2.25.3
 	github.com/onsi/gomega v1.38.2
 	github.com/prometheus/client_golang v1.23.2
-	github.com/kubeelasti/kubeelasti/pkg v0.0.0
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.36.3
