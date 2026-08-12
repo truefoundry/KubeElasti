@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/truefoundry/elasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 	"go.uber.org/zap"
 )
 

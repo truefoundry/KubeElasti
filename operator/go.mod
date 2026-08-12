@@ -1,13 +1,13 @@
-module truefoundry/elasti/operator
+module github.com/kubeelasti/kubeelasti/operator
 
 go 1.26.5
 
 require (
 	github.com/getsentry/sentry-go v0.35.3
+	github.com/kubeelasti/kubeelasti/pkg v0.0.0
 	github.com/onsi/ginkgo/v2 v2.25.3
 	github.com/onsi/gomega v1.38.2
 	github.com/prometheus/client_golang v1.23.2
-	github.com/truefoundry/elasti/pkg v0.0.0
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.36.3
@@ -16,7 +16,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.22.1
 )
 
-replace github.com/truefoundry/elasti/pkg v0.0.0 => ../pkg
+replace github.com/kubeelasti/kubeelasti/pkg v0.0.0 => ../pkg
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect

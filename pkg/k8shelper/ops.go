@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/truefoundry/elasti/pkg/logger"
+	"github.com/kubeelasti/kubeelasti/pkg/logger"
 	"go.uber.org/zap"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

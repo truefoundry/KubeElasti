@@ -26,15 +26,15 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/truefoundry/elasti/pkg/config"
-	"github.com/truefoundry/elasti/pkg/scaling"
+	"github.com/kubeelasti/kubeelasti/pkg/config"
+	"github.com/kubeelasti/kubeelasti/pkg/scaling"
 
-	"truefoundry/elasti/operator/internal/elastiserver"
+	"github.com/kubeelasti/kubeelasti/operator/internal/elastiserver"
 
-	"truefoundry/elasti/operator/internal/crddirectory"
-	"truefoundry/elasti/operator/internal/informer"
+	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
+	"github.com/kubeelasti/kubeelasti/operator/internal/informer"
 
-	tfLogger "github.com/truefoundry/elasti/pkg/logger"
+	tfLogger "github.com/kubeelasti/kubeelasti/pkg/logger"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -51,8 +51,8 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	elastiv1alpha1 "truefoundry/elasti/operator/api/v1alpha1"
-	"truefoundry/elasti/operator/internal/controller"
+	elastiv1alpha1 "github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
 

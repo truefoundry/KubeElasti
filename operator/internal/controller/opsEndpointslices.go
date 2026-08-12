@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/truefoundry/elasti/pkg/config"
-	"github.com/truefoundry/elasti/pkg/utils"
+	"github.com/kubeelasti/kubeelasti/pkg/config"
+	"github.com/kubeelasti/kubeelasti/pkg/utils"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/discovery/v1"

@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/truefoundry/elasti/resolver/internal/prom"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/prom"
 
-	"github.com/truefoundry/elasti/pkg/logger"
-	"github.com/truefoundry/elasti/pkg/utils"
+	"github.com/kubeelasti/kubeelasti/pkg/logger"
+	"github.com/kubeelasti/kubeelasti/pkg/utils"
 
-	"github.com/truefoundry/elasti/pkg/messages"
+	"github.com/kubeelasti/kubeelasti/pkg/messages"
 	"go.uber.org/zap"
 )
 

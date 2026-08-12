@@ -13,14 +13,14 @@ import (
 	"time"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
-	"github.com/truefoundry/elasti/pkg/scaling"
+	"github.com/kubeelasti/kubeelasti/pkg/scaling"
 	"k8s.io/apimachinery/pkg/types"
 
-	"truefoundry/elasti/operator/internal/crddirectory"
-	"truefoundry/elasti/operator/internal/prom"
+	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
+	"github.com/kubeelasti/kubeelasti/operator/internal/prom"
 
+	"github.com/kubeelasti/kubeelasti/pkg/messages"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/truefoundry/elasti/pkg/messages"
 	"go.uber.org/zap"
 )
 

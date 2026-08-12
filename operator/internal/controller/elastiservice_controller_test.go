@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kubeelasti/kubeelasti/pkg/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/truefoundry/elasti/pkg/config"
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -31,7 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	elastiv1alpha1 "truefoundry/elasti/operator/api/v1alpha1"
+	elastiv1alpha1 "github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"

@@ -9,14 +9,15 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"truefoundry/elasti/operator/api/v1alpha1"
+
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
 	"k8s.io/client-go/scale"
 
-	"github.com/truefoundry/elasti/pkg/cronutil"
-	"github.com/truefoundry/elasti/pkg/k8shelper"
-	"github.com/truefoundry/elasti/pkg/scaling/scalers"
-	"github.com/truefoundry/elasti/pkg/values"
+	"github.com/kubeelasti/kubeelasti/pkg/cronutil"
+	"github.com/kubeelasti/kubeelasti/pkg/k8shelper"
+	"github.com/kubeelasti/kubeelasti/pkg/scaling/scalers"
+	"github.com/kubeelasti/kubeelasti/pkg/values"
 	"go.uber.org/zap"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"

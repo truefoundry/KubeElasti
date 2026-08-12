@@ -13,12 +13,12 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/truefoundry/elasti/resolver/internal/crdcache"
-	"github.com/truefoundry/elasti/resolver/internal/prom"
-	"github.com/truefoundry/elasti/resolver/internal/throttler"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/crdcache"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/prom"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/throttler"
 
-	"github.com/truefoundry/elasti/pkg/logger"
-	"github.com/truefoundry/elasti/pkg/messages"
+	"github.com/kubeelasti/kubeelasti/pkg/logger"
+	"github.com/kubeelasti/kubeelasti/pkg/messages"
 	"go.uber.org/zap"
 )
 

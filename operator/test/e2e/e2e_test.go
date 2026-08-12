@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"truefoundry/elasti/operator/test/utils"
+	"github.com/kubeelasti/kubeelasti/operator/test/utils"
 )
 
 const namespace = "elasti-operator-system"

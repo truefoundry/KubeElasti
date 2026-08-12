@@ -2,19 +2,19 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: truefoundry.io
+domain: kubeelasti.dev
 layout:
 - go.kubebuilder.io/v4
 projectName: elasti-operator
-repo: truefoundry/elasti
+repo: github.com/kubeelasti/kubeelasti
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: truefoundry.io
+  domain: kubeelasti.dev
   group: elasti
   kind: ElastiService
-  path: truefoundry/elasti/api/v1alpha1
+  path: github.com/kubeelasti/kubeelasti/operator/api/v1alpha1
   version: v1alpha1
 version: "3"

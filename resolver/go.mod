@@ -1,23 +1,23 @@
-module github.com/truefoundry/elasti/resolver
+module github.com/kubeelasti/kubeelasti/resolver
 
 go 1.26.5
 
 require (
 	github.com/getsentry/sentry-go v0.35.3
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/kubeelasti/kubeelasti/operator v0.0.0
+	github.com/kubeelasti/kubeelasti/pkg v0.0.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/stretchr/testify v1.11.1
-	github.com/truefoundry/elasti/operator v0.0.0
-	github.com/truefoundry/elasti/pkg v0.0.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.56.0
 	k8s.io/apimachinery v0.36.3
 	k8s.io/client-go v0.34.1
 )
 
-replace github.com/truefoundry/elasti/pkg v0.0.0 => ../pkg
+replace github.com/kubeelasti/kubeelasti/pkg v0.0.0 => ../pkg
 
-replace github.com/truefoundry/elasti/operator v0.0.0 => ../operator
+replace github.com/kubeelasti/kubeelasti/operator v0.0.0 => ../operator
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

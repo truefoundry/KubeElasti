@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kubeelasti/kubeelasti/pkg/messages"
 	"github.com/stretchr/testify/assert"
-	"github.com/truefoundry/elasti/pkg/messages"
 	"go.uber.org/zap"
 )
 

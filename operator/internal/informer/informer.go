@@ -9,10 +9,11 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"truefoundry/elasti/operator/internal/prom"
 
-	"github.com/truefoundry/elasti/pkg/config"
-	"github.com/truefoundry/elasti/pkg/values"
+	"github.com/kubeelasti/kubeelasti/operator/internal/prom"
+
+	"github.com/kubeelasti/kubeelasti/pkg/config"
+	"github.com/kubeelasti/kubeelasti/pkg/values"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

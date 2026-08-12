@@ -3,16 +3,16 @@ date: 2025-10-14
 pin: false
 title: Release 0.1.17
 description: Release 0.1.17 of KubeElasti is now available. This release includes a number of new features and improvements.
-keywords: 
-    - KubeElasti Release 0.1.17
-    - Release
-    - cost optimization
-    - kubernetes scaling
-author: 
-    - KubeElasti Team
+keywords:
+  - KubeElasti Release 0.1.17
+  - Release
+  - cost optimization
+  - kubernetes scaling
+author:
+  - KubeElasti Team
 slug: release-0.1.17
 hide:
-    - toc
+  - toc
 ---
 
 # Release 0.1.17
@@ -37,10 +37,11 @@ metadata:
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: StatefulSet  # ← Now supported!
+    kind: StatefulSet # ← Now supported!
     name: my-statefulset
   # ... rest of your configuration
 ```
+
 !!! info "Behind the scenes"
 
     We've fundamentally changed how KubeElasti handles scaling by switching to Kubernetes' standard `/scale` subresource. This means we can support scale-to-zero on any resource that supports the `/scale` subresource.
@@ -48,6 +49,7 @@ spec:
     Want scale-to-zero support for other Kubernetes resources? Simply [open an issue on GitHub](https://github.com/KubeElasti/KubeElasti/issues/new/choose) with your use case.
 
 ## **Other Improvements**
+
 - **Environment variable forwarding**: Helm values can now be passed through environment variables for better configuration management.
 - **Improved test stability**: Enhanced reliability of our automated testing suite.
 - **New adopters page**: Added documentation showcasing organizations using KubeElasti in production.
