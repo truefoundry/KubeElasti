@@ -167,7 +167,7 @@ func mainWithError() error {
 		WebhookServer:                 webhookServer,
 		HealthProbeBindAddress:        probeAddr,
 		LeaderElection:                enableLeaderElection,
-		LeaderElectionID:              "acf50383.kubeelasti.dev",
+		LeaderElectionID:              "acf50383.truefoundry.io",
 		LeaderElectionReleaseOnCancel: true,
 	})
 	if err != nil {
