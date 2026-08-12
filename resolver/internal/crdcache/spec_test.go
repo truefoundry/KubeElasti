@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/truefoundry/elasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )

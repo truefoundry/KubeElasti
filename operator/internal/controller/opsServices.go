@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"truefoundry/elasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
-	"github.com/truefoundry/elasti/pkg/k8shelper"
-	"github.com/truefoundry/elasti/pkg/utils"
+	"github.com/kubeelasti/kubeelasti/pkg/k8shelper"
+	"github.com/kubeelasti/kubeelasti/pkg/utils"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

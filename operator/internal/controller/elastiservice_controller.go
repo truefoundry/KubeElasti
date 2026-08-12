@@ -6,21 +6,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/truefoundry/elasti/pkg/scaling"
+	"github.com/kubeelasti/kubeelasti/pkg/scaling"
 	"k8s.io/apimachinery/pkg/types"
 
-	"truefoundry/elasti/operator/internal/crddirectory"
-	"truefoundry/elasti/operator/internal/informer"
-	"truefoundry/elasti/operator/internal/prom"
+	"github.com/kubeelasti/kubeelasti/operator/internal/crddirectory"
+	"github.com/kubeelasti/kubeelasti/operator/internal/informer"
+	"github.com/kubeelasti/kubeelasti/operator/internal/prom"
 
-	"github.com/truefoundry/elasti/pkg/values"
+	"github.com/kubeelasti/kubeelasti/pkg/values"
 	"k8s.io/apimachinery/pkg/api/errors"
 	kRuntime "k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"truefoundry/elasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
 	"go.uber.org/zap"
 )

@@ -10,17 +10,17 @@ import (
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 
-	"github.com/truefoundry/elasti/resolver/internal/crdcache"
-	"github.com/truefoundry/elasti/resolver/internal/handler"
-	"github.com/truefoundry/elasti/resolver/internal/hostmanager"
-	"github.com/truefoundry/elasti/resolver/internal/operator"
-	"github.com/truefoundry/elasti/resolver/internal/throttler"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/crdcache"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/handler"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/hostmanager"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/operator"
+	"github.com/kubeelasti/kubeelasti/resolver/internal/throttler"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	elasti_config "github.com/truefoundry/elasti/pkg/config"
-	"github.com/truefoundry/elasti/pkg/k8shelper"
-	"github.com/truefoundry/elasti/pkg/logger"
+	elasti_config "github.com/kubeelasti/kubeelasti/pkg/config"
+	"github.com/kubeelasti/kubeelasti/pkg/k8shelper"
+	"github.com/kubeelasti/kubeelasti/pkg/logger"
 	"go.uber.org/zap"
 	"k8s.io/client-go/rest"
 )

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/truefoundry/elasti/pkg/k8shelper"
-	"github.com/truefoundry/elasti/pkg/messages"
+	"github.com/kubeelasti/kubeelasti/pkg/k8shelper"
+	"github.com/kubeelasti/kubeelasti/pkg/messages"
 	"go.uber.org/zap"
 )
 

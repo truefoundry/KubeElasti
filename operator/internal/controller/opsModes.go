@@ -6,9 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	"truefoundry/elasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
 
-	"github.com/truefoundry/elasti/pkg/values"
+	"github.com/kubeelasti/kubeelasti/pkg/values"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"

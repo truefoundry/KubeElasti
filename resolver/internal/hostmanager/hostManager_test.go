@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/truefoundry/elasti/pkg/messages"
+	"github.com/kubeelasti/kubeelasti/pkg/messages"
 	"go.uber.org/zap"
 )
 

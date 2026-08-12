@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/truefoundry/elasti/pkg/config"
-	"github.com/truefoundry/elasti/pkg/values"
+	"github.com/kubeelasti/kubeelasti/pkg/config"
+	"github.com/kubeelasti/kubeelasti/pkg/values"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -14,9 +14,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"truefoundry/elasti/operator/api/v1alpha1"
-	"truefoundry/elasti/operator/internal/informer"
-	"truefoundry/elasti/operator/internal/prom"
+	"github.com/kubeelasti/kubeelasti/operator/api/v1alpha1"
+	"github.com/kubeelasti/kubeelasti/operator/internal/informer"
+	"github.com/kubeelasti/kubeelasti/operator/internal/prom"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"

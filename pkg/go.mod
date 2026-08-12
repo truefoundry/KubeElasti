@@ -1,4 +1,4 @@
-module github.com/truefoundry/elasti/pkg
+module github.com/kubeelasti/kubeelasti/pkg
 
 go 1.26.5
 
