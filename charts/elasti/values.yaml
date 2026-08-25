@@ -225,6 +225,7 @@ elastiResolver:
       queueRetryDuration: "3"
       queueSize: "50000"
       reqTimeout: "600"
+      trafficDisableGraceDuration: "15"
       trafficReEnableDuration: "5"
       enableH2C: false
       crdCachePollIntervalMinutes: "5"
