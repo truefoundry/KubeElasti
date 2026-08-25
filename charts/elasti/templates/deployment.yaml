@@ -139,6 +139,8 @@ spec:
           value: {{ quote .Values.elastiResolver.proxy.env.reqTimeout }}
         - name: TRAFFIC_RE_ENABLE_DURATION
           value: {{ quote .Values.elastiResolver.proxy.env.trafficReEnableDuration }}
+        - name: TRAFFIC_DISABLE_GRACE_DURATION
+          value: {{ quote .Values.elastiResolver.proxy.env.trafficDisableGraceDuration }}
         - name: OPERATOR_RETRY_DURATION
           value: {{ quote .Values.elastiResolver.proxy.env.operatorRetryDuration }}
         - name: HEADER_FOR_HOST

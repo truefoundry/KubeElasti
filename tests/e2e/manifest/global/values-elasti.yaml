@@ -19,6 +19,9 @@ elastiResolver:
     env:
       # Speed up probeResponse CRD cache refresh during e2e (default 5m is too slow for patch assertions).
       crdCachePollIntervalMinutes: "1"
+      # Shrink the post-proxy traffic-disable window (default 15s) so it closes well
+      # before the next test step's traffic, instead of tolerating transient 408s.
+      trafficDisableGraceDuration: "2"
     image:
       registry: local
       repository: elasti-resolver
