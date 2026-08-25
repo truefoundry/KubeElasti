@@ -18,6 +18,12 @@ TARGET_NAME=""
 NUM_CONN_REUSED_REQUESTS=0
 MAX_RETRIES=5
 TIMEOUT=160
+# MAX_FAILURES: number of failed requests that are tolerated before declaring the
+# test as failed. The default (0) means all requests must succeed. Use 1 for
+# steps that immediately follow a prior proxied request in the same test run,
+# where the resolver's post-proxy traffic-disable window (grace + re-enable,
+# ~15-20s by default) can cause the first request to transiently 408.
+MAX_FAILURES=0
 
 # --- Argument Parsing ---
 shift # Shift past the URL argument
@@ -37,6 +43,10 @@ while [ "$#" -gt 0 ]; do
             ;;
         --num-conn-reused-requests)
             NUM_CONN_REUSED_REQUESTS="$2"
+            shift 2
+            ;;
+        --max-failures)
+            MAX_FAILURES="$2"
             shift 2
             ;;
         *)
@@ -108,6 +118,7 @@ echo "  ${CYAN}Curl Pod:${NC}    $CURL_POD_NAME (in $CURL_NAMESPACE namespace)"
 echo "  ${CYAN}Target App:${NC}  app=httpbin (in $TARGET_NAMESPACE namespace)"
 echo "  ${CYAN}Retries:${NC}     $MAX_RETRIES"
 echo "  ${CYAN}Timeout:${NC}     ${TIMEOUT}s"
+echo "  ${CYAN}Max Failures:${NC} $MAX_FAILURES"
 echo "  ${CYAN}Timestamp:${NC}   $(date)"
 echo "${CYAN}==================================${NC}"
 
@@ -207,15 +218,18 @@ done
 
 
 echo "\n${CYAN}=== Test Summary ===${NC}"
-if [ "$failure_count" -gt 0 ]; then
-    echo "${RED}Test FAILED with $failure_count failed requests out of $MAX_RETRIES.${NC}"
-    echo "  ${CYAN}Target:${NC}      $URL"
-    echo "  ${CYAN}Completed at:${NC} $(date)"
+echo "  ${CYAN}Failures:${NC}     $failure_count / $MAX_RETRIES (max tolerated: $MAX_FAILURES)"
+echo "  ${CYAN}Target:${NC}      $URL"
+echo "  ${CYAN}Completed at:${NC} $(date)"
+if [ "$failure_count" -gt "$MAX_FAILURES" ]; then
+    echo "${RED}Test FAILED with $failure_count failed requests out of $MAX_RETRIES (max tolerated: $MAX_FAILURES).${NC}"
     echo "${CYAN}====================${NC}"
     exit 1
 else
-    echo "${GREEN}All $MAX_RETRIES requests completed successfully.${NC}"
-    echo "  ${CYAN}Target:${NC}      $URL"
-    echo "  ${CYAN}Completed at:${NC} $(date)"
+    if [ "$failure_count" -gt 0 ]; then
+        echo "${YELLOW}$failure_count request(s) failed but within the tolerated limit of $MAX_FAILURES — test PASSED.${NC}"
+    else
+        echo "${GREEN}All $MAX_RETRIES requests completed successfully.${NC}"
+    fi
     echo "${CYAN}====================${NC}"
 fi
