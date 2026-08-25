@@ -1,7 +1,10 @@
+global:
+  image:
+    registry: localhost:5001
 elastiController:
   manager:
     image:
-      repository: localhost:5001/elasti-operator
+      repository: elasti-operator
       tag: v1alpha1
     imagePullPolicy: Always
     resources:
@@ -14,7 +17,7 @@ elastiController:
 elastiResolver:
   proxy:
     image:
-      repository: localhost:5001/elasti-resolver
+      repository: elasti-resolver
       tag: v1alpha1
     imagePullPolicy: Always
     resources:
